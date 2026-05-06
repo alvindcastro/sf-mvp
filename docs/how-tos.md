@@ -71,6 +71,8 @@ Use tests for examples of how packages are composed. The demo package owns the P
 
 ## How To Run The Loopback Demo API
 
+Use one server process for the full Phase 17 walkthrough. Approval state, audit history, and trace reports are in memory and are cleared when the server stops.
+
 Start the default loopback server when port `8080` is free:
 
 ```bash
@@ -80,64 +82,88 @@ go run ./cmd/demo-api
 Use a loopback override when port `8080` is occupied:
 
 ```bash
-go run ./cmd/demo-api -addr 127.0.0.1:18080
+go run ./cmd/demo-api -addr 127.0.0.1:18084
 ```
 
 Then call the review endpoint from another terminal:
 
 ```bash
-curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/review \
+curl -i --max-time 5 -X POST http://127.0.0.1:18084/demo/review \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001"}'
 ```
 
-Call the dry-run notification preview endpoint from another terminal:
+Expected highlights: HTTP `200`, `review.validation_status: "accepted"`, `review.severity.level: "low"`, `review.redacted_brief.status: "draft"`, and blocked approval-required actions.
+
+Call the dry-run notification preview endpoint before approval:
 
 ```bash
-curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/notifications/slack \
+curl -i --max-time 5 -X POST http://127.0.0.1:18084/demo/notifications/slack \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}'
 ```
 
-The preview response should be blocked before scoped approval, include a prepared Slack-shaped payload, and report `sent: false` plus `network_delivery_attempted: false`.
+Expected highlights: `notification_preview.status: "blocked"`, a prepared Slack-shaped payload, `sent: false`, and `network_delivery_attempted: false`.
 
 Create an in-memory scoped approval request:
 
 ```bash
-curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/approvals \
+curl -i --max-time 5 -X POST http://127.0.0.1:18084/demo/approvals \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001","action":"external_sharing","channel":"#fleet-safety","reason":"operator requested dry-run preview"}'
 ```
 
-On a fresh server process, approve the deterministic request ID:
+On a fresh server process, the first approval request is `approval-001`. Approve it:
 
 ```bash
-curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/approvals/decisions \
+curl -i --max-time 5 -X POST http://127.0.0.1:18084/demo/approvals/decisions \
   -H "Content-Type: application/json" \
   -d '{"request_id":"approval-001","approver":"fleet-safety-lead","decision":"approved","reason":"redacted brief approved for #fleet-safety dry-run"}'
 ```
 
-Retry the dry-run notification preview. It should return `notification_preview.status: "allowed"` only for the same incident, `external_sharing` action, and `#fleet-safety` channel, while still reporting `sent: false` and `network_delivery_attempted: false`.
+Retry the dry-run notification preview:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18084/demo/notifications/slack \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}'
+```
+
+Expected highlights: `notification_preview.status: "allowed"` only for the same incident, `external_sharing` action, and `#fleet-safety` channel, while still reporting `sent: false` and `network_delivery_attempted: false`.
 
 Call the local eval report endpoint:
 
 ```bash
-curl -i --max-time 5 http://127.0.0.1:18080/demo/eval/latest
+curl -i --max-time 5 http://127.0.0.1:18084/demo/eval/latest
 ```
 
-Use the returned `trace_id` with the trace endpoint:
+Expected highlights: `eval_report.case_count: 5`, `eval_report.passed: true`, and severity accuracy, citation coverage, and recommendation accuracy all equal `1`.
+
+Use the returned eval `trace_id` with the trace endpoint from the same server process:
 
 ```bash
-curl -i --max-time 5 http://127.0.0.1:18080/demo/traces/trace-fic-syn-eval-report-20260506t160000z-001
+curl -i --max-time 5 http://127.0.0.1:18084/demo/traces/trace-fic-syn-eval-report-20260506t160000z-001
 ```
 
-Call the caller-supplied budget demo endpoint:
+Expected highlights: `trace_report.ephemeral: true` and events including `workflow.started` and `eval.score_recorded`.
+
+Optionally call the caller-supplied budget demo endpoint:
 
 ```bash
-curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/budget/check \
+curl -i --max-time 5 -X POST http://127.0.0.1:18084/demo/budget/check \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001","provider":"hosted","model":"demo-review-model","input_tokens":90,"output_tokens":20,"max_total_tokens":100}'
 ```
+
+Expected highlights: `budget_report.status: "budget_exceeded"`, `budget_report.reason: "total token budget exceeded"`, and `budget_report.token_usage.total_tokens: 110`.
+
+Fallback proof path when a live API walkthrough is impractical:
+
+```bash
+go test ./...
+```
+
+The longer recording script lives in [Demo Package](mvp/demo/demo-package.md#local-demo-surface).
 
 ## How To Update Documentation Safely
 

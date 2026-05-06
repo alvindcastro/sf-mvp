@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 17 Demo Script Refresh
+
+### Task: Audit Phase 17 Scope With Parallel Agents
+
+- What: Ran parallel read-only Codex explorer agents to inspect Phase 17 documentation needs, stale implemented-versus-planned wording, local API route contracts, startup behavior, `curl` commands, expected response highlights, and state caveats.
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/how-tos.md](docs/how-tos.md), [internal/httpapi](internal/httpapi), [cmd/demo-api](cmd/demo-api).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 17 should refresh the interview demo script around verified local API behavior without adding or implying new runtime features.
+- How: Spawned two explorer agents while the main thread inspected the phase tracker, demo package, contributor docs, handler code, server wiring, and route tests; used their findings to scope a documentation-only update set and preserve explicit limits around persistence, identity, Slack delivery, webhooks, live model calls, dashboards, production APIs, and external integrations.
+
+### Task: Verify The Phase 17 Local API Walkthrough
+
+- What: Verified one local server process can support the Phase 17 walkthrough: happy-path review, blocked dry-run notification, approval request, approval decision, allowed dry-run retry, deterministic eval report, eval trace report, review and notification trace report, and caller-supplied budget-exceeded report.
+- Where: [cmd/demo-api](cmd/demo-api), [internal/httpapi](internal/httpapi), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/how-tos.md](docs/how-tos.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Ensure the refreshed demo script uses commands that work in the current workspace and response highlights that match code-backed behavior.
+- How: Started `go run ./cmd/demo-api -addr 127.0.0.1:18084`; verified `POST /demo/review` returned HTTP `200` with `review.validation_status: "accepted"`, `review.severity.level: "low"`, `review.redacted_brief.status: "draft"`, blocked approval-required actions, and the eval-summary pointer; verified `POST /demo/notifications/slack` returned `notification_preview.status: "blocked"` before approval; created `approval-001` with `POST /demo/approvals`; approved it with `POST /demo/approvals/decisions`; retried the same dry-run notification and verified `notification_preview.status: "allowed"`, `sent: false`, and `network_delivery_attempted: false`; verified `GET /demo/eval/latest` returned `case_count: 5`, `passed: true`, and perfect primary metrics; verified `GET /demo/traces/trace-fic-syn-eval-report-20260506t160000z-001` returned `workflow.started` and `eval.score_recorded`; verified `POST /demo/budget/check` returned `budget_report.status: "budget_exceeded"` with `total_tokens: 110`.
+
+### Task: Refresh Demo Script Documentation
+
+- What: Converted the demo package from a code/tests-first walkthrough into a local API-first walkthrough, added exact verified commands and response highlights, kept `go test ./...` as the fallback proof path, added a recording plan, updated latest eval summary numbers, marked Phase 17 complete, and synchronized overview wording.
+- Where: [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/phases.md](docs/mvp/phases.md), [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/README.md](docs/README.md), [docs/how-tos.md](docs/how-tos.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Complete Phase 17 by making the interview demo usable from the current loopback API surface while preserving truthfulness about the repo's synthetic-only, in-memory, loopback-only limits.
+- How: Updated the demo video outline, local demo command sequence, response highlights, fallback proof command, recording checklist, roadmap checklist, phase checklist, compatibility phase pointer, README entry points, MVP overview artifact descriptions, docs index, how-to commands, and changelog; did not add or change Go runtime behavior.
+
+### Task: Verify Phase 17 Documentation Refresh
+
+- What: Verified the documentation-only Phase 17 changes against the Go test suite and Markdown whitespace checks.
+- Where: [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/phases.md](docs/mvp/phases.md), [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/README.md](docs/README.md), [docs/how-tos.md](docs/how-tos.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm the refreshed script did not require unimplemented behavior and that the repo remains testable after doc updates.
+- How: Ran `go test ./...` and a scoped `git diff --check` over the Phase 17 documentation edit set; noted unrelated pre-existing dirty files remained outside the Phase 17 write set.
+
 ## 2026-05-06 - Phase 16 Eval And Observability Demo Reports
 
 ### Task: Audit Phase 16 Scope With Parallel Agents

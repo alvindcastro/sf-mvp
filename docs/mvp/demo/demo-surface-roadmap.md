@@ -1,12 +1,12 @@
 # Demo Surface Roadmap
 
-Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, Phase 14 implements a dry-run Slack-shaped notification preview, Phase 15 implements an in-memory scoped approval retry demo, and Phase 16 implements local eval, trace, and budget report routes. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
+Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, Phase 14 implements a dry-run Slack-shaped notification preview, Phase 15 implements an in-memory scoped approval retry demo, Phase 16 implements local eval, trace, and budget report routes, and Phase 17 refreshes the demo script around verified local API commands. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
 
 ## Current State
 
 - [x] The implemented runtime is package-level Go code under `internal`.
-- [x] The current proof command is `go test ./...`.
-- [x] The current demo package is a docs, code, package-level composer, loopback API, and tests walkthrough.
+- [x] The fallback proof command is `go test ./...`.
+- [x] The current demo package is a verified local API walkthrough backed by docs, code, package-level composer behavior, loopback routes, and tests.
 - [x] The repo has in-memory approval, eval, and observability packages.
 - [x] The repo has an in-memory demo review composer in `internal/demo`.
 - [x] Machine-readable demo fixtures exist under `internal/demo/testdata`.
@@ -46,7 +46,7 @@ Original build order, updated as phases land:
 - [x] Add the loopback API.
 - [x] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
 - [x] Add the dry-run Slack-shaped notification preview.
-- [ ] Refresh the demo script with verified commands only after the surfaces exist.
+- [x] Refresh the demo script with verified commands only after the surfaces exist.
 
 ## Verified Loopback Review Endpoint
 
@@ -220,7 +220,7 @@ Expected response highlights:
 | Option | Demo value | Risk | Recommendation |
 | --- | --- | --- | --- |
 | Local loopback API | Shows a concrete `curl` path and backend composition | Could be mistaken for production API | Build first; label loopback-only and demo-only. |
-| CLI command | Simple to run and test | Less impressive than an API call for integration roles | Keep as fallback if HTTP surface is too much for the next code run. |
+| `go test ./...` fallback | Simple proof path when a live API walkthrough is impractical | Less concrete than route-level output | Keep as fallback verification, not as a separate general CLI workflow. |
 | Dry-run Slack preview | Shows integration judgment and approval gating | Easy to overstate as real Slack delivery | Build as preview only; no token, secret, or network request. |
 | Real Slack notification | Visually memorable | Adds secrets, network dependency, and external-data risk | Defer until explicit future scope allows live external services. |
 | Local eval report | Shows quality gates beyond happy-path demo | Could look abstract without the API path | Implemented through `GET /demo/eval/latest`; keep framed as deterministic local eval, not model benchmarking. |
@@ -289,11 +289,13 @@ Implemented output: [Eval And Observability Demo Reports](eval-and-observability
 
 ### Phase 17: Demo Script Refresh
 
-- [ ] Update the demo script from a code/tests walkthrough to a local API walkthrough after implementation exists.
-- [ ] Add exact local run commands and `curl` examples only after they pass locally.
-- [ ] Keep the old package-level walkthrough as a fallback demo.
-- [ ] Add a short recording plan with one happy path, one blocked action, one approved dry-run retry, one eval report, and one trace report.
-- [ ] Confirm all implemented-versus-planned language is synchronized across `README.md`, `docs/mvp/README.md`, and the demo package.
+- [x] Update the demo script from a code/tests walkthrough to a local API walkthrough after implementation exists.
+- [x] Add exact local run commands and `curl` examples only after they pass locally.
+- [x] Keep the old package-level walkthrough as a fallback demo through `go test ./...`.
+- [x] Add a short recording plan with one happy path, one blocked action, one approved dry-run retry, one eval report, and one trace report.
+- [x] Confirm all implemented-versus-planned language is synchronized across `README.md`, `docs/mvp/README.md`, contributor guides, and the demo package.
+
+Implemented output: [Demo Package](demo-package.md), [How-Tos](../../how-tos.md), and top-level overview updates now contain the verified Phase 17 local API walkthrough. Phase 17 added Markdown documentation only; no new route, package behavior, persistence, identity, Slack delivery, webhook, live model call, dashboard, production API, or external integration was added.
 
 ## Wording Guardrails
 

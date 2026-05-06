@@ -48,5 +48,5 @@ Execution and packaging:
 - [Phases And Tasks](mvp/execution/phases.md)
 - [Task Prompts](mvp/execution/task-prompts.md)
 - [Strict TDD Rules](mvp/execution/tdd-rules.md)
-- [Demo Package](mvp/demo/demo-package.md)
+- [Demo Package](mvp/demo/demo-package.md): refreshed local API walkthrough, response highlights, fallback tests, and interview packaging.
 - [Demo Surface Roadmap](mvp/demo/demo-surface-roadmap.md)

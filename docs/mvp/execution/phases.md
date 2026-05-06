@@ -302,14 +302,14 @@ Code-task prompt:
 
 Goal: convert the interview demo from a code/tests walkthrough to a local API walkthrough after the demo surface exists.
 
-- [ ] Update [Demo Package](../demo/demo-package.md) with verified local startup and `curl` commands.
-- [ ] Add a fallback path that still works with `go test ./...`.
-- [ ] Show one happy-path review, one blocked dry-run notification, one exact scoped approval retry, one eval report, and one trace report.
-- [ ] Fill the eval summary with numbers from the latest verified local run.
-- [ ] Update `README.md`, `docs/mvp/README.md`, and contributor guides only for commands that exist.
-- [ ] Confirm implemented-versus-planned wording is synchronized.
+- [x] Update [Demo Package](../demo/demo-package.md) with verified local startup and `curl` commands.
+- [x] Add a fallback path that still works with `go test ./...`.
+- [x] Show one happy-path review, one blocked dry-run notification, one exact scoped approval retry, one eval report, and one trace report.
+- [x] Fill the eval summary with numbers from the latest verified local run.
+- [x] Update `README.md`, `docs/mvp/README.md`, and contributor guides only for commands that exist.
+- [x] Confirm implemented-versus-planned wording is synchronized.
 
-Planned output: refreshed demo package and how-to documentation after Phases 12 through 16 are implemented.
+Output: refreshed [Demo Package](../demo/demo-package.md), [Demo Surface Roadmap](../demo/demo-surface-roadmap.md), [How-Tos](../../how-tos.md), top-level [README](../../../README.md), and [MVP Overview](../README.md). Phase 17 is complete as of 2026-05-06 and added Markdown documentation only: a verified loopback startup path, exact local `curl` walkthrough, response highlights, `go test ./...` fallback, recording plan, latest eval summary numbers, and synchronized implemented-versus-planned wording. No new runtime route, package behavior, persistence, identity, Slack delivery, webhook, live model call, dashboard, production API, or external integration was added.
 
 Documentation prompt:
 

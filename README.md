@@ -2,7 +2,7 @@
 
 This workspace turns [research-report.md](docs/research/research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review, Phase 7 adds a strict-TDD Go approval package that creates in-memory approval requests, records human decisions, blocks pending or denied sensitive action callbacks, and allows approved callbacks only within scope, Phase 8 adds a strict-TDD Go eval package that scores deterministic synthetic golden cases for severity, citations, recommendations, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior, Phase 9 adds a strict-TDD Go observability package that records in-memory structured workflow events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes, Phase 10 adds Markdown demo packaging materials that distinguish implemented package-level behavior from planned production integrations, Phase 11 adds a Markdown roadmap for future local demo surfaces, Phase 12 adds a strict-TDD in-memory demo review composer plus machine-readable synthetic fixtures, Phase 13 adds a strict-TDD loopback-only demo API for `POST /demo/review`, Phase 14 adds a strict-TDD dry-run Slack-shaped notification preview plus `POST /demo/notifications/slack`, Phase 15 adds a strict-TDD in-memory scoped approval retry demo through `POST /demo/approvals` and `POST /demo/approvals/decisions`, and Phase 16 adds strict-TDD local eval, trace, and budget report routes through `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check`. No database, external observability pipeline, persistent log store, real model-provider call, provider billing reconciliation, real export tool, real escalation tool, Slack delivery, webhook, identity, auth, production API, persistent approval store, dashboard, alerting, OpenTelemetry export, model benchmark, or external-sharing integration exists yet.
+The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review, Phase 7 adds a strict-TDD Go approval package that creates in-memory approval requests, records human decisions, blocks pending or denied sensitive action callbacks, and allows approved callbacks only within scope, Phase 8 adds a strict-TDD Go eval package that scores deterministic synthetic golden cases for severity, citations, recommendations, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior, Phase 9 adds a strict-TDD Go observability package that records in-memory structured workflow events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes, Phase 10 adds Markdown demo packaging materials that distinguish implemented package-level behavior from planned production integrations, Phase 11 adds a Markdown roadmap for future local demo surfaces, Phase 12 adds a strict-TDD in-memory demo review composer plus machine-readable synthetic fixtures, Phase 13 adds a strict-TDD loopback-only demo API for `POST /demo/review`, Phase 14 adds a strict-TDD dry-run Slack-shaped notification preview plus `POST /demo/notifications/slack`, Phase 15 adds a strict-TDD in-memory scoped approval retry demo through `POST /demo/approvals` and `POST /demo/approvals/decisions`, Phase 16 adds strict-TDD local eval, trace, and budget report routes through `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check`, and Phase 17 refreshes the Markdown demo package with verified local API commands, response highlights, eval numbers, recording plan, and a `go test ./...` fallback. No database, external observability pipeline, persistent log store, real model-provider call, provider billing reconciliation, real export tool, real escalation tool, Slack delivery, webhook, identity, auth, production API, persistent approval store, dashboard, alerting, OpenTelemetry export, model benchmark, or external-sharing integration exists yet.
 
 ## Documentation
 
@@ -69,8 +69,25 @@ Execution and packaging:
 - [x] Prepare a dry-run Slack-shaped notification preview from the redacted brief and block it as external sharing before scoped approval.
 - [x] Retry the dry-run notification preview after an exact in-memory human approval while keeping missing, pending, denied, out-of-scope, and wrong-action approvals blocked.
 - [x] Expose local eval, trace, and caller-supplied budget report routes while keeping report state in memory and ephemeral.
+- [x] Document a verified local API walkthrough with exact `curl` commands and a `go test ./...` fallback.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
+
+## Local Demo Walkthrough
+
+Start the loopback-only demo server:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18084
+```
+
+Then follow the verified walkthrough in [Demo Package](docs/mvp/demo/demo-package.md#local-demo-surface) or [How-Tos](docs/how-tos.md#how-to-run-the-loopback-demo-api): review one synthetic incident, show the dry-run Slack-shaped preview blocked before approval, create and approve the exact scoped approval, retry the preview, fetch the eval report, and fetch a trace report from the same server process.
+
+Fallback proof path:
+
+```bash
+go test ./...
+```
 
 ## Runtime Surface
 
