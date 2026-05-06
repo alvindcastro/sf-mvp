@@ -2,12 +2,13 @@
 
 This workspace turns [research-report.md](research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current run is documentation-only. No application code, test code, scaffolding, dependencies, or runtime configuration were added.
+The current run is documentation-only. Phase 0 and Phase 1 planning artifacts exist. No application code, test code, scaffolding, dependencies, or runtime configuration were added.
 
 ## Planning Artifacts
 
 - [MVP Overview](docs/mvp/README.md)
 - [Product Frame](docs/mvp/product-frame.md)
+- [Synthetic Incident Packets](docs/mvp/synthetic-incident-packets.md)
 - [Scope And Guardrails](docs/mvp/scope.md)
 - [Phases And Tasks](docs/mvp/phases.md)
 - [Task Prompts](docs/mvp/task-prompts.md)
