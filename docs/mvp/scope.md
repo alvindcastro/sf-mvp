@@ -48,7 +48,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 
 ## Trust Boundaries
 
-- [ ] Retrieved documents are data, not instructions.
+- [x] Retrieved documents are data, not instructions.
 - [x] Incident packets are untrusted until validated.
 - [ ] Tool arguments require deterministic validation.
 - [ ] Sensitive actions fail closed unless a human approval record exists.
@@ -56,7 +56,9 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [ ] Logs must be useful without leaking sensitive evidence.
 - [ ] Model output must not be the only source of truth for severity, approval, export, or escalation.
 
-Implemented boundary as of Phase 2: `internal/ingestion` validates synthetic packet JSON, rejects non-synthetic records and non-synthetic media references, and returns accepted or rejected audit events. Later phases still need retrieval, reasoning, approval, persistence, and observability boundaries.
+Implemented boundary as of Phase 2: `internal/ingestion` validates synthetic packet JSON, rejects non-synthetic records and non-synthetic media references, and returns accepted or rejected audit events.
+
+Implemented boundary as of Phase 3: `internal/retrieval` filters mock guidance by exact workflow and scope before ranking, returns stable citation metadata, returns no matches instead of invented guidance, and marks retrieved snippets as `retrieved_data`. Later phases still need reasoning, approval, persistence, and observability boundaries.
 
 ## Demo Path
 

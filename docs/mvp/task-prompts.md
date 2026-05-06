@@ -44,7 +44,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Planning Prompt: RAG Corpus
 
-> Design the mock RAG corpus for Fleet Incident Copilot. Include document categories, metadata fields, retrieval questions, citation rules, no-match behavior, scope-filtering behavior, and prompt-injection test content. Do not implement retrieval. The output should be ready for a future strict-TDD implementation task.
+> Design or refine `docs/mvp/rag-corpus-and-grounding.md` for Fleet Incident Copilot. Include document categories, metadata fields, retrieval questions, citation rules, no-match behavior, scope-filtering behavior, and prompt-injection test content. Do not claim runtime behavior unless code and tests already exist.
 
 ## Planning Prompt: Agent And Tool Contract
 

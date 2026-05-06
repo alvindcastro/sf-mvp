@@ -57,13 +57,15 @@ Code-task prompt:
 
 Goal: future implementation retrieves only approved mock guidance and preserves citations.
 
-- [ ] Define mock SOP documents.
-- [ ] Define troubleshooting notes.
-- [ ] Define document metadata: source ID, title, workflow, tenant/scope marker, and revision date.
-- [ ] Define citation format for retrieved snippets.
-- [ ] Define no-match behavior.
-- [ ] Include a prompt-injection document fixture that must be treated as untrusted content.
-- [ ] Define retrieval eval questions before implementation.
+- [x] Define mock SOP documents.
+- [x] Define troubleshooting notes.
+- [x] Define document metadata: source ID, title, workflow, tenant/scope marker, and revision date.
+- [x] Define citation format for retrieved snippets.
+- [x] Define no-match behavior.
+- [x] Include a prompt-injection document fixture that must be treated as untrusted content.
+- [x] Define retrieval eval questions before implementation.
+
+Output: [RAG Corpus And Grounding](rag-corpus-and-grounding.md) and the Go package [internal/retrieval](../../internal/retrieval). Phase 3 is complete as of 2026-05-06 and added the first strict-TDD retrieval implementation for approved mock guidance only.
 
 Code-task prompt:
 
