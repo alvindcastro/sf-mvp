@@ -1,6 +1,6 @@
 # Scope And Guardrails
 
-These checklists define MVP scope and guardrails. They do not imply that application behavior has been implemented.
+These checklists define MVP scope and guardrails. Unless an item is specifically called out as implemented, it does not imply that application behavior exists.
 
 ## In Scope
 
@@ -49,12 +49,14 @@ These checklists define MVP scope and guardrails. They do not imply that applica
 ## Trust Boundaries
 
 - [ ] Retrieved documents are data, not instructions.
-- [ ] Incident packets are untrusted until validated.
+- [x] Incident packets are untrusted until validated.
 - [ ] Tool arguments require deterministic validation.
 - [ ] Sensitive actions fail closed unless a human approval record exists.
 - [ ] Shareable outputs must redact sensitive fields by default.
 - [ ] Logs must be useful without leaking sensitive evidence.
 - [ ] Model output must not be the only source of truth for severity, approval, export, or escalation.
+
+Implemented boundary as of Phase 2: `internal/ingestion` validates synthetic packet JSON, rejects non-synthetic records and non-synthetic media references, and returns accepted or rejected audit events. Later phases still need retrieval, reasoning, approval, persistence, and observability boundaries.
 
 ## Demo Path
 

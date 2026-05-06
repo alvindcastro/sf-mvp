@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 2 Incident Packet Ingestion
+
+### Task: Add Phase 2 Go Module And TDD Coverage
+
+- What: Added the initial Go module and failing-first ingestion tests for valid packets, missing required fields, non-synthetic records, malformed incident IDs, malformed telemetry, unsupported event types, non-synthetic evidence references, and audit event emission.
+- Where: [go.mod](go.mod), [internal/ingestion/ingestion_test.go](internal/ingestion/ingestion_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 2 with strict TDD and make packet validation observable before adding production ingestion logic.
+- How: Created tests using synthetic inline packet JSON from the Phase 1 contract, observed red failures for missing APIs and later missing validation rules, then used those tests to drive the implementation.
+
+### Task: Implement Synthetic Packet Validation
+
+- What: Added JSON ingestion, packet schema types, deterministic validation errors, supported event-type validation, synthetic-only evidence validation, telemetry validation, and accepted/rejected audit events.
+- Where: [internal/ingestion/ingestion.go](internal/ingestion/ingestion.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Ensure no downstream reasoning step can use unvalidated or non-synthetic incident packet data.
+- How: Implemented `IngestJSON` with RFC3339 timestamp parsing, required-field checks, `FIC-SYN-` incident ID enforcement, speed bounds, relative-time parsing, `synthetic://` media reference enforcement, and stable validation issue codes/messages.
+
+### Task: Document Phase 2 Ingestion Contract
+
+- What: Added the Phase 2 ingestion schema, validation rules, audit event contract, test commands, red-to-green evidence, and current runtime limits.
+- Where: [docs/mvp/incident-packet-ingestion.md](docs/mvp/incident-packet-ingestion.md), [docs/mvp/phases.md](docs/mvp/phases.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep implementation behavior, acceptance criteria, and phase status synchronized after adding runtime code.
+- How: Created a dedicated Phase 2 artifact and checked off the Phase 2 tracker with links to the document and Go package.
+
+### Task: Update Repository State Documentation
+
+- What: Replaced documentation-only current-state language with an accurate Phase 2 runtime summary and linked the ingestion artifact.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Avoid overclaiming a complete app while no longer claiming the repo has no application code or tests.
+- How: Added runtime-surface notes, marked only the ingestion validation promise complete, and recorded the implemented untrusted-packet boundary while leaving later phases unchecked.
+
 ## 2026-05-06 - Phase 1 Synthetic Evidence And Workflow Contract
 
 ### Task: Create Synthetic Incident Packet Contract

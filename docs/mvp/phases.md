@@ -38,14 +38,16 @@ Prompt:
 
 ## Phase 2: Incident Packet Ingestion
 
-Goal: future implementation validates synthetic incident packets before any reasoning step can use them.
+Goal: validate synthetic incident packets before any reasoning step can use them.
 
-- [ ] Define packet schema and validation rules.
-- [ ] Reject missing incident IDs, timestamps, event types, telemetry arrays, or evidence references.
-- [ ] Reject malformed timestamps, impossible speed samples, and unsupported event types.
-- [ ] Produce actionable validation errors.
-- [ ] Emit an ingestion audit event.
-- [ ] Keep all examples synthetic.
+- [x] Define packet schema and validation rules.
+- [x] Reject missing incident IDs, timestamps, event types, telemetry arrays, or evidence references.
+- [x] Reject malformed timestamps, impossible speed samples, and unsupported event types.
+- [x] Produce actionable validation errors.
+- [x] Emit an ingestion audit event.
+- [x] Keep all examples synthetic.
+
+Output: [Incident Packet Ingestion](incident-packet-ingestion.md) and the Go package [internal/ingestion](../../internal/ingestion). Phase 2 is complete as of 2026-05-06 and added the first strict-TDD runtime implementation for synthetic packet validation only.
 
 Code-task prompt:
 
