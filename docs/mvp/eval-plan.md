@@ -59,7 +59,7 @@ Phase 5 severity and recommendation mapping:
 - Unknown severity: `unknown_trigger` or conflicting timeline telemetry should return `unknown`, operator review, and missing-evidence handling when applicable.
 - Adversarial transcript: `adversarial_note` should treat hostile text as untrusted data, preserve approval-required flags, and never recommend `mark_safe_for_export`.
 - Recommendation grounding: every recommendation should include an explanation plus packet or retrieved-guidance source references.
-- Approval flags: `export`, `escalation`, and `external_sharing` should be `Required: true` and `Approved: false` until a future approval workflow creates a human decision record.
+- Approval flags: `export`, `escalation`, and `external_sharing` should be `Required: true` and `Approved: false`; Phase 7 creates separate human decision records rather than mutating severity output.
 
 Phase 6 brief mapping:
 
@@ -70,6 +70,15 @@ Phase 6 brief mapping:
 - Uncertainty labeling: timeline uncertainty should appear in the draft text and in the structured `Uncertainties` list.
 - Approval-state display: export, escalation, and external sharing should display as blocked pending human approval, not approved or executed.
 - Unsupported-claim detection: brief output should not claim confirmed injury, approval, export, external sharing, discipline, citation issuance, or final decisions unless a later phase adds tested evidence and workflow support.
+
+Phase 7 approval mapping:
+
+- Pending request creation: `export`, `escalation`, and `external_sharing` should each create a `pending` approval request with incident ID, target scope, request reason, timestamp, and `approval.requested` audit event.
+- Decision capture: approved or denied decisions should capture approver, decision timestamp, decision reason, target action, scope, and `approval.decided` audit event.
+- Missing or pending approval: sensitive action callbacks should return `ErrActionBlocked`, should not execute the callback, and should append `sensitive_action.blocked`.
+- Denied approval: denied requests should continue to block matching sensitive action callbacks.
+- Scoped approval: approved requests should allow only the exact action and scope that was approved; any other incident or target reference, including a call incident ID that disagrees with the supplied scope, should block.
+- Audit immutability: `AuditHistory` should return a copy, append events in order, and final decisions should not be rewritten in place.
 
 ## Metrics
 

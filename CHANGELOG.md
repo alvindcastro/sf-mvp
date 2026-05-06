@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 7 Human Approval Workflow
+
+### Task: Add Phase 7 Approval TDD Coverage
+
+- What: Added failing-first approval workflow tests for pending request creation, approver and decision capture, blocked pending actions, denied action blocking, approved scoped execution, out-of-scope blocking, mismatched call-and-scope incident blocking, append-only audit-copy behavior, and final-decision immutability.
+- Where: [internal/approval/approval_test.go](internal/approval/approval_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 7 with strict TDD and make the human approval gate observable before adding production approval logic.
+- How: Created same-package tests around `export`, `escalation`, and `external_sharing` using the existing `severity.SensitiveAction` labels; ran `go test ./internal/approval`; observed the expected red build failure for missing `NewGate`, request, scope, decision, audit, and gate types, then added focused red tests for immutable final decisions and mismatched call-and-scope incidents before tightening enforcement.
+
+### Task: Implement In-Memory Human Approval Gate
+
+- What: Added an approval package that creates in-memory approval requests, records approved or denied human decisions, blocks missing, pending, denied, out-of-scope, and mismatched call-and-scope sensitive action callbacks, allows approved callbacks only within exact scope, prevents final decisions from being rewritten in place, and returns append-only audit history copies.
+- Where: [internal/approval/approval.go](internal/approval/approval.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide the first Phase 7 enforcement boundary without adding real export, escalation, external-sharing, persistence, identity, CLI, HTTP API, or external-service behavior.
+- How: Implemented `NewGate`, `CreateRequest`, `Decide`, `Execute`, and `AuditHistory` with deterministic request IDs, injected clock timestamps, `DecisionPending`, `DecisionApproved`, `DecisionDenied`, `ErrActionBlocked`, `ErrRequestAlreadyDecided`, scoped request matching, and audit events for requested, decided, blocked, and allowed actions; then confirmed `go test ./internal/approval` passed.
+
+### Task: Document Phase 7 Approval Contract
+
+- What: Added the Phase 7 approval workflow contract, runtime surface, approval request model, enforcement rules, audit history behavior, current limits, test command, and red-to-green evidence.
+- Where: [docs/mvp/human-approval-workflow.md](docs/mvp/human-approval-workflow.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, eval planning, future-agent prompt, and behavior documentation synchronized after adding approval workflow runtime behavior.
+- How: Created the dedicated Phase 7 artifact, checked off the Phase 7 tracker, linked the new Go package, added Phase 7 eval mappings for pending, denied, approved, scoped, and immutable-audit cases, and pointed the reusable approval prompt at the new contract.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview and scope language to include the Phase 7 approval package and targeted test command without claiming persistence, identity, real export, real escalation, external sharing, observability, eval harness, CLI, HTTP API, or database behavior exists.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md), [docs/mvp/product-frame.md](docs/mvp/product-frame.md), [docs/mvp/synthetic-incident-packets.md](docs/mvp/synthetic-incident-packets.md), [docs/mvp/severity-classification-and-recommended-actions.md](docs/mvp/severity-classification-and-recommended-actions.md), [docs/mvp/incident-brief-drafting.md](docs/mvp/incident-brief-drafting.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Remove stale statements that human approval records and enforcement were future work while preserving the remaining limits around actual sensitive-action integrations and production runtime surfaces.
+- How: Added the Phase 7 artifact to documentation maps, marked human approval gating as implemented, recorded the fail-closed approval trust boundary, clarified Phase 5 approval flags and Phase 6 approval-state display as separate from Phase 7 decision records, and kept real export, escalation, and external sharing out of implemented scope.
+
 ## 2026-05-06 - Phase 6 Shareable Incident Brief
 
 ### Task: Add Phase 6 Brief TDD Coverage

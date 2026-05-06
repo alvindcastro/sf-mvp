@@ -76,7 +76,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Approval Workflow
 
-> Implement the human approval gate using strict TDD. First write failing tests for pending approval creation, denied approval, granted approval, blocked action before approval, scoped approval, and immutable audit history. Confirm red before production code. Then implement the smallest workflow that passes. Acceptance requires sensitive actions to fail closed, audit records to be append-only, and tests proving denied or out-of-scope actions cannot execute.
+> Implement or refine the human approval gate using strict TDD. Use `docs/mvp/human-approval-workflow.md` as the current Phase 7 behavior contract. First add or update failing tests for pending approval creation, denied approval, granted approval, blocked action before approval, scoped approval, and immutable audit history. Confirm red before production code. Then implement the smallest workflow that passes. Acceptance requires sensitive actions to fail closed, audit records to be append-only, final decisions to avoid in-place rewrites, and tests proving denied or out-of-scope actions cannot execute.
 
 ## Code Prompt: Eval Harness
 

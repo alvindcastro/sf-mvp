@@ -124,18 +124,20 @@ Code-task prompt:
 
 ## Phase 7: Human Approval Workflow
 
-Goal: future implementation blocks sensitive actions until a human decision exists.
+Goal: block sensitive actions until a human decision exists.
 
-- [ ] Create approval requests for export, escalation, and external sharing.
-- [ ] Capture approver, timestamp, decision, reason, and target action.
-- [ ] Block sensitive tool calls while approval is pending.
-- [ ] Block denied actions.
-- [ ] Allow approved actions only within the approved scope.
-- [ ] Preserve append-only audit history.
+- [x] Create approval requests for export, escalation, and external sharing.
+- [x] Capture approver, timestamp, decision, reason, and target action.
+- [x] Block sensitive tool calls while approval is pending.
+- [x] Block denied actions.
+- [x] Allow approved actions only within the approved scope.
+- [x] Preserve append-only audit history.
+
+Output: [Human Approval Workflow](human-approval-workflow.md) and the Go package [internal/approval](../../internal/approval). Phase 7 is complete as of 2026-05-06 and added the first strict-TDD in-memory human approval gate for scoped sensitive-action callbacks only.
 
 Code-task prompt:
 
-> Implement the human approval gate using strict TDD. First write failing tests for pending approval creation, denied approval, granted approval, blocked action before approval, scoped approval, and immutable audit history. Confirm red before production code. Then implement the smallest workflow that passes. Acceptance requires sensitive actions to fail closed, audit records to be append-only, and tests proving denied or out-of-scope actions cannot execute.
+> Implement or refine the human approval gate using strict TDD. Use `docs/mvp/human-approval-workflow.md` as the current Phase 7 behavior contract. First add or update failing tests for pending approval creation, denied approval, granted approval, blocked action before approval, scoped approval, and immutable audit history. Confirm red before production code. Then implement the smallest workflow that passes. Acceptance requires sensitive actions to fail closed, audit records to be append-only, final decisions to avoid in-place rewrites, and tests proving denied or out-of-scope actions cannot execute.
 
 ## Phase 8: Eval Harness
 

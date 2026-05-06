@@ -81,7 +81,7 @@ The following actions must require explicit human approval before execution:
 - Escalating an incident to a supervisor, agency, or external workflow.
 - Sharing content outside the review context.
 
-Approval records should eventually capture approver, timestamp, decision, reason, target action, and scope. Pending, denied, missing, or out-of-scope approvals must block the requested action.
+Phase 7 approval records capture approver, timestamp, decision, reason, target action, and scope in memory. Pending, denied, missing, or out-of-scope approvals must block the requested action.
 
 ## Prohibited Claims
 
