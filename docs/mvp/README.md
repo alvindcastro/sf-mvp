@@ -18,9 +18,9 @@ Given a synthetic fleet incident packet, the system should:
 - [x] Draft a shareable incident brief with citations and redactions.
 - [x] Require human approval before export, escalation, or external sharing.
 - [x] Run local eval checks for severity, citation coverage, recommendation accuracy, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior.
-- [ ] Emit observability signals for traces, retrieval quality, latency, token use, tool calls, and safety checks.
+- [x] Emit package-level observability signals for traces, retrieval quality, latency, token use, tool calls, approval decisions, eval summaries, and budget checks.
 
-This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, the Phase 3 Go retrieval package for approved mock guidance, the Phase 4 Go timeline package for cited synthetic incident timelines, the Phase 5 Go severity package for deterministic classification, SOP-grounded recommendations, and approval-required flags, the Phase 6 Go brief package for cited, redacted draft incident briefs, the Phase 7 Go approval package for in-memory human approval records and scoped sensitive-action gating, and the Phase 8 Go eval package for deterministic local golden-case scoring. No CLI, HTTP API, database, observability pipeline, token or cost tracking, real export tool, real escalation tool, or external-sharing integration exists yet.
+This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, the Phase 3 Go retrieval package for approved mock guidance, the Phase 4 Go timeline package for cited synthetic incident timelines, the Phase 5 Go severity package for deterministic classification, SOP-grounded recommendations, and approval-required flags, the Phase 6 Go brief package for cited, redacted draft incident briefs, the Phase 7 Go approval package for in-memory human approval records and scoped sensitive-action gating, the Phase 8 Go eval package for deterministic local golden-case scoring, and the Phase 9 Go observability package for in-memory structured events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes. No CLI, HTTP API, database, external observability pipeline, persistent log store, real model-provider call, provider billing reconciliation, real export tool, real escalation tool, or external-sharing integration exists yet.
 
 ## Primary User
 
@@ -34,7 +34,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [x] Approval boundaries for sensitive workflows.
 - [ ] Prompt-injection and least-privilege security awareness.
 - [x] Eval discipline for groundedness, citations, severity, recommendations, redaction, prompt injection, and approval fail-closed behavior.
-- [ ] Observability and cost-control thinking.
+- [x] Observability and cost-control thinking.
 - [ ] Clear demo packaging for interviews and review.
 
 ## Artifact Map
@@ -48,6 +48,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [Shareable Incident Brief Drafting](incident-brief-drafting.md): Phase 6 structured draft brief sections, citation rules, redaction behavior, fail-closed behavior, approval-state display, test commands, and red-to-green evidence.
 - [Human Approval Workflow](human-approval-workflow.md): Phase 7 approval request model, decision capture, scoped enforcement rules, append-only audit behavior, test commands, and red-to-green evidence.
 - [Eval Plan](eval-plan.md): Phase 8 local eval harness behavior, golden cases, scoring rules, release thresholds, test commands, and red-to-green evidence.
+- [Observability And Cost Controls](observability-and-cost-controls.md): Phase 9 trace IDs, structured events, latency, token usage, invalid token usage, budget limits, redaction behavior, cache candidates, model-routing notes, test commands, and red-to-green evidence.
 - [Scope And Guardrails](scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
 - [Phases And Tasks](phases.md): tickable phase plan with prompts.
 - [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.
