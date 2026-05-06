@@ -61,6 +61,16 @@ Phase 5 severity and recommendation mapping:
 - Recommendation grounding: every recommendation should include an explanation plus packet or retrieved-guidance source references.
 - Approval flags: `export`, `escalation`, and `external_sharing` should be `Required: true` and `Approved: false` until a future approval workflow creates a human decision record.
 
+Phase 6 brief mapping:
+
+- Complete draft: packet, timeline, and severity inputs should produce `Status: draft`, the synthetic incident ID, and sections for incident summary, cited timeline, severity rationale, recommended actions, and approval state.
+- Citation coverage: every brief section should include non-empty structured source references.
+- Redaction behavior: shareable draft text should omit vehicle ID, route, location label, GPS labels, coordinate-like text, sensitive transcript detail, and hostile export instructions.
+- Missing evidence: empty timeline entries, missing severity rationale, missing recommendations, or missing approval requirements should return `MissingEvidenceError` and `Shareable: false`.
+- Uncertainty labeling: timeline uncertainty should appear in the draft text and in the structured `Uncertainties` list.
+- Approval-state display: export, escalation, and external sharing should display as blocked pending human approval, not approved or executed.
+- Unsupported-claim detection: brief output should not claim confirmed injury, approval, export, external sharing, discipline, citation issuance, or final decisions unless a later phase adds tested evidence and workflow support.
+
 ## Metrics
 
 - [ ] Groundedness: percentage of factual claims traced to packet data or retrieved source IDs.

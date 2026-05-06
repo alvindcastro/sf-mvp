@@ -11,7 +11,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Grounded timeline generation with citations.
 - [x] Severity classification with rationale.
 - [x] Recommended next actions tied to retrieved guidance.
-- [ ] Shareable incident brief drafting with redaction.
+- [x] Shareable incident brief drafting with redaction.
 - [ ] Human approval before export, escalation, or external sharing.
 - [ ] Structured logs for traces, retrieval, tool calls, latency, token use, approval decisions, and eval outcomes.
 - [ ] Security checks for prompt injection, least-privilege retrieval, sensitive-data redaction, and unsafe tool calls.
@@ -52,7 +52,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Incident packets are untrusted until validated.
 - [ ] Tool arguments require deterministic validation.
 - [ ] Sensitive actions fail closed unless a human approval record exists.
-- [ ] Shareable outputs must redact sensitive fields by default.
+- [x] Shareable outputs must redact sensitive fields by default.
 - [ ] Logs must be useful without leaking sensitive evidence.
 - [x] Model output must not be the only source of truth for severity, approval, export, or escalation.
 
@@ -62,7 +62,9 @@ Implemented boundary as of Phase 3: `internal/retrieval` filters mock guidance b
 
 Implemented boundary as of Phase 4: `internal/timeline` builds deterministic timeline entries from validated synthetic packet data, preserves structured source references for factual claims, carries approved retrieved citation references as guidance metadata, labels unavailable or conflicting evidence as uncertain, and does not infer visual facts, approval, export, escalation, injury, plate, or external-sharing claims.
 
-Implemented boundary as of Phase 5: `internal/severity` classifies low, medium, high, and unknown severity with deterministic rules, returns recommendation explanations with packet and retrieved-guidance source references, marks conflicting timeline signals as unknown, treats adversarial transcript content as untrusted data, and flags export, escalation, and external sharing as approval-required but not approved. Later phases still need brief drafting, human approval records and enforcement, persistence, observability, and eval boundaries.
+Implemented boundary as of Phase 5: `internal/severity` classifies low, medium, high, and unknown severity with deterministic rules, returns recommendation explanations with packet and retrieved-guidance source references, marks conflicting timeline signals as unknown, treats adversarial transcript content as untrusted data, and flags export, escalation, and external sharing as approval-required but not approved.
+
+Implemented boundary as of Phase 6: `internal/brief` drafts structured human-review incident briefs from validated packet data, cited timeline entries, and severity results; redacts vehicle, route, location, GPS-label, sensitive transcript, sensitive still-frame, and coordinate-like text; preserves citations; carries uncertainty labels; and displays export, escalation, and external sharing as blocked pending human approval. Later phases still need human approval records and enforcement, persistence, observability, eval boundaries, rendering, export, escalation, and external-sharing behavior.
 
 ## Demo Path
 
@@ -72,7 +74,7 @@ Implemented boundary as of Phase 5: `internal/severity` classifies low, medium, 
 - [ ] Produce a cited timeline.
 - [x] Classify severity and explain the basis.
 - [x] Recommend next actions.
-- [ ] Draft a shareable brief.
+- [x] Draft a shareable brief.
 - [x] Show approval is required before export or escalation.
 - [ ] Show eval and observability summary.
 
