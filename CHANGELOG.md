@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-06 - Phase 8 Eval Harness
+
+### Task: Add Phase 8 Eval TDD Coverage
+
+- What: Added failing-first eval harness tests for loading golden normal, adversarial, and incomplete cases; scoring expected severity; scoring citation coverage; detecting unsupported claims; checking SOP-grounded recommendation accuracy; verifying redaction; checking prompt-injection resistance; and asserting strict release thresholds.
+- Where: [internal/eval/eval_test.go](internal/eval/eval_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 8 with strict TDD and make deterministic eval behavior observable before adding production eval logic.
+- How: Created same-package tests around `GoldenCases`, `Run`, and `DefaultThresholds`; ran `go test ./internal/eval`; observed the expected red build failure for missing eval APIs and types before adding implementation.
+
+### Task: Implement Deterministic In-Memory Eval Harness
+
+- What: Added an eval package that loads synthetic golden cases, retrieves mock guidance, composes timeline, severity, brief, and approval-gate behavior, and reports severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed status.
+- Where: [internal/eval/eval.go](internal/eval/eval.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide repeatable local release gates for the MVP demo path without adding a CLI, HTTP API, database, persistent eval storage, model calls, observability, token tracking, cost controls, export, escalation, or external-sharing integrations.
+- How: Implemented `GoldenCases`, `Run`, `DefaultThresholds`, strict release-gate fields, in-memory synthetic packet fixtures for `FIC-SYN-001` through `FIC-SYN-005`, an approved mock guidance corpus, citation and recommendation scoring, prohibited-claim and sensitive-term scans, prompt-injection checks, and no-approval sensitive-action callback checks; then confirmed `go test ./internal/eval` passed.
+
+### Task: Document Phase 8 Eval Contract
+
+- What: Reworked the eval plan into the Phase 8 behavior contract, checked off Phase 8, documented golden cases, scoring rules, release thresholds, current limits, test commands, and red-to-green evidence.
+- Where: [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, future-agent prompt, and eval behavior documentation synchronized after adding runtime eval harness behavior.
+- How: Linked the new Go package from the Phase 8 tracker, changed the reusable eval prompt to “implement or refine,” recorded strict default thresholds, and kept observability, token and cost metrics, CLI reporting, HTTP API, persistence, and real integrations out of Phase 8 scope.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview and scope language to include the Phase 8 eval package and targeted test command while keeping observability and cost controls deferred.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Remove stale statements that said no eval harness existed and split eval completion from future observability work.
+- How: Added the eval artifact and package to documentation maps, marked deterministic local evals as implemented, added the Phase 8 trust boundary, and clarified that trace IDs, structured logs, latency, token usage, budget metrics, CLI, HTTP API, database, and real integrations remain unimplemented.
+
+### Task: Verify Phase 8 Eval Harness
+
+- What: Verified the targeted eval package, full Go test suite, vet checks, and package coverage after the implementation and documentation sync.
+- Where: [internal/eval](internal/eval), [README.md](README.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 8 is locally repeatable and does not break earlier MVP phase packages.
+- How: Ran `go test ./internal/eval`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; all completed successfully, with `internal/eval` reporting 86.0% statement coverage.
+
 ## 2026-05-06 - Phase 7 Human Approval Workflow
 
 ### Task: Add Phase 7 Approval TDD Coverage

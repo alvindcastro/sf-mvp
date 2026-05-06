@@ -2,7 +2,7 @@
 
 This workspace turns [research-report.md](research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review, and Phase 7 adds a strict-TDD Go approval package that creates in-memory approval requests, records human decisions, blocks pending or denied sensitive action callbacks, and allows approved callbacks only within scope. No CLI, HTTP API, database, real export tool, real escalation tool, or external-sharing integration exists yet.
+The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review, Phase 7 adds a strict-TDD Go approval package that creates in-memory approval requests, records human decisions, blocks pending or denied sensitive action callbacks, and allows approved callbacks only within scope, and Phase 8 adds a strict-TDD Go eval package that scores deterministic synthetic golden cases for severity, citations, recommendations, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior. No CLI, HTTP API, database, observability pipeline, token or cost tracking, real export tool, real escalation tool, or external-sharing integration exists yet.
 
 ## Planning Artifacts
 
@@ -15,11 +15,11 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [Severity Classification And Recommended Actions](docs/mvp/severity-classification-and-recommended-actions.md)
 - [Shareable Incident Brief Drafting](docs/mvp/incident-brief-drafting.md)
 - [Human Approval Workflow](docs/mvp/human-approval-workflow.md)
+- [Eval Plan](docs/mvp/eval-plan.md)
 - [Scope And Guardrails](docs/mvp/scope.md)
 - [Phases And Tasks](docs/mvp/phases.md)
 - [Task Prompts](docs/mvp/task-prompts.md)
 - [Strict TDD Rules](docs/mvp/tdd-rules.md)
-- [Eval Plan](docs/mvp/eval-plan.md)
 - [Demo Package](docs/mvp/demo-package.md)
 
 ## Working Rules
@@ -35,6 +35,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [x] Classify severity and recommend next actions with deterministic rules.
 - [x] Draft cited, redacted incident briefs for human review.
 - [x] Create in-memory human approval records and gate sensitive action callbacks.
+- [x] Run deterministic local evals for severity, citations, recommendations, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
 
@@ -47,5 +48,6 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - Severity package: [internal/severity](internal/severity).
 - Brief package: [internal/brief](internal/brief).
 - Approval package: [internal/approval](internal/approval).
-- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, `go test ./internal/brief`, and `go test ./internal/approval`.
+- Eval package: [internal/eval](internal/eval).
+- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, `go test ./internal/brief`, `go test ./internal/approval`, and `go test ./internal/eval`.
 - Full Go test command: `go test ./...`.

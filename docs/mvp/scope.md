@@ -13,8 +13,10 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Recommended next actions tied to retrieved guidance.
 - [x] Shareable incident brief drafting with redaction.
 - [x] Human approval before export, escalation, or external sharing.
+- [x] Deterministic local evals for severity, citations, recommendations, unsupported claims, redaction, prompt injection, and approval fail-closed behavior.
 - [ ] Structured logs for traces, retrieval, tool calls, latency, token use, approval decisions, and eval outcomes.
-- [ ] Security checks for prompt injection, least-privilege retrieval, sensitive-data redaction, and unsafe tool calls.
+- [x] Implemented safety checks for prompt injection, least-privilege retrieval, sensitive-data redaction, and fail-closed sensitive actions.
+- [ ] Runtime log redaction and unsafe-tool-call observability checks.
 - [ ] Cost controls for token budgets, caching candidates, and model-routing decisions.
 - [ ] Future backend implementation in Go once a strict-TDD code phase begins.
 
@@ -64,9 +66,11 @@ Implemented boundary as of Phase 4: `internal/timeline` builds deterministic tim
 
 Implemented boundary as of Phase 5: `internal/severity` classifies low, medium, high, and unknown severity with deterministic rules, returns recommendation explanations with packet and retrieved-guidance source references, marks conflicting timeline signals as unknown, treats adversarial transcript content as untrusted data, and flags export, escalation, and external sharing as approval-required but not approved.
 
-Implemented boundary as of Phase 6: `internal/brief` drafts structured human-review incident briefs from validated packet data, cited timeline entries, and severity results; redacts vehicle, route, location, GPS-label, sensitive transcript, sensitive still-frame, and coordinate-like text; preserves citations; carries uncertainty labels; and displays export, escalation, and external sharing as blocked pending human approval. Later phases still need persistence, observability, eval boundaries, rendering, export, escalation, and external-sharing behavior.
+Implemented boundary as of Phase 6: `internal/brief` drafts structured human-review incident briefs from validated packet data, cited timeline entries, and severity results; redacts vehicle, route, location, GPS-label, sensitive transcript, sensitive still-frame, and coordinate-like text; preserves citations; carries uncertainty labels; and displays export, escalation, and external sharing as blocked pending human approval. Later phases still need persistence, observability, rendering, export, escalation, and external-sharing behavior.
 
-Implemented boundary as of Phase 7: `internal/approval` creates in-memory approval requests for export, escalation, and external sharing; captures human decisions with approver, timestamp, reason, action, and scope; blocks missing, pending, denied, out-of-scope, and mismatched call-and-scope sensitive action callbacks; allows approved callbacks only within the exact approved scope; prevents final decisions from being rewritten in place; and returns append-only audit history copies. It does not implement persistence, identity, roles, real export, real escalation, external-sharing integrations, CLI, HTTP API, observability, or eval harness behavior.
+Implemented boundary as of Phase 7: `internal/approval` creates in-memory approval requests for export, escalation, and external sharing; captures human decisions with approver, timestamp, reason, action, and scope; blocks missing, pending, denied, out-of-scope, and mismatched call-and-scope sensitive action callbacks; allows approved callbacks only within the exact approved scope; prevents final decisions from being rewritten in place; and returns append-only audit history copies. It does not implement persistence, identity, roles, real export, real escalation, external-sharing integrations, CLI, HTTP API, or observability behavior.
+
+Implemented boundary as of Phase 8: `internal/eval` runs deterministic in-memory golden-case evals for `FIC-SYN-001` through `FIC-SYN-005`; scores severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior; and applies strict default release gates. It does not implement a CLI report, persistent eval history, trace IDs, token or cost tracking, structured logs, HTTP API, database, model-provider calls, or real integrations.
 
 ## Demo Path
 
@@ -78,12 +82,13 @@ Implemented boundary as of Phase 7: `internal/approval` creates in-memory approv
 - [x] Recommend next actions.
 - [x] Draft a shareable brief.
 - [x] Show approval is required before export or escalation.
-- [ ] Show eval and observability summary.
+- [x] Show deterministic eval summary.
+- [ ] Show observability summary.
 
 ## Definition Of MVP Done
 
 - [ ] The demo can be explained in under five minutes.
 - [ ] Every factual output is traceable to packet data or retrieved mock content.
 - [x] Approval-gated actions cannot execute without approval.
-- [ ] Prompt-injection and missing-data cases are represented in fixtures or evals.
+- [x] Prompt-injection and missing-data cases are represented in fixtures or evals.
 - [ ] The demo package includes a repo narrative, short video outline, architecture diagram checklist, and one-page eval summary.

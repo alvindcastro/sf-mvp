@@ -80,7 +80,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Eval Harness
 
-> Implement the MVP eval harness using strict TDD. Start with failing tests for loading eval cases, scoring expected severity, checking citation coverage, detecting unsupported claims, verifying redaction, and handling prompt-injection fixtures. Confirm failures before implementation. Then implement the smallest evaluator. Acceptance requires repeatable local evals, clear pass/fail thresholds, normal/adversarial/incomplete fixtures, and a test summary showing what went red and green.
+> Implement or refine the MVP eval harness using strict TDD. Use `docs/mvp/eval-plan.md` as the current Phase 8 behavior contract. Start with failing tests for loading eval cases, scoring expected severity, checking citation coverage, detecting unsupported claims, verifying redaction, checking recommendation accuracy, checking approval fail-closed behavior, and handling prompt-injection fixtures. Confirm failures before implementation. Then implement the smallest evaluator. Acceptance requires repeatable local evals, clear pass/fail thresholds, normal/adversarial/incomplete fixtures, and a test summary showing what went red and green.
 
 ## Code Prompt: Observability And Cost
 

@@ -141,20 +141,22 @@ Code-task prompt:
 
 ## Phase 8: Eval Harness
 
-Goal: future implementation measures groundedness, citations, severity, recommendations, safety, and redaction before demo release.
+Goal: measure groundedness, citations, severity, recommendations, safety, approval fail-closed behavior, and redaction before demo release.
 
-- [ ] Create golden synthetic incidents.
-- [ ] Score expected severity.
-- [ ] Score citation coverage.
-- [ ] Detect unsupported claims.
-- [ ] Check recommendation accuracy against expected SOP guidance.
-- [ ] Check prompt-injection resistance.
-- [ ] Check redaction behavior.
-- [ ] Define release thresholds.
+- [x] Create golden synthetic incidents.
+- [x] Score expected severity.
+- [x] Score citation coverage.
+- [x] Detect unsupported claims.
+- [x] Check recommendation accuracy against expected SOP guidance.
+- [x] Check prompt-injection resistance.
+- [x] Check redaction behavior.
+- [x] Define release thresholds.
+
+Output: [Eval Plan](eval-plan.md) and the Go package [internal/eval](../../internal/eval). Phase 8 is complete as of 2026-05-06 and added a strict-TDD in-memory eval harness for deterministic synthetic golden cases only.
 
 Code-task prompt:
 
-> Implement the MVP eval harness using strict TDD. Start with failing tests for loading eval cases, scoring expected severity, checking citation coverage, detecting unsupported claims, verifying redaction, and handling prompt-injection fixtures. Confirm failures before implementation. Then implement the smallest evaluator. Acceptance requires repeatable local evals, clear pass/fail thresholds, normal/adversarial/incomplete fixtures, and a test summary showing what went red and green.
+> Implement or refine the MVP eval harness using strict TDD. Use `docs/mvp/eval-plan.md` as the current Phase 8 behavior contract. Start with failing tests for loading eval cases, scoring expected severity, checking citation coverage, detecting unsupported claims, verifying redaction, checking recommendation accuracy, checking approval fail-closed behavior, and handling prompt-injection fixtures. Confirm failures before implementation. Then implement the smallest evaluator. Acceptance requires repeatable local evals, clear pass/fail thresholds, normal/adversarial/incomplete fixtures, and a test summary showing what went red and green.
 
 ## Phase 9: Observability And Cost Controls
 
