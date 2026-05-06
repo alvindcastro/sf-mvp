@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-05-06 - Phase 14 Dry-Run Slack-Shaped Notification Preview
+
+### Task: Audit Phase 14 Scope With Parallel Agents
+
+- What: Ran parallel read-only Codex explorer agents to inspect the Phase 14 acceptance criteria, likely package boundaries, approval and observability contracts, local API options, and documentation update set.
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [internal/approval](internal/approval), [internal/brief](internal/brief), [internal/observability](internal/observability), [internal/demo](internal/demo), [internal/httpapi](internal/httpapi).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 14 should add a dry-run Slack-shaped notification preview without Slack tokens, webhook URLs, SDKs, secrets, outbound network calls, real delivery, approval retry wiring, or external-sharing integration.
+- How: Spawned two read-only explorer agents while the main thread inspected the phase plan and package APIs; resolved the requested `docs/mvp/phases.md` path ambiguity by using [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md) as the canonical tracker and adding a compatibility pointer.
+
+### Task: Add Phase 14 Notification Preview TDD Coverage
+
+- What: Added failing-first tests for blocked dry-run preview without approval, mandatory `delivery_mode: "dry_run"`, denied approval, out-of-scope approval, exact scoped approval, redacted tool-call observability events, prepared Slack-shaped payloads, and no network delivery.
+- Where: [internal/notification/slack_test.go](internal/notification/slack_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Define the Phase 14 behavior contract before production code and prove missing notification-preview behavior through strict TDD.
+- How: Created a new `internal/notification` test surface around `PreviewSlack`, `SlackTargetRef`, dry-run result fields, approval gate semantics, and observability event assertions; ran `go test ./internal/notification`; observed the expected red build failure for missing preview types and functions.
+
+### Task: Implement Dry-Run Slack-Shaped Preview Package
+
+- What: Added `internal/notification` with dry-run-only preview generation, Slack-shaped payload structs, external-sharing approval gating, blocked and allowed preview statuses, redacted observability tool-call events, and explicit no-send/no-network result fields.
+- Where: [internal/notification/slack.go](internal/notification/slack.go), [internal/notification/slack_test.go](internal/notification/slack_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Complete the package-level Phase 14 preview behavior while reusing the existing approval, brief, severity, and observability contracts instead of introducing a Slack integration.
+- How: Implemented `PreviewSlack`, `DeliveryModeDryRun`, `SlackPayload`, `PreviewResult`, `SlackTargetRef`, redacted-brief payload projection, `external_sharing` gate calls with `slack:<channel>` target scope, and `notification.slack.preview` tool-call recording; verified `go test ./internal/notification` passed.
+
+### Task: Add Loopback Notification Preview Route
+
+- What: Added `POST /demo/notifications/slack` to the local demo handler and response projection for blocked dry-run notification previews.
+- Where: [internal/httpapi/httpapi.go](internal/httpapi/httpapi.go), [internal/httpapi/httpapi_test.go](internal/httpapi/httpapi_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Make Phase 14 visible through the existing loopback demo server while keeping approval creation and retry behavior deferred to Phase 15.
+- How: Added failing handler tests for the missing route and non-dry-run rejection; observed `go test ./internal/httpapi` return `404` for the new route; implemented route dispatch, request parsing, review composition, redacted brief conversion, empty in-memory approval gate usage, notification preview projection, and `dry_run_required` error mapping.
+
+### Task: Document Phase 14 Implemented Boundary
+
+- What: Added the Phase 14 behavior doc and synchronized phase tracking, demo roadmap, loopback API docs, demo package, overview, contributor guides, testing docs, troubleshooting docs, docs indexes, and root README.
+- Where: [docs/mvp/demo/dry-run-slack-preview.md](docs/mvp/demo/dry-run-slack-preview.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/demo/review-composition-contract.md](docs/mvp/demo/review-composition-contract.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/README.md](docs/README.md), [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/testing.md](docs/testing.md), [docs/troubleshooting.md](docs/troubleshooting.md), [README.md](README.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep implemented-versus-planned wording accurate after adding the dry-run notification package and route, while preserving explicit limits around real Slack delivery, webhooks, tokens, SDKs, secrets, outbound network calls, approval retry, persistence, auth, production APIs, and external-sharing integrations.
+- How: Marked Phase 14 complete, linked the new package and route, documented the verified `curl` command, updated targeted test lists, described the blocked-before-approval route behavior, and kept Phase 15 approval retry plus Phase 16 report surfaces planned.
+
+### Task: Verify Phase 14 Notification Preview
+
+- What: Verified the new notification package, local handler, related package set, full Go suite, vet checks, coverage, and one local `curl` request against the loopback notification preview route.
+- Where: [internal/notification](internal/notification), [internal/httpapi](internal/httpapi), [cmd/demo-api](cmd/demo-api), [docs/mvp/demo/dry-run-slack-preview.md](docs/mvp/demo/dry-run-slack-preview.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 14 is deterministic, locally repeatable, and does not regress earlier package contracts before closing the task.
+- How: Ran `go test ./internal/notification`, `go test ./internal/approval ./internal/brief ./internal/observability ./internal/notification ./internal/demo ./internal/httpapi`, `go test ./internal/httpapi`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; started `go run ./cmd/demo-api -addr 127.0.0.1:18081`; verified `curl -i --max-time 5 -X POST http://127.0.0.1:18081/demo/notifications/slack -H "Content-Type: application/json" -d '{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}'` returned HTTP `200` with `notification_preview.status: "blocked"`, `sent: false`, and `network_delivery_attempted: false`; stopped the local server.
+
 ## 2026-05-06 - Phase 13 Loopback Demo API
 
 ### Task: Audit Phase 13 Scope With Parallel Agents

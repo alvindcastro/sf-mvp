@@ -10,7 +10,7 @@ Common tasks for working on the Fleet Incident Copilot MVP.
 4. Check [Phases And Tasks](mvp/execution/phases.md) when a task belongs to a planned phase.
 5. Use [Strict TDD Rules](mvp/execution/tdd-rules.md) for every code change.
 
-If a behavior is not implemented in `internal` or the thin `cmd/demo-api` loopback server, describe it as planned or deferred. Do not imply a general CLI workflow, production HTTP API, database, live model call, real export, real escalation, external sharing, identity, dashboards, or production compliance behavior exists.
+If a behavior is not implemented in `internal` or the thin `cmd/demo-api` loopback server, describe it as planned or deferred. Do not imply a general CLI workflow, production HTTP API, database, live model call, real export, real escalation, real external sharing, Slack delivery, identity, dashboards, or production compliance behavior exists.
 
 ## How To Add Or Change Package Behavior
 
@@ -35,6 +35,7 @@ go test ./internal/approval
 go test ./internal/eval
 go test ./internal/observability
 go test ./internal/demo
+go test ./internal/notification
 go test ./internal/httpapi
 go test ./cmd/demo-api
 ```
@@ -66,7 +67,7 @@ internal/eval          scores deterministic golden cases
 internal/observability records in-memory workflow events and budget signals
 ```
 
-Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
+Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route and Phase 14 dry-run notification route; `internal/notification` owns the dry-run Slack-shaped preview; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
 
 ## How To Run The Loopback Demo API
 
@@ -89,6 +90,16 @@ curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/review \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001"}'
 ```
+
+Call the dry-run notification preview endpoint from another terminal:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/notifications/slack \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}'
+```
+
+The preview response should be blocked before scoped approval, include a prepared Slack-shaped payload, and report `sent: false` plus `network_delivery_attempted: false`.
 
 ## How To Update Documentation Safely
 

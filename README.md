@@ -2,7 +2,7 @@
 
 This workspace turns [research-report.md](docs/research/research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review, Phase 7 adds a strict-TDD Go approval package that creates in-memory approval requests, records human decisions, blocks pending or denied sensitive action callbacks, and allows approved callbacks only within scope, Phase 8 adds a strict-TDD Go eval package that scores deterministic synthetic golden cases for severity, citations, recommendations, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior, Phase 9 adds a strict-TDD Go observability package that records in-memory structured workflow events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes, Phase 10 adds Markdown demo packaging materials that distinguish implemented package-level behavior from planned production integrations, Phase 11 adds a Markdown roadmap for future local demo surfaces, Phase 12 adds a strict-TDD in-memory demo review composer plus machine-readable synthetic fixtures, and Phase 13 adds a strict-TDD loopback-only demo API for `POST /demo/review`. No database, external observability pipeline, persistent log store, real model-provider call, provider billing reconciliation, real export tool, real escalation tool, Slack delivery, webhook, identity, auth, production API, or external-sharing integration exists yet.
+The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review, Phase 7 adds a strict-TDD Go approval package that creates in-memory approval requests, records human decisions, blocks pending or denied sensitive action callbacks, and allows approved callbacks only within scope, Phase 8 adds a strict-TDD Go eval package that scores deterministic synthetic golden cases for severity, citations, recommendations, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior, Phase 9 adds a strict-TDD Go observability package that records in-memory structured workflow events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes, Phase 10 adds Markdown demo packaging materials that distinguish implemented package-level behavior from planned production integrations, Phase 11 adds a Markdown roadmap for future local demo surfaces, Phase 12 adds a strict-TDD in-memory demo review composer plus machine-readable synthetic fixtures, Phase 13 adds a strict-TDD loopback-only demo API for `POST /demo/review`, and Phase 14 adds a strict-TDD dry-run Slack-shaped notification preview plus `POST /demo/notifications/slack`. No database, external observability pipeline, persistent log store, real model-provider call, provider billing reconciliation, real export tool, real escalation tool, Slack delivery, webhook, identity, auth, production API, approval retry route, or external-sharing integration exists yet.
 
 ## Documentation
 
@@ -32,6 +32,7 @@ Workflow behavior:
 - [Human Approval Workflow](docs/mvp/workflow/human-approval-workflow.md)
 - [Review Composition Contract](docs/mvp/demo/review-composition-contract.md)
 - [Loopback Demo API](docs/mvp/demo/loopback-demo-api.md)
+- [Dry-Run Slack-Shaped Notification Preview](docs/mvp/demo/dry-run-slack-preview.md)
 
 Quality and operations:
 
@@ -63,6 +64,7 @@ Execution and packaging:
 - [x] Record package-level observability events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes.
 - [x] Compose one deterministic in-memory demo review result with validation status, citations, timeline, severity, recommendations, redacted brief, approval-required actions, and trace ID.
 - [x] Expose the deterministic demo review result through a loopback-only local API.
+- [x] Prepare a dry-run Slack-shaped notification preview from the redacted brief and block it as external sharing before scoped approval.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
 
@@ -78,7 +80,8 @@ Execution and packaging:
 - Eval package: [internal/eval](internal/eval).
 - Observability package: [internal/observability](internal/observability).
 - Demo composer package: [internal/demo](internal/demo).
+- Notification preview package: [internal/notification](internal/notification).
 - Demo HTTP handler package: [internal/httpapi](internal/httpapi).
 - Demo API command: [cmd/demo-api](cmd/demo-api).
-- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, `go test ./internal/brief`, `go test ./internal/approval`, `go test ./internal/eval`, `go test ./internal/observability`, `go test ./internal/demo`, `go test ./internal/httpapi`, and `go test ./cmd/demo-api`.
+- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, `go test ./internal/brief`, `go test ./internal/approval`, `go test ./internal/eval`, `go test ./internal/observability`, `go test ./internal/demo`, `go test ./internal/notification`, `go test ./internal/httpapi`, and `go test ./cmd/demo-api`.
 - Full Go test command: `go test ./...`.

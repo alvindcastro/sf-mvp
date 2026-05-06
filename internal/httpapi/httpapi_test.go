@@ -155,6 +155,65 @@ func TestReviewEndpointRejectsUnknownPath(t *testing.T) {
 	}
 }
 
+func TestSlackNotificationPreviewEndpointReturnsBlockedDryRunPayload(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/demo/notifications/slack", strings.NewReader(`{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`))
+
+	NewHandler().ServeHTTP(recorder, request)
+
+	response := decodeResponse(t, recorder)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d; body = %#v", recorder.Code, http.StatusOK, response)
+	}
+	if response.NotificationPreview.Status != "blocked" {
+		t.Fatalf("notification status = %q, want blocked", response.NotificationPreview.Status)
+	}
+	if response.NotificationPreview.DeliveryMode != "dry_run" {
+		t.Fatalf("delivery_mode = %q, want dry_run", response.NotificationPreview.DeliveryMode)
+	}
+	if !strings.Contains(response.NotificationPreview.Reason, "approval") {
+		t.Fatalf("reason = %q, want approval explanation", response.NotificationPreview.Reason)
+	}
+	if response.NotificationPreview.PreparedPayload.Channel != "#fleet-safety" {
+		t.Fatalf("payload channel = %q, want #fleet-safety", response.NotificationPreview.PreparedPayload.Channel)
+	}
+	if response.NotificationPreview.PreparedPayload.Text == "" || len(response.NotificationPreview.PreparedPayload.Blocks) == 0 {
+		t.Fatalf("prepared payload = %#v, want text and blocks", response.NotificationPreview.PreparedPayload)
+	}
+	if response.NotificationPreview.Sent || response.NotificationPreview.NetworkDeliveryAttempted {
+		t.Fatalf("notification preview = %#v, want no send and no network delivery", response.NotificationPreview)
+	}
+	if len(response.NotificationPreview.ObservabilityEvents) == 0 {
+		t.Fatal("notification preview observability events are empty")
+	}
+}
+
+func TestSlackNotificationPreviewEndpointRequiresDryRunMode(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/demo/notifications/slack", strings.NewReader(`{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "send"
+	}`))
+
+	NewHandler().ServeHTTP(recorder, request)
+
+	response := decodeResponse(t, recorder)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d; body = %#v", recorder.Code, http.StatusBadRequest, response)
+	}
+	if response.Error.Code != "dry_run_required" {
+		t.Fatalf("error.code = %q, want dry_run_required", response.Error.Code)
+	}
+	if response.NotificationPreview.Status != "" || response.NotificationPreview.PreparedPayload.Text != "" {
+		t.Fatalf("notification preview = %#v, want empty preview", response.NotificationPreview)
+	}
+}
+
 func TestDefaultListenAddressUsesLoopbackHost(t *testing.T) {
 	host, _, err := net.SplitHostPort(DefaultListenAddress())
 	if err != nil {
@@ -169,6 +228,7 @@ type testAPIResponse struct {
 	TraceID                 string                       `json:"trace_id"`
 	Review                  testReviewResponse           `json:"review"`
 	ApprovalRequiredActions []testApprovalActionResponse `json:"approval_required_actions"`
+	NotificationPreview     testNotificationPreview      `json:"notification_preview"`
 	EvalSummary             testEvalSummaryResponse      `json:"eval_summary"`
 	Error                   testErrorResponse            `json:"error"`
 }
@@ -191,6 +251,32 @@ type testRedactedBrief struct {
 type testApprovalActionResponse struct {
 	Status   string `json:"status"`
 	Approved bool   `json:"approved"`
+}
+
+type testNotificationPreview struct {
+	Status                   string                     `json:"status"`
+	DeliveryMode             string                     `json:"delivery_mode"`
+	Reason                   string                     `json:"reason"`
+	PreparedPayload          testSlackPayload           `json:"prepared_payload"`
+	Sent                     bool                       `json:"sent"`
+	NetworkDeliveryAttempted bool                       `json:"network_delivery_attempted"`
+	ObservabilityEvents      []observabilityEventStatus `json:"observability_events"`
+}
+
+type testSlackPayload struct {
+	Channel string           `json:"channel"`
+	Text    string           `json:"text"`
+	Blocks  []testSlackBlock `json:"blocks"`
+}
+
+type testSlackBlock struct {
+	Type string        `json:"type"`
+	Text testSlackText `json:"text"`
+}
+
+type testSlackText struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
 }
 
 type testEvalSummaryResponse struct {

@@ -14,9 +14,9 @@ This directory keeps the research and MVP planning artifacts separate from the r
 
 - [How-Tos](how-tos.md): common local workflows for scope checks, package changes, synthetic fixtures, documentation updates, and review prep.
 - [Developer Guide](developer-guide.md): repository layout, package boundaries, development workflow, and documentation rules.
-- [Nice To Knows](nice-to-knows.md): context that prevents common wrong assumptions about runtime, demo, retrieval, eval, and observability behavior.
+- [Nice To Knows](nice-to-knows.md): context that prevents common wrong assumptions about runtime, demo, retrieval, eval, observability, and notification-preview behavior.
 - [Testing](testing.md): targeted and full Go test commands, TDD expectations, coverage notes, and doc-only verification.
-- [Troubleshooting](troubleshooting.md): fixes for common local development, packet, retrieval, timeline, severity, brief, approval, eval, and observability issues.
+- [Troubleshooting](troubleshooting.md): fixes for common local development, packet, retrieval, timeline, severity, brief, approval, eval, observability, and local demo API issues.
 
 Product and scope:
 
@@ -34,6 +34,7 @@ Workflow behavior:
 - [Human Approval Workflow](mvp/workflow/human-approval-workflow.md)
 - [Review Composition Contract](mvp/demo/review-composition-contract.md)
 - [Loopback Demo API](mvp/demo/loopback-demo-api.md)
+- [Dry-Run Slack-Shaped Notification Preview](mvp/demo/dry-run-slack-preview.md)
 
 Quality and operations:
 

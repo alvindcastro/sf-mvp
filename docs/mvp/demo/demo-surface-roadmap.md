@@ -1,6 +1,6 @@
 # Demo Surface Roadmap
 
-Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 now implements the loopback review API; Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
+Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, and Phase 14 implements a dry-run Slack-shaped notification preview. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
 
 ## Current State
 
@@ -12,8 +12,10 @@ Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager 
 - [x] Machine-readable demo fixtures exist under `internal/demo/testdata`.
 - [x] The repo has a loopback-only local review API in `internal/httpapi`.
 - [x] The repo has a thin local server command in `cmd/demo-api`.
+- [x] The repo has a dry-run Slack-shaped notification preview package in `internal/notification`.
+- [x] The loopback demo API exposes `POST /demo/notifications/slack` for blocked dry-run previews.
 - [ ] No general CLI workflow exists yet.
-- [ ] No Slack integration exists yet.
+- [ ] No real Slack integration exists yet.
 - [ ] No webhook or external notification delivery exists yet.
 
 ## Recommended Hiring-Manager Demo Arc
@@ -21,7 +23,7 @@ Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager 
 Build the smallest local demo surface that proves the workflow without implying production integrations:
 
 1. [x] `POST /demo/review` accepts a synthetic incident ID or synthetic packet JSON and returns the composed incident review.
-2. [ ] `POST /demo/notifications/slack` prepares a Slack-shaped notification preview in `dry_run` mode and returns `blocked` before scoped approval.
+2. [x] `POST /demo/notifications/slack` prepares a Slack-shaped notification preview in `dry_run` mode and returns `blocked` before scoped approval.
 3. [ ] `POST /demo/approvals` records an in-memory human approval for the exact synthetic incident, action, and channel target.
 4. [ ] Retrying `POST /demo/notifications/slack` returns an allowed `dry_run` payload without sending a network request.
 5. [ ] `GET /demo/eval/latest` returns a local deterministic eval report with scores, thresholds, and pass/fail status.
@@ -39,7 +41,7 @@ Original build order, updated as phases land:
 - [ ] Add demo-surface observability events for fixture load, review, approval retry, notification preview, eval report, and budget paths.
 - [x] Add the loopback API.
 - [ ] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
-- [ ] Add the dry-run Slack-shaped notification preview.
+- [x] Add the dry-run Slack-shaped notification preview.
 - [ ] Refresh the demo script with verified commands only after the surfaces exist.
 
 ## Verified Loopback Review Endpoint
@@ -87,26 +89,35 @@ Expected response highlights:
 }
 ```
 
-## Planned Endpoint Sketch
+## Verified Dry-Run Notification Preview Endpoint
 
-The remaining commands are planned examples only. They must not be documented as runnable until a future strict-TDD code phase implements and verifies them.
+The Phase 14 dry-run notification route is implemented and locally verified. It returns a prepared Slack-shaped payload with `status: "blocked"` before Phase 15 approval retry wiring exists.
 
 ```bash
-curl -s -X POST http://localhost:8080/demo/notifications/slack \
+go run ./cmd/demo-api -addr 127.0.0.1:18081
+```
+
+In a second terminal:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18081/demo/notifications/slack \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}'
 ```
 
-Expected blocked response shape before approval:
+Expected blocked response highlights:
 
 ```json
 {
-  "status": "blocked",
-  "delivery_mode": "dry_run",
-  "reason": "external notification requires scoped human approval",
-  "prepared_payload": {
-    "channel": "#fleet-safety",
-    "text": "Draft incident review ready for human approval: FIC-SYN-001"
+  "notification_preview": {
+    "status": "blocked",
+    "delivery_mode": "dry_run",
+    "reason": "no approval exists within the requested scope",
+    "prepared_payload": {
+      "channel": "#fleet-safety"
+    },
+    "sent": false,
+    "network_delivery_attempted": false
   }
 }
 ```
@@ -154,11 +165,13 @@ Implemented output: [Loopback Demo API](loopback-demo-api.md), `internal/httpapi
 
 ### Phase 14: Dry-Run Slack Preview
 
-- [ ] Add a Slack-shaped preview payload generated from the redacted brief.
-- [ ] Require `delivery_mode: "dry_run"` for every notification preview.
-- [ ] Block previewed external sharing until scoped approval exists.
-- [ ] Prove no network call, token, secret, webhook, or Slack SDK is used.
-- [ ] Record a redacted tool-call observability event for preview generation.
+- [x] Add a Slack-shaped preview payload generated from the redacted brief.
+- [x] Require `delivery_mode: "dry_run"` for every notification preview.
+- [x] Block previewed external sharing until scoped approval exists.
+- [x] Prove no network call, token, secret, webhook, or Slack SDK is used.
+- [x] Record a redacted tool-call observability event for preview generation.
+
+Implemented output: [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-preview.md), `internal/notification`, and `POST /demo/notifications/slack`. The route returns a blocked dry-run preview before scoped approval; Phase 15 owns approval request and retry wiring.
 
 ### Phase 15: Scoped Approval Retry
 
@@ -188,7 +201,7 @@ Implemented output: [Loopback Demo API](loopback-demo-api.md), `internal/httpapi
 
 Use these phrases for surfaces that remain unimplemented:
 
-- **planned dry-run Slack-shaped notification preview**, not Slack integration.
+- **implemented dry-run Slack-shaped notification preview**, not Slack integration.
 - **planned in-memory scoped approval demo**, not identity-backed approval workflow.
 - **planned local eval report over deterministic synthetic cases**, not model benchmark.
 - **planned in-memory observability proof**, not monitoring platform.
@@ -196,7 +209,7 @@ Use these phrases for surfaces that remain unimplemented:
 Use these phrases after strict-TDD implementation proves the behavior:
 
 - **implemented loopback-only demo API** if tests and local commands prove the endpoint.
-- **implemented dry-run Slack-shaped preview** if no network delivery exists.
+- **implemented dry-run Slack-shaped preview** because no network delivery exists.
 - **implemented in-memory approval gate** for scoped action callbacks.
 - **implemented local eval report** if the report is generated from `internal/eval`.
 - **implemented in-memory trace report** if it returns package-level observability events.

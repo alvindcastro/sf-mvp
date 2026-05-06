@@ -1,6 +1,6 @@
 # Loopback Demo API
 
-Phase 13 adds the first runnable local transport for Fleet Incident Copilot. The API is loopback-only, stateless, deterministic, and backed by the existing `internal/demo` review composer. It is a hiring-manager demo surface, not a production API.
+Phase 13 added the first runnable local transport for Fleet Incident Copilot. Phase 14 extends the same loopback server with a dry-run Slack-shaped notification preview. The API is loopback-only, stateless, deterministic, and backed by the existing `internal/demo` review composer plus `internal/notification`. It is a hiring-manager demo surface, not a production API.
 
 ## Phase 13 Checklist
 
@@ -15,7 +15,7 @@ Phase 13 adds the first runnable local transport for Fleet Incident Copilot. The
 
 - Handler package: [internal/httpapi](../../../internal/httpapi).
 - Local server command: [cmd/demo-api](../../../cmd/demo-api).
-- Route: `POST /demo/review`.
+- Routes: `POST /demo/review` and `POST /demo/notifications/slack`.
 - Default listen address: `127.0.0.1:8080`.
 - Loopback override: `-addr 127.0.0.1:<port>`.
 - Targeted handler test: `go test ./internal/httpapi`.
@@ -57,6 +57,23 @@ If `127.0.0.1:8080` is free, the default startup command is:
 go run ./cmd/demo-api
 ```
 
+Phase 14 verified the dry-run notification preview route with this command:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18081/demo/notifications/slack \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}'
+```
+
+Expected response highlights:
+
+- HTTP `200`.
+- `notification_preview.status: "blocked"`.
+- `notification_preview.delivery_mode: "dry_run"`.
+- `notification_preview.prepared_payload.channel: "#fleet-safety"`.
+- `notification_preview.sent: false`.
+- `notification_preview.network_delivery_attempted: false`.
+
 ## Request Contract
 
 Known synthetic fixture by ID:
@@ -87,6 +104,17 @@ Successful responses include:
 - `approval_required_actions`.
 - `eval_summary`, currently a pointer to the deterministic local eval documentation and command.
 
+`POST /demo/notifications/slack` successful dry-run preview responses include:
+
+- `trace_id`.
+- `notification_preview.status`.
+- `notification_preview.delivery_mode`.
+- `notification_preview.reason`.
+- `notification_preview.prepared_payload`.
+- `notification_preview.sent`.
+- `notification_preview.network_delivery_attempted`.
+- `notification_preview.observability_events`.
+
 Error responses use the shape:
 
 ```json
@@ -110,13 +138,14 @@ Status mappings:
 | Unsupported method | `405` | `method_not_allowed` |
 | Non-synthetic packet or incident ID | `422` | `non_synthetic_input` |
 | Required evidence missing | `422` | `missing_evidence` |
+| Non-dry-run notification mode | `400` | `dry_run_required` |
 
 ## Current Limits
 
 - The API is loopback-only and demo-only.
 - State remains in memory; no database or persistence is added.
 - No authentication, authorization, identity, roles, tenants, or production access control exists.
-- No Slack payload, webhook, token, SDK, or network delivery exists; Phase 14 owns dry-run notification preview behavior.
+- The Slack-shaped payload is dry-run only. No Slack webhook, token, SDK, network delivery, or real external sharing exists.
 - No approval retry demo exists; Phase 15 owns local approval retry wiring.
 - No local eval report or trace lookup endpoint exists; Phase 16 owns those report surfaces.
 - No live model provider, vector database, hosted RAG service, real export, real escalation, external sharing, dashboard, alerting, or production audit store exists.

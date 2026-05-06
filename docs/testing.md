@@ -42,6 +42,7 @@ go test ./internal/approval
 go test ./internal/eval
 go test ./internal/observability
 go test ./internal/demo
+go test ./internal/notification
 go test ./internal/httpapi
 go test ./cmd/demo-api
 ```
@@ -81,7 +82,8 @@ Every code task should follow [Strict TDD Rules](mvp/execution/tdd-rules.md):
 - `internal/eval`: golden cases, release thresholds, unsupported claims, redaction, prompt injection, and approval fail-closed behavior.
 - `internal/observability`: trace IDs, structured events, redaction, token accounting, budget limits, invalid token usage, cache candidates, and routing notes.
 - `internal/demo`: machine-readable synthetic fixture loading, deterministic review composition, non-synthetic rejection, missing-evidence fail-closed behavior, citation and redaction preservation, approval-required action display, and trace propagation.
-- `internal/httpapi`: loopback review handler behavior, deterministic JSON response shape, malformed JSON, unknown ID, non-synthetic rejection, unsupported methods, unknown paths, and loopback defaults.
+- `internal/notification`: dry-run Slack-shaped preview formatting, mandatory dry-run mode, external-sharing approval gating, blocked/allowed preview states, redacted observability, and no network delivery.
+- `internal/httpapi`: loopback review and dry-run notification handler behavior, deterministic JSON response shape, malformed JSON, unknown ID, non-synthetic rejection, mandatory dry-run notification mode, unsupported methods, unknown paths, and loopback defaults.
 - `cmd/demo-api`: thin local server wiring, default loopback address, loopback override, and non-loopback rejection.
 
 ## Coverage

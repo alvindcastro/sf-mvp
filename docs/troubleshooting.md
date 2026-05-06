@@ -113,13 +113,34 @@ Fail-closed behavior is intentional for shareable outputs.
 
 `POST /demo/review` accepts either `{"incident_id":"FIC-SYN-001"}` or a full synthetic packet JSON body.
 
+`POST /demo/notifications/slack` accepts a known synthetic incident ID, channel, and dry-run mode:
+
+```json
+{"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}
+```
+
 Common response codes:
 
 - `400 malformed_json`: the request body is not valid JSON.
+- `400 dry_run_required`: notification preview requests must use `delivery_mode: "dry_run"`.
 - `404 incident_not_found`: the synthetic incident ID is not in the demo fixture set.
 - `405 method_not_allowed`: use `POST`.
 - `422 non_synthetic_input`: `synthetic_record` is false or the incident ID does not start with `FIC-SYN-`.
 - `422 missing_evidence`: the underlying composer failed closed rather than returning a partial review.
+
+## Dry-Run Notification Preview Is Blocked
+
+Blocked notification preview is expected before Phase 15 approval retry wiring. Phase 14 uses an empty in-memory approval gate at the HTTP route, so a valid dry-run request returns a prepared payload with `notification_preview.status: "blocked"`.
+
+Check:
+
+- `delivery_mode` is exactly `dry_run`.
+- The incident ID exists in the synthetic fixture set.
+- The response still has `prepared_payload`.
+- `sent` is `false`.
+- `network_delivery_attempted` is `false`.
+
+Do not add Slack tokens, webhook URLs, SDKs, or network calls to fix a blocked preview. Scoped approval retry belongs to Phase 15.
 
 ## Sensitive Action Is Blocked
 

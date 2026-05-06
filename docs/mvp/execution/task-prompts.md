@@ -174,14 +174,14 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Dry-Run Slack Preview
 
-> Add a dry-run Slack-shaped notification adapter using strict TDD. This must not call Slack or require network access.
+> Add or refine the dry-run Slack-shaped notification preview using strict TDD. Phase 14 is implemented in `internal/notification` and exposed through the loopback-only `POST /demo/notifications/slack` route; this must not call Slack or require network access.
 >
 > Ownership suggestion: add `internal/notification` for dry-run message formatting and send simulation. Use `internal/approval` for gating, `internal/brief` for redacted brief content, and `internal/observability` for a tool-call event.
 >
 > Red:
 >
-> - Add `internal/notification/slack_test.go`.
-> - First failing test: `TestDryRunSlackSendBlocksWithoutApprovedExternalSharingScope`.
+> - Add or update `internal/notification/slack_test.go`.
+> - First failing test: `TestDryRunSlackPreviewBlocksWithoutApprovedExternalSharingScope` or the smallest missing preview behavior.
 > - Run `go test ./internal/notification` and confirm targeted failure.
 > - Add tests for approved dry-run preview, denied approval, mismatched incident scope, mismatched channel target, no sensitive text leakage, mandatory `dry_run`, and no network side effects.
 >
@@ -196,6 +196,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 >
 > - Run `go test ./internal/notification`.
 > - Run `go test ./internal/approval ./internal/brief ./internal/observability`.
+> - Run `go test ./internal/httpapi` if the local route changes.
 > - Run `go test ./...`.
 > - Document the route or command only after local verification passes.
 

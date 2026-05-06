@@ -6,7 +6,7 @@ Phase 10 packages the Fleet Incident Copilot MVP for a short review or interview
 
 Use this wording rule across the repo narrative, video, diagram, and interview answers:
 
-- Say **implemented** only for behavior backed by current docs, Go packages, and tests under `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, `internal/eval`, `internal/observability`, `internal/demo`, `internal/httpapi`, and `cmd/demo-api`.
+- Say **implemented** only for behavior backed by current docs, Go packages, and tests under `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, `internal/eval`, `internal/observability`, `internal/demo`, `internal/notification`, `internal/httpapi`, and `cmd/demo-api`.
 - Say **package-level**, **in-memory**, or **loopback-only local API** when describing current runtime behavior. Do not imply persistence, production deployment, identity, live integrations, or external delivery.
 - Say **planned** for live model-provider calls, vector databases, hosted RAG services, real export tools, real escalation tools, external sharing, identity, roles, dashboards, alerts, billing reconciliation, production audit/compliance guarantees, production APIs, and live fleet integrations.
 - Say **agent-ready boundaries** or **constrained action gates** for the current approval and tool-call surfaces. Do not claim a live autonomous agent loop exists.
@@ -16,9 +16,9 @@ Use this wording rule across the repo narrative, video, diagram, and interview a
 
 Fleet Incident Copilot is a synthetic fleet-safety incident review MVP for a fleet safety operator. The operator's job is to turn fragmented incident evidence into a grounded review: what happened, what evidence supports each claim, how severe the event appears, what actions are recommended, and which actions require human approval before anything leaves the review context.
 
-The current repository demonstrates the backend core of that workflow with deterministic Go packages. A synthetic incident packet is validated, approved mock SOP guidance is retrieved with citations, a cited timeline is built, severity and recommended actions are derived, a redacted draft brief is produced, sensitive actions are blocked unless a human approval record matches scope, deterministic evals score golden cases, and in-memory observability records trace, retrieval, tool-call, approval, token, budget, and eval signals.
+The current repository demonstrates the backend core of that workflow with deterministic Go packages. A synthetic incident packet is validated, approved mock SOP guidance is retrieved with citations, a cited timeline is built, severity and recommended actions are derived, a redacted draft brief is produced, sensitive actions are blocked unless a human approval record matches scope, deterministic evals score golden cases, in-memory observability records trace, retrieval, tool-call, approval, token, budget, and eval signals, and a dry-run Slack-shaped notification preview stays blocked before scoped approval.
 
-This is not a production fleet platform. It has a loopback-only local demo API, but no general CLI workflow, database, UI, real model call, vector database, telemetry backend, live export, live escalation, external-sharing integration, identity provider, production API, or real customer evidence processing. The demo is valuable because it shows how a production-minded AI workflow would be grounded, constrained, measured, observed, and cost-controlled before connecting real integrations.
+This is not a production fleet platform. It has a loopback-only local demo API, but no general CLI workflow, database, UI, real model call, vector database, telemetry backend, live export, live escalation, Slack delivery, external-sharing integration, identity provider, production API, or real customer evidence processing. The demo is valuable because it shows how a production-minded AI workflow would be grounded, constrained, measured, observed, and cost-controlled before connecting real integrations.
 
 ## Target Role Mapping
 
@@ -32,6 +32,7 @@ For a fleet safety operator, the MVP maps to these review responsibilities:
 | Triage severity and next steps | `internal/severity` classifies severity and recommends SOP-grounded actions | Reviewer-configurable policies, escalation queues, audit trails |
 | Prepare a safe review artifact | `internal/brief` drafts cited, redacted, human-reviewable brief sections | Rendering, export, sharing, templates, review UI |
 | Prevent unsafe automation | `internal/approval` blocks export, escalation, and external sharing without scoped approval | Roles, expiry, policy engine, real action tools |
+| Preview integration-shaped actions safely | `internal/notification` prepares dry-run Slack-shaped payloads from redacted briefs and blocks external sharing before scoped approval | Notification adapters, channel policy, delivery audit, approval retry flow |
 | Trust quality over time | `internal/eval` scores deterministic synthetic golden cases | CI reports, broader fixture sets, model regression tracking |
 | Operate cost and reliability | `internal/observability` records in-memory events, caller-supplied token usage, budget failures, cache candidates, and routing notes | OpenTelemetry, dashboards, alerts, provider billing reconciliation |
 
@@ -48,24 +49,24 @@ Target length: 3 to 5 minutes. The current demo can include one loopback `curl` 
 | 2:10-2:45 | `internal/approval` tests | "Export, escalation, and external sharing are gated. Pending, denied, missing, and out-of-scope approvals fail closed. This is the current agent safety boundary." |
 | 2:45-3:25 | `docs/mvp/quality/eval-plan.md` and `internal/eval` tests | "The repo includes deterministic golden eval cases for severity, citation coverage, recommendation accuracy, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior." |
 | 3:25-4:10 | `docs/mvp/quality/observability-and-cost-controls.md` and `internal/observability` tests | "The observability package records in-memory trace, retrieval, tool-call, approval, latency, token, budget, and eval events. It also defines cache candidates and model-routing notes, but it does not call a live provider or reconcile billing." |
-| 4:10-4:45 | `docs/mvp/demo/loopback-demo-api.md` or `curl` output | "The local API wraps the deterministic review composer for a concrete walkthrough. It stays loopback-only and returns blocked approval-required actions; it is not a production API or integration layer." |
+| 4:10-4:45 | `docs/mvp/demo/loopback-demo-api.md`, `docs/mvp/demo/dry-run-slack-preview.md`, or `curl` output | "The local API wraps the deterministic review composer and dry-run notification preview for a concrete walkthrough. It stays loopback-only, returns blocked approval-required actions, and prepares but does not deliver a Slack-shaped payload." |
 
-Optional close: "The next production step would be dry-run notification preview and scoped approval retry, followed later by persistence, real observability export, model-provider integration, and a reviewer UI."
+Optional close: "The next production step would be scoped approval retry for the dry-run preview, followed later by persistence, real observability export, model-provider integration, and a reviewer UI."
 
 ## Local Demo Surface
 
-The current local walkthrough is described in [Loopback Demo API](loopback-demo-api.md) and [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`, and the loopback-only review API is implemented in `internal/httpapi` with a thin `cmd/demo-api` server. Notification preview, approval retry, eval report endpoint, and trace report endpoint are still planned.
+The current local walkthrough is described in [Loopback Demo API](loopback-demo-api.md), [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-preview.md), and [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`, dry-run notification preview is implemented in `internal/notification`, and the loopback-only API is implemented in `internal/httpapi` with a thin `cmd/demo-api` server. Approval retry, eval report endpoint, and trace report endpoint are still planned.
 
 The target hiring-manager arc is:
 
 - [x] Call the implemented local review endpoint with a synthetic incident ID or packet.
 - [x] Show the composed review output at package level: validation, citations, timeline, severity, recommendations, redacted brief, approval-required actions, and trace ID.
-- [ ] Attempt a planned dry-run Slack-shaped notification preview and show it is blocked before scoped approval.
+- [x] Attempt the dry-run Slack-shaped notification preview and show it is blocked before scoped approval.
 - [ ] Record a planned in-memory approval for the exact incident, action, and channel.
 - [ ] Retry the dry-run notification preview and show only the approved dry-run payload is allowed.
 - [ ] Show a planned local eval report and redacted trace report.
 
-Until the remaining integration-shaped phases are implemented with strict TDD, the current demo remains the docs, package-level composer, loopback review API, code, and tests walkthrough above.
+Until the remaining integration-shaped phases are implemented with strict TDD, the current demo remains the docs, package-level composer, loopback review API, dry-run notification preview, code, and tests walkthrough above.
 
 ## Architecture Diagram Checklist
 
@@ -82,6 +83,7 @@ Include these boxes and labels:
 - Shareable brief drafting: implemented by `internal/brief`; label as structured draft data, not rendered export.
 - Demo review composer: implemented by `internal/demo`; label as deterministic package-level composition.
 - Loopback review API: implemented by `internal/httpapi` and `cmd/demo-api`; label as demo-only and local, not a production API.
+- Dry-run notification preview: implemented by `internal/notification` and exposed through `internal/httpapi`; label as Slack-shaped payload only, not Slack delivery.
 - Human approval gate: implemented by `internal/approval`; label export, escalation, and external sharing as blocked unless approved in scope.
 - Eval harness: implemented by `internal/eval` over deterministic synthetic golden cases.
 - Observability and cost controls: implemented by `internal/observability` as in-memory events, token-budget checks, cache candidates, and routing notes.
@@ -137,7 +139,7 @@ Use this one-page structure:
 
 ### Backend APIs
 
-- Implemented: explicit Go package APIs for ingestion, retrieval, timeline building, severity, brief drafting, approval, evals, observability, demo composition, and the loopback-only review demo API.
+- Implemented: explicit Go package APIs for ingestion, retrieval, timeline building, severity, brief drafting, approval, evals, observability, demo composition, dry-run notification preview, and the loopback-only demo API.
 - Planned: production API, general CLI fallback, database, durable jobs, authentication, authorization, and integration adapters.
 - Key point: the current code favors testable domain boundaries before service transport.
 

@@ -251,14 +251,14 @@ Code-task prompt:
 
 Goal: show an integration-shaped action while proving external sharing fails closed and no network delivery occurs.
 
-- [ ] Generate a Slack-shaped payload from the redacted brief only.
-- [ ] Require `delivery_mode: "dry_run"` for notification previews.
-- [ ] Block notification preview as external sharing unless a scoped approval exists.
-- [ ] Return blocked status, reason, and prepared payload when approval is missing.
-- [ ] Record a redacted tool-call observability event for preview generation.
-- [ ] Prove no Slack token, webhook URL, SDK, secret, or network request is used.
+- [x] Generate a Slack-shaped payload from the redacted brief only.
+- [x] Require `delivery_mode: "dry_run"` for notification previews.
+- [x] Block notification preview as external sharing unless a scoped approval exists.
+- [x] Return blocked status, reason, and prepared payload when approval is missing.
+- [x] Record a redacted tool-call observability event for preview generation.
+- [x] Prove no Slack token, webhook URL, SDK, secret, or network request is used.
 
-Planned output: a dry-run notification preview package or API route, plus documentation updates after implementation exists.
+Output: [Dry-Run Slack-Shaped Notification Preview](../demo/dry-run-slack-preview.md), the Go package [internal/notification](../../../internal/notification), and the route `POST /demo/notifications/slack` in [internal/httpapi](../../../internal/httpapi). Phase 14 is complete as of 2026-05-06 and added dry-run Slack-shaped payload generation plus a loopback-only blocked preview route. No Slack SDK, token, webhook URL, secret, network request, real Slack delivery, approval retry route, persistent approval store, or external-sharing integration exists yet.
 
 Code-task prompt:
 

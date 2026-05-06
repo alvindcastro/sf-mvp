@@ -8,15 +8,19 @@ import (
 	"strings"
 	"time"
 
+	"sf-mvp/internal/approval"
+	"sf-mvp/internal/brief"
 	"sf-mvp/internal/demo"
 	"sf-mvp/internal/ingestion"
+	"sf-mvp/internal/notification"
 	"sf-mvp/internal/observability"
 )
 
 const (
-	reviewPath        = "/demo/review"
-	evalSummaryRef    = "docs/mvp/quality/eval-plan.md"
-	defaultListenAddr = "127.0.0.1:8080"
+	reviewPath                   = "/demo/review"
+	slackNotificationPreviewPath = "/demo/notifications/slack"
+	evalSummaryRef               = "docs/mvp/quality/eval-plan.md"
+	defaultListenAddr            = "127.0.0.1:8080"
 )
 
 type Handler struct {
@@ -48,24 +52,25 @@ func DefaultListenAddress() string {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.URL.Path != reviewPath {
-		writeError(w, http.StatusNotFound, "not_found", "supported path is POST /demo/review")
-		return
+	switch r.URL.Path {
+	case reviewPath:
+		h.handleReview(w, r)
+	case slackNotificationPreviewPath:
+		h.handleSlackNotificationPreview(w, r)
+	default:
+		writeError(w, http.StatusNotFound, "not_found", "supported paths are POST /demo/review and POST /demo/notifications/slack")
 	}
+}
+
+func (h *Handler) handleReview(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is POST")
 		return
 	}
 
-	body := http.MaxBytesReader(w, r.Body, 1<<20)
-	defer body.Close()
-
-	var raw map[string]json.RawMessage
-	decoder := json.NewDecoder(body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&raw); err != nil {
-		writeError(w, http.StatusBadRequest, "malformed_json", "request body must be valid JSON")
+	raw, ok := decodeRequestObject(w, r)
+	if !ok {
 		return
 	}
 	if len(raw) == 0 {
@@ -79,6 +84,78 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, apiResponseFromReview(review))
+}
+
+func (h *Handler) handleSlackNotificationPreview(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is POST")
+		return
+	}
+
+	var request slackPreviewRequest
+	if !decodeRequestStruct(w, r, &request) {
+		return
+	}
+	if request.DeliveryMode != notification.DeliveryModeDryRun {
+		h.writeNotificationError(w, notification.ErrDryRunRequired)
+		return
+	}
+
+	review, err := demo.ComposeIncident(request.IncidentID, demo.Options{Now: h.now})
+	if err != nil {
+		h.writeComposeError(w, err)
+		return
+	}
+
+	recorder := observability.NewRecorder(h.now, observability.Budget{})
+	workflow, err := recorder.StartWorkflow(review.IncidentID, observability.SensitiveData{})
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_notification_preview", "notification preview could not start a trace")
+		return
+	}
+	preview, err := notification.PreviewSlack(notification.PreviewRequest{
+		IncidentID:   review.IncidentID,
+		Channel:      request.Channel,
+		DeliveryMode: request.DeliveryMode,
+		Brief:        briefResultFromReview(review),
+		Gate:         approval.NewGate(h.now),
+		Recorder:     recorder,
+		Workflow:     workflow,
+	})
+	if err != nil {
+		h.writeNotificationError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, apiResponseFromNotificationPreview(workflow.TraceID, preview, recorder.Events()))
+}
+
+func decodeRequestObject(w http.ResponseWriter, r *http.Request) (map[string]json.RawMessage, bool) {
+	body := http.MaxBytesReader(w, r.Body, 1<<20)
+	defer body.Close()
+
+	var raw map[string]json.RawMessage
+	decoder := json.NewDecoder(body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&raw); err != nil {
+		writeError(w, http.StatusBadRequest, "malformed_json", "request body must be valid JSON")
+		return nil, false
+	}
+	return raw, true
+}
+
+func decodeRequestStruct(w http.ResponseWriter, r *http.Request, target any) bool {
+	body := http.MaxBytesReader(w, r.Body, 1<<20)
+	defer body.Close()
+
+	decoder := json.NewDecoder(body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(target); err != nil {
+		writeError(w, http.StatusBadRequest, "malformed_json", "request body must be valid JSON")
+		return false
+	}
+	return true
 }
 
 func (h *Handler) composeReview(raw map[string]json.RawMessage) (demo.ReviewResult, error) {
@@ -127,8 +204,25 @@ func (h *Handler) writeComposeError(w http.ResponseWriter, err error) {
 	}
 }
 
+func (h *Handler) writeNotificationError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, notification.ErrDryRunRequired):
+		writeError(w, http.StatusBadRequest, "dry_run_required", "delivery_mode must be dry_run")
+	case errors.Is(err, notification.ErrInvalidPreviewInput), errors.Is(err, notification.ErrNoRedactedBriefInput):
+		writeError(w, http.StatusBadRequest, "invalid_notification_preview", "notification preview request is invalid")
+	default:
+		writeError(w, http.StatusBadRequest, "invalid_notification_preview", "notification preview could not be prepared")
+	}
+}
+
 type incidentReviewRequest struct {
 	IncidentID string `json:"incident_id"`
+}
+
+type slackPreviewRequest struct {
+	IncidentID   string                    `json:"incident_id"`
+	Channel      string                    `json:"channel"`
+	DeliveryMode notification.DeliveryMode `json:"delivery_mode"`
 }
 
 type reviewResponse struct {
@@ -213,12 +307,24 @@ type evalSummaryResponse struct {
 	Command   string `json:"command"`
 }
 
+type notificationPreviewResponse struct {
+	Status                   string                     `json:"status"`
+	DeliveryMode             string                     `json:"delivery_mode"`
+	Reason                   string                     `json:"reason"`
+	ApprovalRequestID        string                     `json:"approval_request_id,omitempty"`
+	PreparedPayload          notification.SlackPayload  `json:"prepared_payload"`
+	Sent                     bool                       `json:"sent"`
+	NetworkDeliveryAttempted bool                       `json:"network_delivery_attempted"`
+	ObservabilityEvents      []observabilityEventStatus `json:"observability_events"`
+}
+
 type apiResponse struct {
-	TraceID                 string                   `json:"trace_id,omitempty"`
-	Review                  *reviewResponse          `json:"review,omitempty"`
-	ApprovalRequiredActions []approvalActionResponse `json:"approval_required_actions,omitempty"`
-	EvalSummary             *evalSummaryResponse     `json:"eval_summary,omitempty"`
-	Error                   *errorResponse           `json:"error,omitempty"`
+	TraceID                 string                       `json:"trace_id,omitempty"`
+	Review                  *reviewResponse              `json:"review,omitempty"`
+	ApprovalRequiredActions []approvalActionResponse     `json:"approval_required_actions,omitempty"`
+	NotificationPreview     *notificationPreviewResponse `json:"notification_preview,omitempty"`
+	EvalSummary             *evalSummaryResponse         `json:"eval_summary,omitempty"`
+	Error                   *errorResponse               `json:"error,omitempty"`
 }
 
 type errorResponse struct {
@@ -235,6 +341,22 @@ func apiResponseFromReview(review demo.ReviewResult) apiResponse {
 			Available: true,
 			Ref:       evalSummaryRef,
 			Command:   "go test ./internal/eval",
+		},
+	}
+}
+
+func apiResponseFromNotificationPreview(traceID string, preview notification.PreviewResult, events []observability.Event) apiResponse {
+	return apiResponse{
+		TraceID: traceID,
+		NotificationPreview: &notificationPreviewResponse{
+			Status:                   string(preview.Status),
+			DeliveryMode:             string(preview.DeliveryMode),
+			Reason:                   preview.Reason,
+			ApprovalRequestID:        preview.ApprovalRequestID,
+			PreparedPayload:          preview.PreparedPayload,
+			Sent:                     preview.Sent,
+			NetworkDeliveryAttempted: preview.NetworkDeliveryAttempted,
+			ObservabilityEvents:      observabilityEventStatuses(events),
 		},
 	}
 }
@@ -324,6 +446,38 @@ func briefResponseFromReview(brief demo.ReviewBrief) briefResponse {
 		RedactionsApplied: redactions,
 		Uncertainties:     append([]string(nil), brief.Uncertainties...),
 	}
+}
+
+func briefResultFromReview(review demo.ReviewResult) brief.Result {
+	sections := make([]brief.Section, len(review.RedactedBrief.Sections))
+	for i, section := range review.RedactedBrief.Sections {
+		sections[i] = brief.Section{
+			Title:   section.Title,
+			Text:    section.Text,
+			Sources: briefSourcesFromRefs(section.SourceRefs),
+		}
+	}
+	return brief.Result{
+		Status:            review.RedactedBrief.Status,
+		IncidentID:        review.IncidentID,
+		SyntheticRecord:   true,
+		Sections:          sections,
+		ApprovalState:     append([]brief.ApprovalState(nil), review.RedactedBrief.ApprovalState...),
+		RedactionsApplied: append([]brief.Redaction(nil), review.RedactedBrief.RedactionsApplied...),
+		Uncertainties:     append([]string(nil), review.RedactedBrief.Uncertainties...),
+		Shareable:         review.RedactedBrief.Shareable,
+	}
+}
+
+func briefSourcesFromRefs(refs []string) []brief.Source {
+	sources := make([]brief.Source, 0, len(refs))
+	for _, ref := range refs {
+		if strings.TrimSpace(ref) == "" {
+			continue
+		}
+		sources = append(sources, brief.Source{Ref: ref, Type: brief.SourceTypePacket})
+	}
+	return sources
 }
 
 func approvalActionResponses(actions []demo.ApprovalRequiredAction) []approvalActionResponse {
