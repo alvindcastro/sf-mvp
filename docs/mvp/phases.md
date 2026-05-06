@@ -75,12 +75,14 @@ Code-task prompt:
 
 Goal: future implementation builds a chronological, grounded account from packet data and retrieved guidance.
 
-- [ ] Order packet events and telemetry chronologically.
-- [ ] Incorporate transcript or still-frame notes without inventing visual facts.
-- [ ] Preserve source references for every factual claim.
-- [ ] Mark uncertainty when data is missing or conflicting.
-- [ ] Avoid unsupported claims.
-- [ ] Produce a timeline format suitable for the incident brief.
+- [x] Order packet events and telemetry chronologically.
+- [x] Incorporate transcript or still-frame notes without inventing visual facts.
+- [x] Preserve source references for every factual claim.
+- [x] Mark uncertainty when data is missing or conflicting.
+- [x] Avoid unsupported claims.
+- [x] Produce a timeline format suitable for the incident brief.
+
+Output: [Incident Timeline Builder](incident-timeline-builder.md) and the Go package [internal/timeline](../../internal/timeline). Phase 4 is complete as of 2026-05-06 and added the first strict-TDD timeline implementation for grounded synthetic packet timelines only.
 
 Code-task prompt:
 

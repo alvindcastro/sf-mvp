@@ -8,7 +8,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [ ] Fake event metadata, vehicle identifiers, route names, location labels, GPS/speed samples, and media references.
 - [ ] Transcript notes or still-frame descriptions instead of real video processing.
 - [ ] Small mock RAG corpus made from public-product-style notes, mock SOPs, and troubleshooting guidance.
-- [ ] Grounded timeline generation with citations.
+- [x] Grounded timeline generation with citations.
 - [ ] Severity classification with rationale.
 - [ ] Recommended next actions tied to retrieved guidance.
 - [ ] Shareable incident brief drafting with redaction.
@@ -58,7 +58,9 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 
 Implemented boundary as of Phase 2: `internal/ingestion` validates synthetic packet JSON, rejects non-synthetic records and non-synthetic media references, and returns accepted or rejected audit events.
 
-Implemented boundary as of Phase 3: `internal/retrieval` filters mock guidance by exact workflow and scope before ranking, returns stable citation metadata, returns no matches instead of invented guidance, and marks retrieved snippets as `retrieved_data`. Later phases still need reasoning, approval, persistence, and observability boundaries.
+Implemented boundary as of Phase 3: `internal/retrieval` filters mock guidance by exact workflow and scope before ranking, returns stable citation metadata, returns no matches instead of invented guidance, and marks retrieved snippets as `retrieved_data`. Later workflow phases still need severity, recommendation, approval, persistence, and observability boundaries.
+
+Implemented boundary as of Phase 4: `internal/timeline` builds deterministic timeline entries from validated synthetic packet data, preserves structured source references for factual claims, carries approved retrieved citation references as guidance metadata, labels unavailable or conflicting evidence as uncertain, and does not infer visual facts, approval, export, escalation, injury, plate, or external-sharing claims. Later phases still need severity, recommendations, brief drafting, approval, persistence, observability, and eval boundaries.
 
 ## Demo Path
 
