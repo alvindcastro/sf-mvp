@@ -74,18 +74,21 @@ Implemented boundary as of Phase 8: `internal/eval` runs deterministic in-memory
 
 Implemented boundary as of Phase 9: `internal/observability` creates deterministic trace IDs for synthetic incident workflows; records in-memory structured events for retrieval counts, retrieved source IDs, tool-call success, approval decisions, caller-supplied token usage, invalid token usage, latency, budget failures, and eval summaries; redacts configured sensitive terms and coordinate-like strings from event fields; defines budget limits; and records cache candidates plus hosted, smaller-model, and self-hosted routing notes. It does not implement an external telemetry backend, dashboards, alerts, persistent log storage, provider billing reconciliation, real model-provider calls, live model routing, cache storage, CLI, HTTP API, database behavior, or production audit/compliance guarantees.
 
+Implemented boundary as of Phase 12: `internal/demo` loads machine-readable synthetic fixtures through ingestion validation and composes one deterministic in-memory review result with validation status, retrieved citation refs, timeline entries, severity, recommendations, redacted brief fields, approval-required actions, and trace ID. It rejects non-synthetic or real-looking input before downstream composition and keeps export, escalation, and external sharing blocked without scoped approval. It does not implement an HTTP API, CLI, Slack behavior, webhook, database, persistence, live model calls, real export, real escalation, external sharing, or external observability behavior.
+
 ## Demo Path
 
-- [ ] Select a synthetic incident packet.
-- [ ] Validate and load packet contents.
-- [ ] Retrieve mock SOPs and troubleshooting notes.
-- [ ] Produce a cited timeline.
+- [x] Select a synthetic incident packet.
+- [x] Validate and load packet contents.
+- [x] Retrieve mock SOPs and troubleshooting notes.
+- [x] Produce a cited timeline.
 - [x] Classify severity and explain the basis.
 - [x] Recommend next actions.
 - [x] Draft a shareable brief.
 - [x] Show approval is required before export or escalation.
 - [x] Show deterministic eval summary.
 - [x] Show package-level observability summary.
+- [x] Compose the package-level review result for a synthetic incident.
 
 ## Definition Of MVP Done
 

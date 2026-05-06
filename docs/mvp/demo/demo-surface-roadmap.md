@@ -6,8 +6,10 @@ Phase 11 is a documentation-only brainstorm for adding a concrete hiring-manager
 
 - [x] The implemented runtime is package-level Go code under `internal`.
 - [x] The current proof command is `go test ./...`.
-- [x] The current demo package is a docs, code, and tests walkthrough.
+- [x] The current demo package is a docs, code, package-level composer, and tests walkthrough.
 - [x] The repo has in-memory approval, eval, and observability packages.
+- [x] The repo has an in-memory demo review composer in `internal/demo`.
+- [x] Machine-readable demo fixtures exist under `internal/demo/testdata`.
 - [ ] No local HTTP API exists yet.
 - [ ] No CLI exists yet.
 - [ ] No Slack integration exists yet.
@@ -30,10 +32,11 @@ This arc shows a concrete API call, an integration-shaped action, human approval
 
 Build the supporting proof surfaces before the external-looking adapter:
 
-- [ ] Add machine-readable synthetic demo fixtures through strict TDD.
+- [x] Add machine-readable synthetic demo fixtures through strict TDD.
+- [x] Add the review composer.
 - [ ] Add a local eval report renderer over existing deterministic golden cases.
 - [ ] Add demo-surface observability events for fixture load, review, approval retry, notification preview, eval report, and budget paths.
-- [ ] Add the review composer and loopback API.
+- [ ] Add the loopback API.
 - [ ] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
 - [ ] Add the dry-run Slack-shaped notification preview.
 - [ ] Refresh the demo script with verified commands only after the surfaces exist.
@@ -112,11 +115,13 @@ Expected blocked response shape before approval:
 
 ### Phase 12: Review Composition Contract
 
-- [ ] Add or reuse machine-readable synthetic fixtures only through a failing test first.
-- [ ] Define a demo review response that composes ingestion, retrieval, timeline, severity, brief, approval state, and trace ID.
-- [ ] Reject non-synthetic or real-looking evidence before downstream composition.
-- [ ] Preserve citations and redactions from existing package contracts.
-- [ ] Record package-level observability events without adding persistent logs.
+- [x] Add or reuse machine-readable synthetic fixtures only through a failing test first.
+- [x] Define a demo review response that composes ingestion, retrieval, timeline, severity, brief, approval state, and trace ID.
+- [x] Reject non-synthetic or real-looking evidence before downstream composition.
+- [x] Preserve citations and redactions from existing package contracts.
+- [x] Record package-level observability events without adding persistent logs.
+
+Implemented output: [Review Composition Contract](review-composition-contract.md), `internal/demo`, and `internal/demo/testdata/demo-fixtures.json`. This remains package-level and in-memory; no local server, route, notification preview, persistence, or external integration exists yet.
 
 ### Phase 13: Loopback Demo API
 

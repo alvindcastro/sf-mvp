@@ -41,6 +41,7 @@ go test ./internal/brief
 go test ./internal/approval
 go test ./internal/eval
 go test ./internal/observability
+go test ./internal/demo
 ```
 
 Run one test by name:
@@ -77,6 +78,7 @@ Every code task should follow [Strict TDD Rules](mvp/execution/tdd-rules.md):
 - `internal/approval`: pending, approved, denied, missing approval, out-of-scope calls, callback execution, and immutable audit history.
 - `internal/eval`: golden cases, release thresholds, unsupported claims, redaction, prompt injection, and approval fail-closed behavior.
 - `internal/observability`: trace IDs, structured events, redaction, token accounting, budget limits, invalid token usage, cache candidates, and routing notes.
+- `internal/demo`: machine-readable synthetic fixture loading, deterministic review composition, non-synthetic rejection, missing-evidence fail-closed behavior, citation and redaction preservation, approval-required action display, and trace propagation.
 
 ## Coverage
 

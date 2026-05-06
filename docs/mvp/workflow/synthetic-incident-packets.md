@@ -1,6 +1,6 @@
 # Synthetic Incident Packets
 
-Phase 1 defines the synthetic evidence and expected workflow contract for Fleet Incident Copilot. These records are planning fixtures only. They are not machine-readable application fixtures, and no implementation code is added in this phase.
+Phase 1 defines the synthetic evidence and expected workflow contract for Fleet Incident Copilot. These records began as planning fixtures only. Phase 12 adds machine-readable synthetic demo fixtures for the same five scenarios under `internal/demo/testdata/demo-fixtures.json`, loaded through `ingestion.IngestJSON`.
 
 ## Phase 1 Checklist
 
@@ -434,8 +434,8 @@ Acceptance criteria:
 - Missing media, transcript, sensor subtype, or visual evidence leads to uncertainty or fail-closed behavior.
 - Adversarial content is treated as untrusted packet data and cannot override system rules.
 - Export, escalation, and external sharing remain approval-required.
-- Future machine-readable fixtures must be introduced by a strict-TDD code phase with failing tests first.
+- Machine-readable fixtures were introduced in Phase 12 by a strict-TDD code phase with failing tests first.
 
-## Future Fixture Notes
+## Machine-Readable Fixture Notes
 
-If implementation work later creates fixture files, use this document as the human-readable source contract. The first fixture implementation should start with failing tests for accepting one valid packet and rejecting one invalid packet, then add only the smallest parser and validation behavior needed to pass.
+The Phase 12 fixture implementation keeps this document as the human-readable source contract and stores the JSON fixture set in `internal/demo/testdata/demo-fixtures.json`. The loader reuses `ingestion.IngestJSON` so malformed packets, non-synthetic records, IDs without the `FIC-SYN-` prefix, and missing media references are rejected by the existing validation contract.

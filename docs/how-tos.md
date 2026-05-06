@@ -34,6 +34,7 @@ go test ./internal/brief
 go test ./internal/approval
 go test ./internal/eval
 go test ./internal/observability
+go test ./internal/demo
 ```
 
 ## How To Add A Synthetic Incident Fixture
@@ -49,7 +50,7 @@ The ingestion package rejects non-synthetic records, unsupported event types, ma
 
 ## How To Trace The Demo Workflow In Code
 
-The package-level demo path is:
+The package-level workflow path is:
 
 ```text
 internal/ingestion -> internal/retrieval -> internal/timeline -> internal/severity -> internal/brief
@@ -63,7 +64,7 @@ internal/eval          scores deterministic golden cases
 internal/observability records in-memory workflow events and budget signals
 ```
 
-Use tests for examples of how packages are composed. The eval package has the broadest in-memory composition surface through `GoldenCases` and `Run`.
+Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
 
 ## How To Update Documentation Safely
 

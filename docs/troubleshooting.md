@@ -89,6 +89,14 @@ Unknown severity should route toward human operator review instead of model-only
 
 Fail-closed behavior is intentional for shareable outputs.
 
+## Demo Review Composition Fails
+
+`demo.ComposeIncident` returns `demo.ErrIncidentNotFound` when the incident ID is not present in the loaded synthetic fixtures.
+
+`demo.ComposePacket` returns `demo.ErrNonSyntheticInput` before downstream composition when the packet is not synthetic or the incident ID does not start with `FIC-SYN-`.
+
+`demo.ErrMissingEvidence` means the composer reached the existing fail-closed brief contract and did not return a partial review result. Check the same missing-evidence causes listed for brief drafting.
+
 ## Sensitive Action Is Blocked
 
 `approval.Gate.Execute` blocks by default. Confirm:

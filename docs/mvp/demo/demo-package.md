@@ -50,22 +50,22 @@ Target length: 3 to 5 minutes. The current demo should be framed as a docs, code
 | 3:25-4:10 | `docs/mvp/quality/observability-and-cost-controls.md` and `internal/observability` tests | "The observability package records in-memory trace, retrieval, tool-call, approval, latency, token, budget, and eval events. It also defines cache candidates and model-routing notes, but it does not call a live provider or reconcile billing." |
 | 4:10-4:45 | This file | "The production-readiness case is the architecture discipline: grounded inputs, constrained actions, eval gates, redacted logs, budget limits, and clear known limits before external integrations are added." |
 
-Optional close: "The next production step would be a thin API or CLI around these package contracts, followed by persistence, real observability export, model-provider integration, and a reviewer UI."
+Optional close: "The next production step would be a thin local API or CLI around the implemented demo composer, followed by persistence, real observability export, model-provider integration, and a reviewer UI."
 
 ## Future Local Demo Surface
 
-The recommended next demo improvement is a local, loopback-only walkthrough described in [Demo Surface Roadmap](demo-surface-roadmap.md). It is planned, not implemented.
+The recommended next demo improvement is a local, loopback-only walkthrough described in [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`; the local API, notification preview, approval retry, eval report endpoint, and trace report endpoint are still planned.
 
 The target hiring-manager arc is:
 
 - [ ] Call a planned local review endpoint with a synthetic incident ID or packet.
-- [ ] Show the composed review output: validation, citations, timeline, severity, recommendations, redacted brief, approval-required actions, and trace ID.
+- [x] Show the composed review output at package level: validation, citations, timeline, severity, recommendations, redacted brief, approval-required actions, and trace ID.
 - [ ] Attempt a planned dry-run Slack-shaped notification preview and show it is blocked before scoped approval.
 - [ ] Record a planned in-memory approval for the exact incident, action, and channel.
 - [ ] Retry the dry-run notification preview and show only the approved dry-run payload is allowed.
 - [ ] Show a planned local eval report and redacted trace report.
 
-Until those phases are implemented with strict TDD, the current demo remains the docs, code, and tests walkthrough above.
+Until the API and integration-shaped phases are implemented with strict TDD, the current demo remains the docs, package-level composer, code, and tests walkthrough above.
 
 ## Architecture Diagram Checklist
 
@@ -80,6 +80,7 @@ Include these boxes and labels:
 - Cited timeline builder: implemented by `internal/timeline`.
 - Severity and recommended-action engine: implemented by `internal/severity`.
 - Shareable brief drafting: implemented by `internal/brief`; label as structured draft data, not rendered export.
+- Demo review composer: implemented by `internal/demo`; label as deterministic package-level composition, not an HTTP API.
 - Human approval gate: implemented by `internal/approval`; label export, escalation, and external sharing as blocked unless approved in scope.
 - Eval harness: implemented by `internal/eval` over deterministic synthetic golden cases.
 - Observability and cost controls: implemented by `internal/observability` as in-memory events, token-budget checks, cache candidates, and routing notes.

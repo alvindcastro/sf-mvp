@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-06 - Phase 12 Review Composition Contract
+
+### Task: Audit Phase 12 Scope With Parallel Agents
+
+- What: Ran parallel read-only Codex explorer agents to inspect Phase 12 acceptance criteria, related docs, existing package contracts, likely implementation surface, and verification commands.
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [internal](internal), [README.md](README.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm the new work belonged in a deterministic package-level demo composer and avoid adding HTTP, Slack, persistence, live model calls, or external integrations outside Phase 12.
+- How: Spawned two read-only explorer agents while the main thread inspected the phase plan and package APIs; used their findings to scope `internal/demo`, fixture loading, and documentation updates.
+
+### Task: Add Phase 12 Demo Composer TDD Coverage
+
+- What: Added failing-first tests for loading default synthetic demo fixtures, rejecting malformed and non-synthetic fixture data, composing a known synthetic incident, rejecting unknown incident IDs, rejecting non-synthetic typed input before downstream composition, failing closed on missing evidence, preserving retrieved citations, preserving redactions, and displaying approval-required actions.
+- Where: [internal/demo/review_test.go](internal/demo/review_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Define the Phase 12 behavior contract before production code and prove the new composer surface was missing for the expected reason.
+- How: Created `internal/demo` tests around `LoadDefaultFixtures`, `LoadFixtures`, `ComposeIncident`, and `ComposePacket`; ran `go test ./internal/demo`; observed the expected red build failure for missing fixture loader, composer, response, and status types.
+
+### Task: Implement In-Memory Demo Fixtures And Review Composer
+
+- What: Added an `internal/demo` package with machine-readable synthetic fixture loading, an embedded JSON fixture set for `FIC-SYN-001` through `FIC-SYN-005`, deterministic review composition, non-synthetic rejection, missing-evidence fail-closed errors, retrieved citation refs, timeline entries, severity, recommendations, redacted brief fields, approval-required action display, and observability events.
+- Where: [internal/demo/review.go](internal/demo/review.go), [internal/demo/testdata/demo-fixtures.json](internal/demo/testdata/demo-fixtures.json).
+- When: 2026-05-06, America/Vancouver.
+- Why: Complete Phase 12 by composing the existing package-level workflow into one review result without moving business rules out of ingestion, retrieval, timeline, severity, brief, approval, or observability packages.
+- How: Implemented fixture decoding through `ingestion.IngestJSON`, reused deterministic mock guidance retrieval, called `timeline.Build`, `severity.Classify`, `brief.Draft`, `approval.Gate.Execute`, and `observability.Recorder`, then projected the existing package outputs into a small `ReviewResult`.
+
+### Task: Document Phase 12 Implemented Boundary
+
+- What: Added the Phase 12 review composition behavior contract and synchronized the phase tracker, demo roadmap, demo package, overview, fixture docs, contributor docs, testing docs, troubleshooting docs, and root README.
+- Where: [docs/mvp/demo/review-composition-contract.md](docs/mvp/demo/review-composition-contract.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/README.md](docs/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/mvp/workflow/synthetic-incident-packets.md](docs/mvp/workflow/synthetic-incident-packets.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/testing.md](docs/testing.md), [docs/troubleshooting.md](docs/troubleshooting.md), [README.md](README.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep implemented-versus-planned wording accurate now that the package-level composer and machine-readable fixtures exist, while preserving explicit limits around API, CLI, Slack, persistence, live providers, export, escalation, and external sharing.
+- How: Marked Phase 12 complete, added the new behavior doc, linked `internal/demo`, updated fixture notes from future to implemented, added targeted test commands, and kept Phase 13 through Phase 17 surfaces documented as planned.
+
+### Task: Verify Phase 12 Review Composition
+
+- What: Verified the new demo package, related composed package set, full Go suite, vet checks, package coverage, and Markdown or code whitespace for the Phase 12 edit set.
+- Where: [internal/demo](internal/demo), [internal/ingestion](internal/ingestion), [internal/retrieval](internal/retrieval), [internal/timeline](internal/timeline), [internal/severity](internal/severity), [internal/brief](internal/brief), [internal/approval](internal/approval), [internal/observability](internal/observability), [docs/mvp/demo/review-composition-contract.md](docs/mvp/demo/review-composition-contract.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 12 is locally repeatable, does not regress earlier package contracts, and keeps the documentation sync reviewable.
+- How: Ran `go test ./internal/demo`, `go test ./internal/ingestion ./internal/retrieval ./internal/timeline ./internal/severity ./internal/brief ./internal/approval ./internal/observability ./internal/demo`, `go test ./...`, `go vet ./...`, and `go test -cover ./...` successfully. Ran `git diff --check` on the tracked Phase 12 edit set and `git diff --check --no-index /dev/null ...` on new files; the new-file checks produced no whitespace warnings and returned nonzero only because the files are untracked additions.
+
 ## 2026-05-06 - Phase 11 Demo Surface Roadmap
 
 ### Task: Plan Hiring-Manager Demo Surfaces

@@ -9,12 +9,14 @@ Useful context that prevents common wrong assumptions.
 - The current implementation is Go package-level behavior under `internal`.
 - Most state is in memory and deterministic by design.
 - The module name is `sf-mvp`, even though the product narrative is Fleet Incident Copilot.
+- `internal/demo` composes package results in memory; it is not a transport layer or runnable app.
 
 ## Demo Boundaries
 
 - The demo is synthetic-only.
 - A checked item in a planning doc means the repo has some supporting artifact or package behavior, not necessarily production readiness.
 - The demo package is for explaining architecture and judgment; it is not a deployable app.
+- Machine-readable demo fixtures live under `internal/demo/testdata` and are loaded through ingestion validation.
 - Approval requirements in severity output are not the same as executing a real export, escalation, or external share.
 - The approval package gates callbacks, but the callbacks are local function calls, not real integrations.
 

@@ -32,6 +32,7 @@ Workflow behavior:
 - [Severity Classification And Recommended Actions](mvp/workflow/severity-classification-and-recommended-actions.md)
 - [Shareable Incident Brief Drafting](mvp/workflow/incident-brief-drafting.md)
 - [Human Approval Workflow](mvp/workflow/human-approval-workflow.md)
+- [Review Composition Contract](mvp/demo/review-composition-contract.md)
 
 Quality and operations:
 

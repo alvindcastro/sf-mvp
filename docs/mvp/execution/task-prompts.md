@@ -40,7 +40,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Planning Prompt: Synthetic Incident Specs
 
-> Create or update `docs/mvp/workflow/synthetic-incident-packets.md` with Markdown specs for at least five synthetic incident packets. Include low, medium, high, unknown, and adversarial/missing-data cases. For each packet, list required fields, expected timeline outputs, expected severity, expected recommendations, expected brief behavior, and acceptance criteria. Use fake data only and do not create machine-readable fixtures until a future strict-TDD code phase introduces failing tests first.
+> Create or update `docs/mvp/workflow/synthetic-incident-packets.md` with Markdown specs for at least five synthetic incident packets. Include low, medium, high, unknown, and adversarial/missing-data cases. For each packet, list required fields, expected timeline outputs, expected severity, expected recommendations, expected brief behavior, and acceptance criteria. Use fake data only. Machine-readable fixture changes belong in the Phase 12 fixture contract and must keep strict-TDD failing tests first.
 
 ## Planning Prompt: RAG Corpus
 
@@ -92,15 +92,15 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Demo Review Composer
 
-> Add a demo review composition contract using strict TDD. Do not add an HTTP server, Slack behavior, persistence, live model call, or external service in this task.
+> Add or refine a demo review composition contract using strict TDD. Use `docs/mvp/demo/review-composition-contract.md` as the current Phase 12 behavior contract. Do not add an HTTP server, Slack behavior, persistence, live model call, or external service in this task.
 >
 > Ownership suggestion: add a small `internal/demo` package for composition and fixture-facing helpers. Reuse `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, and `internal/observability`. Do not move business rules into demo glue code.
 >
 > Red:
 >
 > - Add `internal/demo/review_test.go`.
-> - First failing test: `TestComposeReviewReturnsSeverityBriefApprovalAndTrace`.
-> - Run `go test ./internal/demo` and confirm failure is missing composer behavior.
+> - First failing test: `TestComposeReviewReturnsSeverityBriefApprovalAndTrace` or the smallest missing composer behavior.
+> - Run `go test ./internal/demo` and confirm failure is missing composer behavior or the specific regression under test.
 > - Add focused tests for unknown incident ID, non-synthetic input, missing evidence, citation preservation, redaction preservation, approval-required action display, and no external action execution.
 >
 > Green:
@@ -115,19 +115,19 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 > - Run `go test ./internal/demo`.
 > - Run `go test ./internal/ingestion ./internal/retrieval ./internal/timeline ./internal/severity ./internal/brief ./internal/approval ./internal/observability`.
 > - Run `go test ./...`.
-> - Update docs only if the composer behavior becomes real.
+> - Update docs whenever composer behavior changes.
 
 ## Code Prompt: Machine-Readable Demo Fixtures
 
-> Add synthetic machine-readable demo fixtures using strict TDD. The goal is to make current golden cases usable by demo adapters without weakening validation or introducing real data.
+> Add or refine synthetic machine-readable demo fixtures using strict TDD. The goal is to make current golden cases usable by demo adapters without weakening validation or introducing real data.
 >
 > Ownership suggestion: add fixture loading to `internal/demo` or `internal/fixtures`. Keep eval scoring in `internal/eval`. If fixture files are added, place them under `testdata/demo` or `docs/mvp/demo/fixtures` and load them through ingestion validation.
 >
 > Red:
 >
-> - Add `internal/demo/fixtures_test.go` or `internal/fixtures/fixtures_test.go`.
-> - First failing test: `TestLoadDemoFixturesReturnsSyntheticNormalIncompleteAndAdversarialPackets`.
-> - Run the targeted package test and confirm failure is missing fixture loader behavior.
+> - Add `internal/demo/fixtures_test.go`, `internal/demo/review_test.go`, or `internal/fixtures/fixtures_test.go`.
+> - First failing test: `TestLoadDemoFixturesReturnsSyntheticNormalIncompleteAndAdversarialPackets` or the smallest missing fixture-loader behavior.
+> - Run the targeted package test and confirm failure is missing fixture loader behavior or the specific regression under test.
 > - Add tests for rejecting non-synthetic fixture data, malformed fixture JSON, missing media refs, and incident IDs without the `FIC-SYN-` prefix.
 >
 > Green:

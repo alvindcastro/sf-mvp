@@ -16,6 +16,7 @@ This repository is a Go package workspace for the Fleet Incident Copilot MVP. It
 - [internal/approval](../internal/approval): creates in-memory approval requests and gates sensitive actions.
 - [internal/eval](../internal/eval): runs deterministic in-memory golden-case evals.
 - [internal/observability](../internal/observability): records in-memory workflow events, redaction, token, budget, cache, and routing signals.
+- [internal/demo](../internal/demo): loads machine-readable synthetic demo fixtures and composes deterministic in-memory review results.
 
 ## Design Principles
 
@@ -45,6 +46,8 @@ This repository is a Go package workspace for the Fleet Incident Copilot MVP. It
 `internal/eval` composes the package path over local golden cases and reports severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior.
 
 `internal/observability` records package-level workflow events in memory. It does not send telemetry externally or reconcile provider billing.
+
+`internal/demo` composes the implemented package path for synthetic demo review results. It owns fixture-facing helpers, review response projection, and package-level composition glue; it must not move validation, retrieval, timeline, severity, brief, approval, or observability business rules out of their owning packages.
 
 ## Development Workflow
 

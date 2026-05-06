@@ -213,22 +213,22 @@ Prompt:
 
 Goal: compose the existing package-level workflow into one deterministic demo review result.
 
-- [ ] Add machine-readable synthetic demo fixtures only after failing tests define fixture-loading expectations.
-- [ ] Define the smallest review response that includes validation status, retrieved citation refs, timeline entries, severity, recommendations, redacted brief, approval-required actions, and trace ID.
-- [ ] Reject non-synthetic or real-looking incident input before downstream composition.
-- [ ] Preserve existing citation, redaction, approval, eval, and observability package contracts.
-- [ ] Keep the composer in-memory and deterministic.
-- [ ] Document behavior only after tests prove it.
+- [x] Add machine-readable synthetic demo fixtures only after failing tests define fixture-loading expectations.
+- [x] Define the smallest review response that includes validation status, retrieved citation refs, timeline entries, severity, recommendations, redacted brief, approval-required actions, and trace ID.
+- [x] Reject non-synthetic or real-looking incident input before downstream composition.
+- [x] Preserve existing citation, redaction, approval, eval, and observability package contracts.
+- [x] Keep the composer in-memory and deterministic.
+- [x] Document behavior only after tests prove it.
 
-Planned output: a small demo composition package or command boundary, plus documentation updates after implementation exists.
+Output: [Review Composition Contract](../demo/review-composition-contract.md), the Go package [internal/demo](../../../internal/demo), and machine-readable synthetic fixtures in [internal/demo/testdata/demo-fixtures.json](../../../internal/demo/testdata/demo-fixtures.json). Phase 12 is complete as of 2026-05-06 and added an in-memory deterministic demo review composer only. No HTTP API, CLI, Slack behavior, database, persistence, live model call, webhook, export, escalation, or external-sharing integration exists yet.
 
 Code-task prompt:
 
-> Implement a demo review composition contract using strict TDD. Start by naming the smallest observable behavior: composing one known synthetic incident into a review result with incident ID, trace ID, severity, citation refs, redacted brief fields, and approval-required actions. Add failing tests before production code for the happy path, unknown incident ID, non-synthetic input, missing evidence, citation preservation, redaction preservation, and approval-required action display. Confirm red for the expected reason. Implement only enough in-memory composition logic to pass using existing `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, and `internal/observability` contracts. Run the targeted tests and then `go test ./...`. Do not add an HTTP server, Slack behavior, database, persistence, live model call, or external service in this phase.
+> Implement or refine a demo review composition contract using strict TDD. Start by naming the smallest observable behavior: composing one known synthetic incident into a review result with incident ID, trace ID, severity, citation refs, redacted brief fields, and approval-required actions. Add failing tests before production code for the happy path, unknown incident ID, non-synthetic input, missing evidence, citation preservation, redaction preservation, and approval-required action display. Confirm red for the expected reason. Implement only enough in-memory composition logic to pass using existing `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, and `internal/observability` contracts. Run the targeted tests and then `go test ./...`. Do not add an HTTP server, Slack behavior, database, persistence, live model call, or external service in this phase.
 
 Fixture-task prompt:
 
-> Add synthetic machine-readable demo fixtures using strict TDD before demo adapters depend on fixtures. Add a failing test such as `TestLoadDemoFixturesReturnsSyntheticNormalIncompleteAndAdversarialPackets`; confirm the targeted package test fails because the loader does not exist. Add rejection tests for non-synthetic fixture data, malformed JSON, missing media refs, and incident IDs without `FIC-SYN-`. Implement only a small loader that returns typed `ingestion.Packet` values by reusing `ingestion.IngestJSON`; do not bypass validation or duplicate business rules. Verify with the targeted fixture package test, `go test ./internal/ingestion ./internal/eval`, and `go test ./...`.
+> Add or refine synthetic machine-readable demo fixtures using strict TDD before demo adapters depend on fixtures. Add a failing test such as `TestLoadDemoFixturesReturnsSyntheticNormalIncompleteAndAdversarialPackets`; confirm the targeted package test fails because the loader does not exist or the expected behavior is missing. Add rejection tests for non-synthetic fixture data, malformed JSON, missing media refs, and incident IDs without `FIC-SYN-`. Implement only a small loader that returns typed `ingestion.Packet` values by reusing `ingestion.IngestJSON`; do not bypass validation or duplicate business rules. Verify with the targeted fixture package test, `go test ./internal/ingestion ./internal/eval`, and `go test ./...`.
 
 ## Phase 13: Loopback Demo API
 
