@@ -89,8 +89,8 @@ Implemented boundary as of Phase 9: `internal/observability` creates determinist
 
 ## Definition Of MVP Done
 
-- [ ] The demo can be explained in under five minutes.
+- [x] The demo can be explained in under five minutes.
 - [ ] Every factual output is traceable to packet data or retrieved mock content.
 - [x] Approval-gated actions cannot execute without approval.
 - [x] Prompt-injection and missing-data cases are represented in fixtures or evals.
-- [ ] The demo package includes a repo narrative, short video outline, architecture diagram checklist, and one-page eval summary.
+- [x] The demo package includes a repo narrative, short video outline, architecture diagram checklist, and one-page eval summary.

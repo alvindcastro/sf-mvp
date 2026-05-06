@@ -35,7 +35,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [ ] Prompt-injection and least-privilege security awareness.
 - [x] Eval discipline for groundedness, citations, severity, recommendations, redaction, prompt injection, and approval fail-closed behavior.
 - [x] Observability and cost-control thinking.
-- [ ] Clear demo packaging for interviews and review.
+- [x] Clear demo packaging for interviews and review.
 
 ## Artifact Map
 
@@ -53,4 +53,4 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [Phases And Tasks](phases.md): tickable phase plan with prompts.
 - [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.
 - [Strict TDD Rules](tdd-rules.md): non-negotiable rules for code tasks.
-- [Demo Package](demo-package.md): checklist for repo narrative, architecture diagram, demo video, and eval summary.
+- [Demo Package](demo-package.md): Phase 10 repo narrative, target-role mapping, demo video script, architecture diagram checklist, one-page eval summary outline, interview talking points, and implemented-versus-planned wording rules.
