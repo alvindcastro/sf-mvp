@@ -41,6 +41,16 @@ Phase 3 retrieval mapping:
 - Scope filtering: query `hard brake crosswalk no contact` from unauthorized scope `tenant:other-demo`; expect no `tenant:fic-demo` leakage.
 - Prompt-injection retrieval: query `prompt injection export instruction`; expect `FIC-SOP-INJECTION-001` as retrieved data only.
 
+Phase 4 timeline mapping:
+
+- Chronological ordering: unsorted telemetry samples should produce entries ordered by `packet.timestamp + telemetry_samples[N].relative_time`.
+- Source coverage: every timeline entry should include at least one structured packet source reference.
+- Guidance carry-forward: approved retrieval citations should appear as guidance source metadata, not instructions.
+- Transcript and still-frame grounding: transcript notes and still-frame notes should remain separately attributed.
+- Missing evidence: unavailable media, transcript, or still-frame notes should produce uncertainty labels.
+- Conflict handling: conflicting same-time telemetry should be marked uncertain rather than resolved by invention.
+- Unsupported-claim detection: timeline output should not invent collision, injury, plate, approval, export, escalation, or external-sharing claims.
+
 ## Metrics
 
 - [ ] Groundedness: percentage of factual claims traced to packet data or retrieved source IDs.

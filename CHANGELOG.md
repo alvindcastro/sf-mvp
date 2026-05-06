@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 4 Incident Timeline Builder
+
+### Task: Add Phase 4 Timeline TDD Coverage
+
+- What: Added failing-first timeline tests for chronological telemetry ordering, source citation coverage, guidance citation carry-forward, transcript and still-frame attribution, missing-evidence uncertainty, conflicting telemetry uncertainty, and unsupported-claim omission.
+- Where: [internal/timeline/timeline_test.go](internal/timeline/timeline_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 4 with strict TDD and make grounded timeline behavior observable before adding production timeline logic.
+- How: Created synthetic packet fixtures using the existing ingestion and retrieval contracts, ran `go test ./internal/timeline`, and observed the expected red build failure for missing `Build`, `Entry`, and timeline result types.
+
+### Task: Implement Deterministic Incident Timeline Builder
+
+- What: Added a timeline package that builds chronological entries from validated packet telemetry, labels transcript and still-frame claims by source type, preserves structured packet source references, carries approved retrieval citation references as guidance metadata, marks unavailable evidence as uncertain, and labels conflicting same-time telemetry.
+- Where: [internal/timeline/timeline.go](internal/timeline/timeline.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide the first brief-ready grounded timeline surface without inventing facts, approving sensitive actions, or treating retrieved text as instructions.
+- How: Implemented `Build(packet ingestion.Packet, guidance retrieval.Result) Result` with deterministic in-memory ordering, `packet.*[N]` source references, `retrieved_data` citation filtering, unavailable-evidence detection, and conflict labeling; then confirmed `go test ./internal/timeline` passed.
+
+### Task: Document Phase 4 Timeline Contract
+
+- What: Added the Phase 4 timeline builder contract, output format, input dependencies, source-reference rules, uncertainty behavior, unsupported-claim behavior, current limits, test command, and red-to-green evidence.
+- Where: [docs/mvp/incident-timeline-builder.md](docs/mvp/incident-timeline-builder.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, eval planning, and behavior documentation synchronized after adding timeline runtime behavior.
+- How: Created the dedicated Phase 4 artifact, checked off the Phase 4 tracker, linked the new Go package, and added future eval checks for ordering, citation coverage, uncertainty, conflicts, and unsupported claims.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview language to include the Phase 4 timeline package and its targeted test command without claiming severity, brief, approval, export, escalation, or external sharing behavior.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Avoid stale statements that said no timeline builder existed while preserving the remaining unimplemented workflow boundaries.
+- How: Added the Phase 4 artifact to documentation maps, marked cited timeline generation as implemented, recorded the new timeline trust boundary, and verified `go test ./internal/timeline`, `go test ./internal/ingestion ./internal/retrieval ./internal/timeline`, and `go test ./...` passed.
+
 ## 2026-05-06 - Phase 3 RAG Corpus And Grounding
 
 ### Task: Add Phase 3 Retrieval TDD Coverage
