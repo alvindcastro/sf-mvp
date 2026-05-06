@@ -52,7 +52,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Planning Prompt: Demo Package
 
-> Create the demo packaging materials for the Fleet Incident Copilot MVP. Include a repo narrative, demo video script, architecture diagram checklist, one-page eval summary outline, and interview talking points mapped to RAG, agents, backend APIs, evals, monitoring, security, cost controls, and production readiness.
+> Create or refine the demo packaging materials for the Fleet Incident Copilot MVP. Include a repo narrative, demo video script, architecture diagram checklist, one-page eval summary outline, and interview talking points mapped to RAG, agents, backend APIs, evals, monitoring, security, cost controls, and production readiness. Distinguish implemented package-level behavior from planned production integrations, and do not claim a feature is implemented unless the current docs, Go packages, and tests prove it.
 
 ## Code Prompt: Incident Packet Ingestion
 
