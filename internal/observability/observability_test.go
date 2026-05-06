@@ -107,6 +107,32 @@ func TestRecordToolCallTracksSuccessAndRedactsSensitiveFields(t *testing.T) {
 	}
 }
 
+func TestRecordToolCallRedactsOverlappingSensitiveTermsLongestFirst(t *testing.T) {
+	recorder := NewRecorder(fixedClock(), Budget{})
+	workflow := mustStartWorkflow(t, recorder, "FIC-SYN-011A", SensitiveData{
+		Terms: []string{
+			"Oak Street",
+			"Oak Street at Pine Avenue",
+		},
+	})
+
+	event := recorder.RecordToolCall(workflow, ToolCall{
+		Name:    "draft_brief",
+		Success: true,
+		Fields: map[string]string{
+			"summary": "Telemetry near Oak Street at Pine Avenue",
+		},
+	})
+
+	summary := event.Fields["summary"]
+	if strings.Contains(summary, "Pine Avenue") {
+		t.Fatalf("summary leaked overlapping sensitive suffix: %q", summary)
+	}
+	if !strings.Contains(summary, RedactedValue) {
+		t.Fatalf("summary = %q, want redaction marker", summary)
+	}
+}
+
 func TestRecordApprovalDecisionTracksDecisionActionAndScope(t *testing.T) {
 	recorder := NewRecorder(fixedClock(), Budget{})
 	workflow := mustStartWorkflow(t, recorder, "FIC-SYN-012", SensitiveData{})

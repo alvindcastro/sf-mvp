@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -410,6 +411,9 @@ func normalizeSensitive(sensitive SensitiveData) SensitiveData {
 		seen[term] = struct{}{}
 		terms = append(terms, term)
 	}
+	sort.SliceStable(terms, func(i, j int) bool {
+		return len(terms[i]) > len(terms[j])
+	})
 	return SensitiveData{Terms: terms}
 }
 

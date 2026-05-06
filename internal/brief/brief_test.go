@@ -107,6 +107,27 @@ func TestDraftRedactsSensitiveFieldsFromShareableOutput(t *testing.T) {
 	assertRedactionField(t, result.RedactionsApplied, "packet.transcript_notes[1]")
 }
 
+func TestDraftRedactsOverlappingSensitiveFieldsLongestFirst(t *testing.T) {
+	packet, _, _ := completeBriefInputs()
+	packet.LocationLabel = "Oak Street"
+	packet.TelemetrySamples[0].GPSLabel = "Oak Street at Pine Avenue"
+	guidance := retrieval.Result{Matches: []retrieval.Citation{hardBrakeCitation()}}
+	timelineResult := timeline.Build(packet, guidance)
+	severityResult := severity.Classify(packet, timelineResult, guidance)
+
+	result, err := Draft(packet, timelineResult, severityResult)
+	if err != nil {
+		t.Fatalf("Draft returned error for complete inputs: %v", err)
+	}
+
+	joined := strings.Join(sectionTexts(result.Sections), "\n")
+	if strings.Contains(joined, "Pine Avenue") {
+		t.Fatalf("shareable draft leaked overlapping GPS suffix: %s", joined)
+	}
+	assertRedactionField(t, result.RedactionsApplied, "packet.location_label")
+	assertRedactionField(t, result.RedactionsApplied, "packet.telemetry_samples[0].gps_label")
+}
+
 func TestDraftFailsClosedWhenRequiredEvidenceIsMissing(t *testing.T) {
 	packet, timelineResult, severityResult := completeBriefInputs()
 	timelineResult.Entries = nil

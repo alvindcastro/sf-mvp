@@ -3,6 +3,7 @@ package brief
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -443,7 +444,14 @@ func newRedactor(packet ingestion.Packet) *redactor {
 			)
 		}
 	}
+	r.sortReplacements()
 	return r
+}
+
+func (r *redactor) sortReplacements() {
+	sort.SliceStable(r.replacements, func(i, j int) bool {
+		return len(r.replacements[i].value) > len(r.replacements[j].value)
+	})
 }
 
 func (r *redactor) add(field, value, placeholder, reason string) {
