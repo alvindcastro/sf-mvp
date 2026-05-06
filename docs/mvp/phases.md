@@ -160,18 +160,20 @@ Code-task prompt:
 
 ## Phase 9: Observability And Cost Controls
 
-Goal: future implementation exposes enough runtime signals to explain quality, safety, latency, and spend.
+Goal: expose enough runtime signals to explain quality, safety, latency, and spend.
 
-- [ ] Generate a trace ID per incident workflow.
-- [ ] Track retrieval count, retrieved source IDs, tool-call success, approval decisions, latency, token usage, and eval score.
-- [ ] Redact sensitive data from logs.
-- [ ] Add model-call budget limits.
-- [ ] Define caching candidates.
-- [ ] Define model-routing notes for hosted, smaller, or self-hosted models.
+- [x] Generate a trace ID per incident workflow.
+- [x] Track retrieval count, retrieved source IDs, tool-call success, approval decisions, latency, token usage, and eval score.
+- [x] Redact sensitive data from logs.
+- [x] Add model-call budget limits.
+- [x] Define caching candidates.
+- [x] Define model-routing notes for hosted, smaller, or self-hosted models.
+
+Output: [Observability And Cost Controls](observability-and-cost-controls.md) and the Go package [internal/observability](../../internal/observability). Phase 9 is complete as of 2026-05-06 and added a strict-TDD package-level observability and budget-control surface for synthetic MVP workflows only.
 
 Code-task prompt:
 
-> Implement observability and cost controls using strict TDD. Add failing tests for trace propagation, structured event emission, token recording, latency recording, budget-limit behavior, and sensitive-field redaction in logs. Confirm red before production changes. Then implement instrumentation with the smallest surface needed. Acceptance requires structured logs, useful debugging signals, no sensitive evidence leakage, and tests for normal and budget-exceeded paths.
+> Implement or refine observability and cost controls using strict TDD. Use `docs/mvp/observability-and-cost-controls.md` as the current Phase 9 behavior contract. Add failing tests for trace propagation, structured event emission, token recording, latency recording, budget-limit behavior, and sensitive-field redaction in logs. Confirm red before production changes. Then implement instrumentation with the smallest surface needed. Acceptance requires structured logs, useful debugging signals, no sensitive evidence leakage, and tests for normal and budget-exceeded paths.
 
 ## Phase 10: Demo Package
 

@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-05-06 - Phase 9 Observability And Cost Controls
+
+### Task: Add Phase 9 Observability TDD Coverage
+
+- What: Added failing-first observability tests for trace ID creation, structured workflow events, retrieval counts and source IDs, tool-call success and redaction, approval decision metadata, token and latency recording, budget-exceeded behavior, eval score recording, cache candidates, and model-routing notes.
+- Where: [internal/observability/observability_test.go](internal/observability/observability_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 9 with strict TDD and make quality, safety, latency, and spend signals observable before adding production recorder behavior.
+- How: Created same-package tests around `NewRecorder`, `StartWorkflow`, retrieval, tool-call, approval, model-call, eval, and cost-plan APIs; ran `go test ./internal/observability`; observed the expected red build failure for missing observability APIs and types before adding implementation.
+
+### Task: Implement In-Memory Observability Recorder And Cost Plan
+
+- What: Added an observability package that creates deterministic trace IDs, records in-memory structured events for workflow start, retrieval, tool calls, approval decisions, model calls, budget failures, and eval summaries, redacts configured sensitive terms and coordinate-like strings, and exposes cache candidates plus hosted, smaller-model, and self-hosted routing notes.
+- Where: [internal/observability/observability.go](internal/observability/observability.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide the first package-level Phase 9 observability and cost-control surface without adding an external telemetry backend, dashboards, alerts, persistent log store, provider billing reconciliation, live model-provider calls, cache storage, CLI, HTTP API, database behavior, real export, real escalation, or external-sharing integrations.
+- How: Implemented `NewRecorder`, `StartWorkflow`, `Events`, `RecordRetrieval`, `RecordToolCall`, `RecordApprovalDecision`, `RecordModelCall`, `RecordEvalScore`, `Budget`, `SensitiveData`, event models, defensive event copying, redaction helpers, cumulative token accounting, budget-limit checks, and `DefaultCostPlan`; then confirmed `go test ./internal/observability` passed.
+
+### Task: Tighten Phase 9 Regression Coverage
+
+- What: Added regression assertions for retrieval snippet non-logging, approval request ID, approver, and latency recording, private location label redaction, input, output, and total token budget failures, and invalid negative token usage rejection.
+- Where: [internal/observability/observability_test.go](internal/observability/observability_test.go), [internal/observability/observability.go](internal/observability/observability.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Close Phase 9 assertion gaps and prevent invalid caller-supplied token counts from reducing cumulative spend accounting.
+- How: Added a failing test for negative token usage, observed `go test ./internal/observability` fail for missing `ErrInvalidTokenUsage` and `model_call.rejected`, implemented the smallest rejection path before budget accounting, and expanded existing tests for the documented metadata, redaction, and budget dimensions.
+
+### Task: Document Phase 9 Observability Contract
+
+- What: Added the Phase 9 behavior contract, runtime surface, structured event model, recorded signals, redaction rules, budget controls, cache candidates, model-routing notes, current limits, test commands, and red-to-green evidence.
+- Where: [docs/mvp/observability-and-cost-controls.md](docs/mvp/observability-and-cost-controls.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, future-agent prompt, and observability behavior documentation synchronized after adding Phase 9 runtime behavior and the invalid-token guard.
+- How: Created the dedicated Phase 9 artifact, checked off the Phase 9 tracker, linked the new Go package, changed the reusable observability prompt to “implement or refine,” documented `ErrInvalidTokenUsage` and `model_call.rejected`, and kept external telemetry, persistent logs, live providers, billing reconciliation, live routing, cache storage, CLI, HTTP API, and database behavior out of scope.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview and scope language to include the Phase 9 observability package, targeted test command, package-level structured events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Remove stale statements that observability, token tracking, and cost controls were unimplemented while preserving the limits around external telemetry, persistence, live providers, billing, real integrations, CLI, HTTP API, and database behavior.
+- How: Added the Phase 9 artifact and package to documentation maps, marked observability and cost-control thinking as implemented, recorded the Phase 9 trust boundary, and clarified that the current surface is in-memory and package-level only.
+
+### Task: Verify Phase 9 Observability Surface
+
+- What: Verified the targeted observability package, full Go test suite, vet checks, and package coverage after implementation and documentation sync.
+- Where: [internal/observability](internal/observability), [docs/mvp/observability-and-cost-controls.md](docs/mvp/observability-and-cost-controls.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 9 is locally repeatable and does not break earlier MVP phase packages.
+- How: Ran `go test ./internal/observability`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; all completed successfully, with `internal/observability` reporting 94.3% statement coverage.
+
 ## 2026-05-06 - Phase 8 Eval Harness
 
 ### Task: Add Phase 8 Eval TDD Coverage

@@ -42,7 +42,7 @@
 - [ ] Evals: quality is measured through deterministic checks and golden synthetic incidents.
 - [ ] Monitoring: traces, latency, token use, retrieval quality, tool calls, and approvals are visible.
 - [ ] Security: least-privilege retrieval, untrusted content boundaries, redaction, and fail-closed behavior.
-- [ ] Cost: token budgets, caching candidates, routing notes, and budget-exceeded behavior are planned.
+- [ ] Cost: token budgets, caching candidates, routing notes, and budget-exceeded behavior are modeled in the Phase 9 package-level surface.
 - [ ] Production readiness: the demo shows how the system would be governed, measured, and operated.
 
 ## Final Packaging Checklist
@@ -54,4 +54,3 @@
 - [ ] README does not overclaim implementation.
 - [ ] All fixtures are synthetic.
 - [ ] Known risks and next steps are explicit.
-

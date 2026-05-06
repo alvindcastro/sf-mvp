@@ -1,6 +1,6 @@
 # Eval Plan
 
-Phase 8 adds the first deterministic local eval harness for Fleet Incident Copilot. The harness runs in memory against synthetic golden cases and existing Phase 2 through Phase 7 package APIs. It does not add a CLI, HTTP API, database, logs, token tracking, model calls, or cost controls.
+Phase 8 adds the first deterministic local eval harness for Fleet Incident Copilot. The harness runs in memory against synthetic golden cases and existing Phase 2 through Phase 7 package APIs. It does not add a CLI, HTTP API, database, logs, token tracking, model calls, or cost controls. Phase 9 can record an `eval.Report` summary through the separate observability package.
 
 ## Phase 8 Checklist
 
@@ -73,7 +73,7 @@ All cases are synthetic and in memory. They mirror [Synthetic Incident Packets](
 - The harness is an in-memory package API, not a command-line report generator.
 - Golden eval cases are Go fixtures, not external JSON or YAML fixture files.
 - The harness evaluates deterministic package outputs only; it does not call a model provider.
-- It does not collect latency, token usage, cost, trace IDs, structured logs, or budget metrics. Those remain Phase 9 work.
+- It does not itself collect latency, token usage, cost, trace IDs, structured logs, or budget metrics. The Phase 9 observability package can record eval summaries separately.
 - It does not persist eval results.
 - It does not implement export, escalation, external sharing, identity, role checks, HTTP APIs, or database behavior.
 
