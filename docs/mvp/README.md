@@ -19,6 +19,8 @@ Given a synthetic fleet incident packet, the system should:
 - [ ] Require human approval before export, escalation, or external sharing.
 - [ ] Emit observability and eval signals for traces, retrieval quality, latency, token use, tool calls, and safety checks.
 
+This is the target promise, not current runtime behavior. The current repository state is Phase 0 planning only, with no application code added.
+
 ## Primary User
 
 A fleet safety operator reviewing an incident packet after a school bus, transit, law-enforcement, or waste-fleet safety event.
@@ -36,10 +38,10 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 
 ## Artifact Map
 
+- [Product Frame](product-frame.md): Phase 0 product promise, primary user, approval gates, non-goals, demo narrative, and success criteria.
 - [Scope And Guardrails](scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
 - [Phases And Tasks](phases.md): tickable phase plan with prompts.
 - [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.
 - [Strict TDD Rules](tdd-rules.md): non-negotiable rules for code tasks.
 - [Eval Plan](eval-plan.md): metrics, fixtures, release gates, and risk checks.
 - [Demo Package](demo-package.md): checklist for repo narrative, architecture diagram, demo video, and eval summary.
-

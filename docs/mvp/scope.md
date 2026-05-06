@@ -1,5 +1,7 @@
 # Scope And Guardrails
 
+These checklists define MVP scope and guardrails. They do not imply that application behavior has been implemented.
+
 ## In Scope
 
 - [ ] Synthetic incident packets only.
@@ -14,6 +16,7 @@
 - [ ] Structured logs for traces, retrieval, tool calls, latency, token use, approval decisions, and eval outcomes.
 - [ ] Security checks for prompt injection, least-privilege retrieval, sensitive-data redaction, and unsafe tool calls.
 - [ ] Cost controls for token budgets, caching candidates, and model-routing decisions.
+- [ ] Future backend implementation in Go once a strict-TDD code phase begins.
 
 ## Out Of Scope
 
@@ -26,6 +29,22 @@
 - [ ] Autonomous approval, denial, enforcement, discipline, or citation decisions.
 - [ ] Full multi-tenant SaaS administration.
 - [ ] Live external sharing.
+
+## Prohibited Claims
+
+- Do not claim real video, live telemetry, or real customer evidence processing.
+- Do not claim live integrations with fleet, school, transit, law-enforcement, waste, CRM, ERP, GIS, or evidence-management systems.
+- Do not claim production chain-of-custody, legal evidence-management, retention, disclosure, compliance, or audit guarantees.
+- Do not claim autonomous export, escalation, enforcement, discipline, citation, approval, or denial.
+- Do not claim implemented runtime behavior before code and tests exist.
+
+## Approval Gates
+
+- Export requires explicit human approval.
+- Escalation requires explicit human approval.
+- External sharing requires explicit human approval.
+- Pending, denied, missing, or out-of-scope approvals must block sensitive actions.
+- Future approval records should include approver, timestamp, decision, reason, target action, and scope.
 
 ## Trust Boundaries
 
@@ -56,4 +75,3 @@
 - [ ] Approval-gated actions cannot execute without approval.
 - [ ] Prompt-injection and missing-data cases are represented in fixtures or evals.
 - [ ] The demo package includes a repo narrative, short video outline, architecture diagram checklist, and one-page eval summary.
-

@@ -7,6 +7,7 @@ The current run is documentation-only. No application code, test code, scaffoldi
 ## Planning Artifacts
 
 - [MVP Overview](docs/mvp/README.md)
+- [Product Frame](docs/mvp/product-frame.md)
 - [Scope And Guardrails](docs/mvp/scope.md)
 - [Phases And Tasks](docs/mvp/phases.md)
 - [Task Prompts](docs/mvp/task-prompts.md)
@@ -21,6 +22,6 @@ The current run is documentation-only. No application code, test code, scaffoldi
 - [x] Require human approval before any future export or escalation behavior.
 - [x] Require strict TDD for every future coding task.
 - [x] Avoid coding during this planning run.
+- [x] Use Go for future backend implementation when code phases begin.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
-
