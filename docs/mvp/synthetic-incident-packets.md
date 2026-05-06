@@ -36,7 +36,7 @@ Expected workflow outputs should include:
 - Shareable brief requirements, including redaction and approval state.
 - Missing-data behavior that fails closed or marks uncertainty instead of inventing facts.
 
-Sensitive actions remain blocked until a future human approval workflow exists. Phase 1 only defines expected behavior; it does not implement validation, retrieval, timeline generation, classification, brief drafting, export, escalation, or external sharing.
+Sensitive actions remain blocked unless the Phase 7 human approval gate has an approved request for the exact action and scope. Phase 1 only defines expected behavior; it does not implement validation, retrieval, timeline generation, classification, brief drafting, approval gating, export, escalation, or external sharing.
 
 ## Packet FIC-SYN-001: Low Severity Hard Brake
 

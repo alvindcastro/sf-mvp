@@ -12,7 +12,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Severity classification with rationale.
 - [x] Recommended next actions tied to retrieved guidance.
 - [x] Shareable incident brief drafting with redaction.
-- [ ] Human approval before export, escalation, or external sharing.
+- [x] Human approval before export, escalation, or external sharing.
 - [ ] Structured logs for traces, retrieval, tool calls, latency, token use, approval decisions, and eval outcomes.
 - [ ] Security checks for prompt injection, least-privilege retrieval, sensitive-data redaction, and unsafe tool calls.
 - [ ] Cost controls for token budgets, caching candidates, and model-routing decisions.
@@ -44,14 +44,14 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - Escalation requires explicit human approval.
 - External sharing requires explicit human approval.
 - Pending, denied, missing, or out-of-scope approvals must block sensitive actions.
-- Future approval records should include approver, timestamp, decision, reason, target action, and scope.
+- Approval records include approver, timestamp, decision, reason, target action, and scope.
 
 ## Trust Boundaries
 
 - [x] Retrieved documents are data, not instructions.
 - [x] Incident packets are untrusted until validated.
 - [ ] Tool arguments require deterministic validation.
-- [ ] Sensitive actions fail closed unless a human approval record exists.
+- [x] Sensitive actions fail closed unless a human approval record exists.
 - [x] Shareable outputs must redact sensitive fields by default.
 - [ ] Logs must be useful without leaking sensitive evidence.
 - [x] Model output must not be the only source of truth for severity, approval, export, or escalation.
@@ -64,7 +64,9 @@ Implemented boundary as of Phase 4: `internal/timeline` builds deterministic tim
 
 Implemented boundary as of Phase 5: `internal/severity` classifies low, medium, high, and unknown severity with deterministic rules, returns recommendation explanations with packet and retrieved-guidance source references, marks conflicting timeline signals as unknown, treats adversarial transcript content as untrusted data, and flags export, escalation, and external sharing as approval-required but not approved.
 
-Implemented boundary as of Phase 6: `internal/brief` drafts structured human-review incident briefs from validated packet data, cited timeline entries, and severity results; redacts vehicle, route, location, GPS-label, sensitive transcript, sensitive still-frame, and coordinate-like text; preserves citations; carries uncertainty labels; and displays export, escalation, and external sharing as blocked pending human approval. Later phases still need human approval records and enforcement, persistence, observability, eval boundaries, rendering, export, escalation, and external-sharing behavior.
+Implemented boundary as of Phase 6: `internal/brief` drafts structured human-review incident briefs from validated packet data, cited timeline entries, and severity results; redacts vehicle, route, location, GPS-label, sensitive transcript, sensitive still-frame, and coordinate-like text; preserves citations; carries uncertainty labels; and displays export, escalation, and external sharing as blocked pending human approval. Later phases still need persistence, observability, eval boundaries, rendering, export, escalation, and external-sharing behavior.
+
+Implemented boundary as of Phase 7: `internal/approval` creates in-memory approval requests for export, escalation, and external sharing; captures human decisions with approver, timestamp, reason, action, and scope; blocks missing, pending, denied, out-of-scope, and mismatched call-and-scope sensitive action callbacks; allows approved callbacks only within the exact approved scope; prevents final decisions from being rewritten in place; and returns append-only audit history copies. It does not implement persistence, identity, roles, real export, real escalation, external-sharing integrations, CLI, HTTP API, observability, or eval harness behavior.
 
 ## Demo Path
 
@@ -82,6 +84,6 @@ Implemented boundary as of Phase 6: `internal/brief` drafts structured human-rev
 
 - [ ] The demo can be explained in under five minutes.
 - [ ] Every factual output is traceable to packet data or retrieved mock content.
-- [ ] Approval-gated actions cannot execute without approval.
+- [x] Approval-gated actions cannot execute without approval.
 - [ ] Prompt-injection and missing-data cases are represented in fixtures or evals.
 - [ ] The demo package includes a repo narrative, short video outline, architecture diagram checklist, and one-page eval summary.

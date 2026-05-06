@@ -16,10 +16,10 @@ Given a synthetic fleet incident packet, the system should:
 - [x] Classify severity with rationale.
 - [x] Recommend next actions grounded in retrieved guidance.
 - [x] Draft a shareable incident brief with citations and redactions.
-- [ ] Require human approval before export, escalation, or external sharing.
+- [x] Require human approval before export, escalation, or external sharing.
 - [ ] Emit observability and eval signals for traces, retrieval quality, latency, token use, tool calls, and safety checks.
 
-This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, the Phase 3 Go retrieval package for approved mock guidance, the Phase 4 Go timeline package for cited synthetic incident timelines, the Phase 5 Go severity package for deterministic classification, SOP-grounded recommendations, and approval-required flags, and the Phase 6 Go brief package for cited, redacted draft incident briefs. No CLI, HTTP API, database, approval workflow, eval harness, export, escalation, or external-sharing runtime exists yet.
+This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, the Phase 3 Go retrieval package for approved mock guidance, the Phase 4 Go timeline package for cited synthetic incident timelines, the Phase 5 Go severity package for deterministic classification, SOP-grounded recommendations, and approval-required flags, the Phase 6 Go brief package for cited, redacted draft incident briefs, and the Phase 7 Go approval package for in-memory human approval records and scoped sensitive-action gating. No CLI, HTTP API, database, eval harness, real export tool, real escalation tool, or external-sharing integration exists yet.
 
 ## Primary User
 
@@ -30,7 +30,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [ ] RAG design over proprietary-style operational content.
 - [ ] Agent/tool orchestration with constrained actions.
 - [ ] Backend-oriented product thinking.
-- [ ] Approval boundaries for sensitive workflows.
+- [x] Approval boundaries for sensitive workflows.
 - [ ] Prompt-injection and least-privilege security awareness.
 - [ ] Eval discipline for groundedness, citations, severity, redaction, and tool calls.
 - [ ] Observability and cost-control thinking.
@@ -45,6 +45,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [Incident Timeline Builder](incident-timeline-builder.md): Phase 4 timeline output format, source-reference rules, uncertainty behavior, unsupported-claim behavior, test commands, and red-to-green evidence.
 - [Severity Classification And Recommended Actions](severity-classification-and-recommended-actions.md): Phase 5 deterministic severity rules, recommendation output, approval-required flags, test commands, and red-to-green evidence.
 - [Shareable Incident Brief Drafting](incident-brief-drafting.md): Phase 6 structured draft brief sections, citation rules, redaction behavior, fail-closed behavior, approval-state display, test commands, and red-to-green evidence.
+- [Human Approval Workflow](human-approval-workflow.md): Phase 7 approval request model, decision capture, scoped enforcement rules, append-only audit behavior, test commands, and red-to-green evidence.
 - [Scope And Guardrails](scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
 - [Phases And Tasks](phases.md): tickable phase plan with prompts.
 - [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.

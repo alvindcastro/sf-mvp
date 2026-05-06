@@ -75,7 +75,7 @@ Phase 6 displays the approval flags produced by Phase 5:
 - `escalation`: blocked pending human approval.
 - `external_sharing`: blocked pending human approval.
 
-The draft does not approve, deny, export, escalate, share, or create approval records. Phase 7 remains responsible for the human approval workflow and enforcement.
+The draft does not approve, deny, export, escalate, share, or create approval records. The Phase 7 `internal/approval` package provides the separate human approval workflow and scoped enforcement gate.
 
 ## Red-To-Green Evidence
 
@@ -91,7 +91,7 @@ Green state:
 
 ## Current Limits
 
-- No Markdown, PDF, email, download, CLI, HTTP API, database, persistence, approval workflow, export, escalation, external sharing, observability, or eval harness exists in Phase 6.
+- No Markdown, PDF, email, download, CLI, HTTP API, database, persistence, export, escalation, external sharing, observability, or eval harness exists in Phase 6.
 - The draft is structured data only; downstream rendering is a future phase or integration task.
 - Redaction rules are deterministic MVP rules, not a configurable policy engine.
 - `Shareable: true` means the draft is safe structured output for human review, not final approval or external release.

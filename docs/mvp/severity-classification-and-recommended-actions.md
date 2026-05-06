@@ -53,7 +53,7 @@ Every classification result flags these sensitive actions:
 - `escalation`: approval required, not approved.
 - `external_sharing`: approval required, not approved.
 
-Phase 5 does not create approval records, approve actions, deny actions, execute tools, export evidence, escalate incidents, or share externally. Phase 7 remains responsible for the human approval workflow.
+Phase 5 does not create approval records, approve actions, deny actions, execute tools, export evidence, escalate incidents, or share externally. The Phase 7 `internal/approval` package uses the same sensitive action labels when a human approval gate is needed.
 
 ## Red-To-Green Evidence
 
@@ -70,6 +70,6 @@ Green state:
 ## Current Limits
 
 - No model judgment interface is implemented because Phase 5 does not need model-dependent behavior.
-- No CLI, HTTP API, database, persistent fixture loader, brief generator, approval workflow, export, escalation, external sharing, observability, or eval harness exists in Phase 5.
+- No CLI, HTTP API, database, persistent fixture loader, brief generator, export, escalation, external sharing, observability, or eval harness exists in Phase 5.
 - Recommendations are advisory data for downstream review surfaces; they are not tool calls.
-- Approval requirements are flags only; they do not represent a human approval decision record.
+- Approval requirements are flags only; separate human approval decision records are created by the Phase 7 approval gate.
