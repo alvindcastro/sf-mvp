@@ -285,14 +285,14 @@ Code-task prompt:
 
 Goal: expose quality and operations proof through local reports.
 
-- [ ] Add a local eval report surface that runs deterministic golden cases and returns case count, metric scores, thresholds, and pass/fail status.
-- [ ] Add an in-memory trace report surface that returns redacted events by trace ID.
-- [ ] Include a budget-exceeded demo path using caller-supplied token counts.
-- [ ] Include eval summary and notification preview tool-call events when available.
-- [ ] Keep reports local and ephemeral.
-- [ ] Do not imply dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, or model benchmarking.
+- [x] Add a local eval report surface that runs deterministic golden cases and returns case count, metric scores, thresholds, and pass/fail status.
+- [x] Add an in-memory trace report surface that returns redacted events by trace ID.
+- [x] Include a budget-exceeded demo path using caller-supplied token counts.
+- [x] Include eval summary and notification preview tool-call events when available.
+- [x] Keep reports local and ephemeral.
+- [x] Do not imply dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, or model benchmarking.
 
-Planned output: local eval and trace report routes or commands, plus documentation updates after implementation exists.
+Output: [Eval And Observability Demo Reports](../demo/eval-and-observability-reports.md), the routes `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check` in [internal/httpapi](../../../internal/httpapi). Phase 16 is complete as of 2026-05-06 and added loopback-only report surfaces over deterministic eval and in-memory observability events. No dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, model calls, model benchmarking, database, identity, auth, Slack delivery, webhook, real export, real escalation, or external-sharing integration exists yet.
 
 Code-task prompt:
 

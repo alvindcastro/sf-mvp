@@ -10,7 +10,7 @@ Useful context that prevents common wrong assumptions.
 - Most implementation remains Go package-level behavior under `internal`.
 - Most state is in memory and deterministic by design.
 - The module name is `sf-mvp`, even though the product narrative is Fleet Incident Copilot.
-- `internal/demo` composes package results in memory; `internal/notification` prepares dry-run Slack-shaped previews; `internal/httpapi` wraps those packages and the in-memory approval retry flow for local demo routes.
+- `internal/demo` composes package results in memory; `internal/notification` prepares dry-run Slack-shaped previews; `internal/httpapi` wraps those packages, the in-memory approval retry flow, local eval reports, trace reports, and caller-supplied budget reports for local demo routes.
 
 ## Demo Boundaries
 
@@ -23,6 +23,7 @@ Useful context that prevents common wrong assumptions.
 - The approval package gates callbacks, but the callbacks are local function calls, not real integrations.
 - The dry-run Slack-shaped preview is not Slack delivery. It has no Slack SDK, token, webhook URL, environment secret, outbound network request, or real external-sharing behavior.
 - The notification preview route uses in-memory approval state in Phase 15, so it returns `blocked` before approval and `allowed` only after an exact approved `external_sharing` request for the same incident and Slack-shaped target channel.
+- The report routes added in Phase 16 are local and ephemeral: `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check`.
 
 ## Retrieval And Citations
 
@@ -38,6 +39,7 @@ Useful context that prevents common wrong assumptions.
 - Default eval thresholds require perfect severity accuracy, citation coverage, and recommendation accuracy.
 - Eval checks redaction, unsupported claims, prompt-injection resistance, and approval fail-closed behavior.
 - Eval is deterministic and local. It does not call a model provider.
+- The eval report route runs the same deterministic golden cases and returns scores, thresholds, gates, and pass/fail state.
 
 ## Observability
 
@@ -46,6 +48,7 @@ Useful context that prevents common wrong assumptions.
 - Budget failures and invalid token usage produce local events and errors.
 - Sensitive terms and coordinate-like values are redacted from event fields.
 - Cache candidates and model-routing notes are planning signals, not active cache storage or live routing.
+- Trace reports only show events already recorded by the current loopback handler process.
 
 ## Documentation
 

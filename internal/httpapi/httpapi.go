@@ -12,6 +12,7 @@ import (
 	"sf-mvp/internal/approval"
 	"sf-mvp/internal/brief"
 	"sf-mvp/internal/demo"
+	"sf-mvp/internal/eval"
 	"sf-mvp/internal/ingestion"
 	"sf-mvp/internal/notification"
 	"sf-mvp/internal/observability"
@@ -23,6 +24,9 @@ const (
 	approvalRequestPath          = "/demo/approvals"
 	approvalDecisionPath         = "/demo/approvals/decisions"
 	slackNotificationPreviewPath = "/demo/notifications/slack"
+	evalReportPath               = "/demo/eval/latest"
+	traceReportPathPrefix        = "/demo/traces/"
+	budgetReportPath             = "/demo/budget/check"
 	evalSummaryRef               = "docs/mvp/quality/eval-plan.md"
 	defaultListenAddr            = "127.0.0.1:8080"
 )
@@ -31,12 +35,17 @@ type Handler struct {
 	now          func() time.Time
 	approvalMu   sync.Mutex
 	approvalGate *approval.Gate
+	traceMu      sync.Mutex
+	traces       map[string][]observability.Event
 }
 
 type Option func(*Handler)
 
 func NewHandler(options ...Option) http.Handler {
-	handler := &Handler{now: defaultNow}
+	handler := &Handler{
+		now:    defaultNow,
+		traces: make(map[string][]observability.Event),
+	}
 	for _, option := range options {
 		option(handler)
 	}
@@ -61,17 +70,23 @@ func DefaultListenAddress() string {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	switch r.URL.Path {
-	case reviewPath:
+	switch {
+	case r.URL.Path == reviewPath:
 		h.handleReview(w, r)
-	case approvalRequestPath:
+	case r.URL.Path == approvalRequestPath:
 		h.handleApprovalRequest(w, r)
-	case approvalDecisionPath:
+	case r.URL.Path == approvalDecisionPath:
 		h.handleApprovalDecision(w, r)
-	case slackNotificationPreviewPath:
+	case r.URL.Path == slackNotificationPreviewPath:
 		h.handleSlackNotificationPreview(w, r)
+	case r.URL.Path == evalReportPath:
+		h.handleEvalReport(w, r)
+	case r.URL.Path == budgetReportPath:
+		h.handleBudgetReport(w, r)
+	case strings.HasPrefix(r.URL.Path, traceReportPathPrefix):
+		h.handleTraceReport(w, r)
 	default:
-		writeError(w, http.StatusNotFound, "not_found", "supported paths are POST /demo/review, POST /demo/approvals, POST /demo/approvals/decisions, and POST /demo/notifications/slack")
+		writeError(w, http.StatusNotFound, "not_found", "supported paths are POST /demo/review, POST /demo/approvals, POST /demo/approvals/decisions, POST /demo/notifications/slack, GET /demo/eval/latest, GET /demo/traces/{trace_id}, and POST /demo/budget/check")
 	}
 }
 
@@ -96,6 +111,7 @@ func (h *Handler) handleReview(w http.ResponseWriter, r *http.Request) {
 		h.writeComposeError(w, err)
 		return
 	}
+	h.storeTraceEvents(review.ObservabilityEvents)
 	writeJSON(w, http.StatusOK, apiResponseFromReview(review))
 }
 
@@ -213,7 +229,106 @@ func (h *Handler) handleSlackNotificationPreview(w http.ResponseWriter, r *http.
 		return
 	}
 
-	writeJSON(w, http.StatusOK, apiResponseFromNotificationPreview(workflow.TraceID, preview, recorder.Events(), audit))
+	events := recorder.Events()
+	h.storeTraceEvents(events)
+	writeJSON(w, http.StatusOK, apiResponseFromNotificationPreview(workflow.TraceID, preview, events, audit))
+}
+
+func (h *Handler) handleEvalReport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is GET")
+		return
+	}
+
+	report := eval.Run(eval.GoldenCases(), eval.DefaultThresholds())
+	recorder := observability.NewRecorder(h.now, observability.Budget{})
+	workflow, err := recorder.StartWorkflow("FIC-SYN-EVAL-REPORT", observability.SensitiveData{})
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_eval_report", "eval report could not start a trace")
+		return
+	}
+	recorder.RecordEvalScore(workflow, report, 0)
+	events := recorder.Events()
+	h.storeTraceEvents(events)
+
+	writeJSON(w, http.StatusOK, apiResponse{
+		TraceID:    workflow.TraceID,
+		EvalReport: evalReportResponseFromReport(report),
+	})
+}
+
+func (h *Handler) handleTraceReport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is GET")
+		return
+	}
+
+	traceID := strings.TrimSpace(strings.TrimPrefix(r.URL.Path, traceReportPathPrefix))
+	events, ok := h.traceEvents(traceID)
+	if !ok {
+		writeError(w, http.StatusNotFound, "trace_not_found", "trace report was not found in this local handler")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, apiResponse{
+		TraceID:     traceID,
+		TraceReport: traceReportResponseFromEvents(traceID, events),
+	})
+}
+
+func (h *Handler) handleBudgetReport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is POST")
+		return
+	}
+
+	var request budgetReportRequest
+	if !decodeRequestStruct(w, r, &request) {
+		return
+	}
+	if strings.TrimSpace(request.IncidentID) == "" {
+		writeError(w, http.StatusBadRequest, "invalid_budget_report", "incident_id is required")
+		return
+	}
+
+	recorder := observability.NewRecorder(h.now, observability.Budget{
+		MaxInputTokens:  request.MaxInputTokens,
+		MaxOutputTokens: request.MaxOutputTokens,
+		MaxTotalTokens:  request.MaxTotalTokens,
+		MaxModelCalls:   request.MaxModelCalls,
+	})
+	workflow, err := recorder.StartWorkflow(request.IncidentID, observability.SensitiveData{Terms: request.SensitiveTerms})
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_budget_report", "budget report could not start a trace")
+		return
+	}
+	event, err := recorder.RecordModelCall(workflow, observability.ModelCall{
+		Provider:     request.Provider,
+		Model:        request.Model,
+		InputTokens:  request.InputTokens,
+		OutputTokens: request.OutputTokens,
+		Duration:     0,
+	})
+	if errors.Is(err, observability.ErrInvalidTokenUsage) {
+		h.storeTraceEvents(recorder.Events())
+		writeError(w, http.StatusBadRequest, "invalid_token_usage", "token usage cannot be negative")
+		return
+	}
+	if err != nil && !errors.Is(err, observability.ErrBudgetExceeded) {
+		h.storeTraceEvents(recorder.Events())
+		writeError(w, http.StatusBadRequest, "invalid_budget_report", "budget report could not be recorded")
+		return
+	}
+	events := recorder.Events()
+	h.storeTraceEvents(events)
+
+	writeJSON(w, http.StatusOK, apiResponse{
+		TraceID:      workflow.TraceID,
+		BudgetReport: budgetReportResponseFromEvent(event, err),
+	})
 }
 
 func decodeRequestObject(w http.ResponseWriter, r *http.Request) (map[string]json.RawMessage, bool) {
@@ -335,6 +450,19 @@ type slackPreviewRequest struct {
 	DeliveryMode notification.DeliveryMode `json:"delivery_mode"`
 }
 
+type budgetReportRequest struct {
+	IncidentID      string   `json:"incident_id"`
+	Provider        string   `json:"provider"`
+	Model           string   `json:"model"`
+	InputTokens     int      `json:"input_tokens"`
+	OutputTokens    int      `json:"output_tokens"`
+	MaxInputTokens  int      `json:"max_input_tokens"`
+	MaxOutputTokens int      `json:"max_output_tokens"`
+	MaxTotalTokens  int      `json:"max_total_tokens"`
+	MaxModelCalls   int      `json:"max_model_calls"`
+	SensitiveTerms  []string `json:"sensitive_terms"`
+}
+
 type reviewResponse struct {
 	ValidationStatus      demo.ValidationStatus      `json:"validation_status"`
 	IncidentID            string                     `json:"incident_id"`
@@ -439,6 +567,69 @@ type evalSummaryResponse struct {
 	Command   string `json:"command"`
 }
 
+type evalReportResponse struct {
+	CaseCount  int                    `json:"case_count"`
+	Passed     bool                   `json:"passed"`
+	Metrics    evalMetricsResponse    `json:"metrics"`
+	Thresholds evalThresholdsResponse `json:"thresholds"`
+	Gates      []evalGateResponse     `json:"gates"`
+}
+
+type evalMetricsResponse struct {
+	SeverityAccuracy       float64 `json:"severity_accuracy"`
+	CitationCoverage       float64 `json:"citation_coverage"`
+	RecommendationAccuracy float64 `json:"recommendation_accuracy"`
+}
+
+type evalThresholdsResponse struct {
+	MinSeverityAccuracy              float64 `json:"min_severity_accuracy"`
+	MinCitationCoverage              float64 `json:"min_citation_coverage"`
+	MinRecommendationAccuracy        float64 `json:"min_recommendation_accuracy"`
+	RequireNoUnsupportedClaims       bool    `json:"require_no_unsupported_claims"`
+	RequireRedaction                 bool    `json:"require_redaction"`
+	RequirePromptInjectionResistance bool    `json:"require_prompt_injection_resistance"`
+	RequireApprovalFailSafe          bool    `json:"require_approval_fail_safe"`
+}
+
+type evalGateResponse struct {
+	Name      string  `json:"name"`
+	Actual    float64 `json:"actual,omitempty"`
+	Threshold float64 `json:"threshold,omitempty"`
+	Required  bool    `json:"required,omitempty"`
+	Passed    bool    `json:"passed"`
+}
+
+type traceReportResponse struct {
+	TraceID    string               `json:"trace_id"`
+	IncidentID string               `json:"incident_id"`
+	Events     []traceEventResponse `json:"events"`
+	Ephemeral  bool                 `json:"ephemeral"`
+}
+
+type traceEventResponse struct {
+	Type       string             `json:"type"`
+	TraceID    string             `json:"trace_id"`
+	IncidentID string             `json:"incident_id"`
+	OccurredAt string             `json:"occurred_at"`
+	DurationMS int64              `json:"duration_ms,omitempty"`
+	Fields     map[string]string  `json:"fields,omitempty"`
+	Metrics    map[string]float64 `json:"metrics,omitempty"`
+	SourceIDs  []string           `json:"source_ids,omitempty"`
+	TokenUsage tokenUsageResponse `json:"token_usage,omitempty"`
+}
+
+type budgetReportResponse struct {
+	Status     string             `json:"status"`
+	Reason     string             `json:"reason"`
+	TokenUsage tokenUsageResponse `json:"token_usage"`
+}
+
+type tokenUsageResponse struct {
+	InputTokens  int `json:"input_tokens"`
+	OutputTokens int `json:"output_tokens"`
+	TotalTokens  int `json:"total_tokens"`
+}
+
 type notificationPreviewResponse struct {
 	Status                   string                     `json:"status"`
 	DeliveryMode             string                     `json:"delivery_mode"`
@@ -458,6 +649,9 @@ type apiResponse struct {
 	ApprovalRequest         *approvalRequestResponse     `json:"approval_request,omitempty"`
 	AuditHistory            []auditEventResponse         `json:"audit_history,omitempty"`
 	EvalSummary             *evalSummaryResponse         `json:"eval_summary,omitempty"`
+	EvalReport              *evalReportResponse          `json:"eval_report,omitempty"`
+	TraceReport             *traceReportResponse         `json:"trace_report,omitempty"`
+	BudgetReport            *budgetReportResponse        `json:"budget_report,omitempty"`
 	Error                   *errorResponse               `json:"error,omitempty"`
 }
 
@@ -500,6 +694,138 @@ func apiResponseFromApprovalRequest(request approval.Request, audit []approval.A
 	return apiResponse{
 		ApprovalRequest: approvalRequestResponseFromApproval(request),
 		AuditHistory:    auditEventResponses(audit),
+	}
+}
+
+func evalReportResponseFromReport(report eval.Report) *evalReportResponse {
+	return &evalReportResponse{
+		CaseCount: report.Summary.CaseCount,
+		Passed:    report.Passed,
+		Metrics: evalMetricsResponse{
+			SeverityAccuracy:       report.Summary.SeverityAccuracy,
+			CitationCoverage:       report.Summary.CitationCoverage,
+			RecommendationAccuracy: report.Summary.RecommendationAccuracy,
+		},
+		Thresholds: evalThresholdsResponse{
+			MinSeverityAccuracy:              report.Thresholds.MinSeverityAccuracy,
+			MinCitationCoverage:              report.Thresholds.MinCitationCoverage,
+			MinRecommendationAccuracy:        report.Thresholds.MinRecommendationAccuracy,
+			RequireNoUnsupportedClaims:       report.Thresholds.RequireNoUnsupportedClaims,
+			RequireRedaction:                 report.Thresholds.RequireRedaction,
+			RequirePromptInjectionResistance: report.Thresholds.RequirePromptInjectionResistance,
+			RequireApprovalFailSafe:          report.Thresholds.RequireApprovalFailSafe,
+		},
+		Gates: evalGateResponses(report),
+	}
+}
+
+func evalGateResponses(report eval.Report) []evalGateResponse {
+	return []evalGateResponse{
+		{
+			Name:      "severity_accuracy",
+			Actual:    report.Summary.SeverityAccuracy,
+			Threshold: report.Thresholds.MinSeverityAccuracy,
+			Passed:    report.Summary.SeverityAccuracy >= report.Thresholds.MinSeverityAccuracy,
+		},
+		{
+			Name:      "citation_coverage",
+			Actual:    report.Summary.CitationCoverage,
+			Threshold: report.Thresholds.MinCitationCoverage,
+			Passed:    report.Summary.CitationCoverage >= report.Thresholds.MinCitationCoverage,
+		},
+		{
+			Name:      "recommendation_accuracy",
+			Actual:    report.Summary.RecommendationAccuracy,
+			Threshold: report.Thresholds.MinRecommendationAccuracy,
+			Passed:    report.Summary.RecommendationAccuracy >= report.Thresholds.MinRecommendationAccuracy,
+		},
+		{
+			Name:     "no_unsupported_claims",
+			Required: report.Thresholds.RequireNoUnsupportedClaims,
+			Passed:   !report.Thresholds.RequireNoUnsupportedClaims || allCasesPass(report, func(result eval.CaseResult) bool { return len(result.UnsupportedClaims) == 0 }),
+		},
+		{
+			Name:     "redaction",
+			Required: report.Thresholds.RequireRedaction,
+			Passed:   !report.Thresholds.RequireRedaction || allCasesPass(report, func(result eval.CaseResult) bool { return len(result.RedactionLeaks) == 0 }),
+		},
+		{
+			Name:     "prompt_injection_resistance",
+			Required: report.Thresholds.RequirePromptInjectionResistance,
+			Passed:   !report.Thresholds.RequirePromptInjectionResistance || allCasesPass(report, func(result eval.CaseResult) bool { return result.PromptInjectionResistant }),
+		},
+		{
+			Name:     "approval_fail_safe",
+			Required: report.Thresholds.RequireApprovalFailSafe,
+			Passed:   !report.Thresholds.RequireApprovalFailSafe || allCasesPass(report, func(result eval.CaseResult) bool { return result.SensitiveActionsBlockedWithoutApproval }),
+		},
+	}
+}
+
+func allCasesPass(report eval.Report, check func(eval.CaseResult) bool) bool {
+	if len(report.Cases) == 0 {
+		return false
+	}
+	for _, result := range report.Cases {
+		if !check(result) {
+			return false
+		}
+	}
+	return true
+}
+
+func traceReportResponseFromEvents(traceID string, events []observability.Event) *traceReportResponse {
+	report := &traceReportResponse{
+		TraceID:   traceID,
+		Events:    traceEventResponses(events),
+		Ephemeral: true,
+	}
+	for _, event := range events {
+		if event.TraceID == traceID && strings.TrimSpace(event.IncidentID) != "" {
+			report.IncidentID = event.IncidentID
+			break
+		}
+	}
+	return report
+}
+
+func traceEventResponses(events []observability.Event) []traceEventResponse {
+	responses := make([]traceEventResponse, len(events))
+	for i, event := range events {
+		responses[i] = traceEventResponse{
+			Type:       string(event.Type),
+			TraceID:    event.TraceID,
+			IncidentID: event.IncidentID,
+			OccurredAt: event.OccurredAt.UTC().Format(time.RFC3339),
+			DurationMS: event.Duration.Milliseconds(),
+			Fields:     cloneFields(event.Fields),
+			Metrics:    cloneMetrics(event.Metrics),
+			SourceIDs:  append([]string(nil), event.SourceIDs...),
+			TokenUsage: tokenUsageResponseFromUsage(event.TokenUsage),
+		}
+	}
+	return responses
+}
+
+func budgetReportResponseFromEvent(event observability.Event, err error) *budgetReportResponse {
+	status := "within_budget"
+	reason := "caller-supplied token usage is within configured local budget"
+	if errors.Is(err, observability.ErrBudgetExceeded) || event.Type == observability.EventBudgetExceeded {
+		status = "budget_exceeded"
+		reason = event.Fields["budget_reason"]
+	}
+	return &budgetReportResponse{
+		Status:     status,
+		Reason:     reason,
+		TokenUsage: tokenUsageResponseFromUsage(event.TokenUsage),
+	}
+}
+
+func tokenUsageResponseFromUsage(usage observability.TokenUsage) tokenUsageResponse {
+	return tokenUsageResponse{
+		InputTokens:  usage.InputTokens,
+		OutputTokens: usage.OutputTokens,
+		TotalTokens:  usage.TotalTokens,
 	}
 }
 
@@ -677,6 +1003,80 @@ func auditEventResponses(events []approval.AuditEvent) []auditEventResponse {
 		}
 	}
 	return responses
+}
+
+func (h *Handler) storeTraceEvents(events []observability.Event) {
+	if len(events) == 0 {
+		return
+	}
+	byTraceID := make(map[string][]observability.Event)
+	for _, event := range events {
+		if strings.TrimSpace(event.TraceID) == "" {
+			continue
+		}
+		byTraceID[event.TraceID] = append(byTraceID[event.TraceID], cloneObservabilityEvent(event))
+	}
+	if len(byTraceID) == 0 {
+		return
+	}
+
+	h.traceMu.Lock()
+	defer h.traceMu.Unlock()
+	for traceID, traceEvents := range byTraceID {
+		h.traces[traceID] = append(h.traces[traceID], traceEvents...)
+	}
+}
+
+func (h *Handler) traceEvents(traceID string) ([]observability.Event, bool) {
+	traceID = strings.TrimSpace(traceID)
+	if traceID == "" {
+		return nil, false
+	}
+
+	h.traceMu.Lock()
+	defer h.traceMu.Unlock()
+	events, ok := h.traces[traceID]
+	if !ok || len(events) == 0 {
+		return nil, false
+	}
+	return cloneObservabilityEvents(events), true
+}
+
+func cloneObservabilityEvents(events []observability.Event) []observability.Event {
+	cloned := make([]observability.Event, len(events))
+	for i, event := range events {
+		cloned[i] = cloneObservabilityEvent(event)
+	}
+	return cloned
+}
+
+func cloneObservabilityEvent(event observability.Event) observability.Event {
+	event.Fields = cloneFields(event.Fields)
+	event.Metrics = cloneMetrics(event.Metrics)
+	event.SourceIDs = append([]string(nil), event.SourceIDs...)
+	return event
+}
+
+func cloneFields(fields map[string]string) map[string]string {
+	if len(fields) == 0 {
+		return nil
+	}
+	cloned := make(map[string]string, len(fields))
+	for key, value := range fields {
+		cloned[key] = value
+	}
+	return cloned
+}
+
+func cloneMetrics(metrics map[string]float64) map[string]float64 {
+	if len(metrics) == 0 {
+		return nil
+	}
+	cloned := make(map[string]float64, len(metrics))
+	for key, value := range metrics {
+		cloned[key] = value
+	}
+	return cloned
 }
 
 func writeError(w http.ResponseWriter, status int, code string, message string) {

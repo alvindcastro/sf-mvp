@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-06 - Phase 16 Eval And Observability Demo Reports
+
+### Task: Audit Phase 16 Scope With Parallel Agents
+
+- What: Ran parallel read-only Codex explorer agents to inspect the Phase 16 acceptance criteria, existing eval and observability APIs, HTTP route patterns, demo command constraints, and stale documentation wording.
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [internal/eval](internal/eval), [internal/observability](internal/observability), [internal/httpapi](internal/httpapi), [cmd/demo-api](cmd/demo-api).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 16 should expose deterministic local quality and operations proof without dashboards, alerts, OpenTelemetry export, provider billing reconciliation, model calls, model benchmarking, persisted history, or external integrations.
+- How: Spawned two read-only explorer agents while the main thread inspected the canonical phase tracker and existing handler code; aligned route naming with the roadmap’s `GET /demo/eval/latest` and `GET /demo/traces/{trace_id}` pattern and scoped the caller-supplied budget route as `POST /demo/budget/check`.
+
+### Task: Add Phase 16 Report TDD Coverage
+
+- What: Added failing-first handler tests for deterministic eval report generation, case count, metric scores, threshold pass/fail gates, trace lookup by trace ID, notification preview tool-call event display, budget-exceeded event display, redacted event fields, missing trace behavior, and per-handler ephemeral trace state.
+- Where: [internal/httpapi/httpapi_test.go](internal/httpapi/httpapi_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Define the Phase 16 local report contract before production code and prove the missing routes at the HTTP boundary.
+- How: Added `httptest` coverage around `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check`; observed `go test ./internal/httpapi` fail with `404` for the missing report routes before implementing the handler behavior.
+
+### Task: Implement Local Eval, Trace, And Budget Report Routes
+
+- What: Added loopback-only report routes, an in-memory trace event store on the handler, eval report response projection, trace report response projection, caller-supplied budget check response projection, and deterministic error mapping for missing traces and invalid budget inputs.
+- Where: [internal/httpapi/httpapi.go](internal/httpapi/httpapi.go), [internal/httpapi/httpapi_test.go](internal/httpapi/httpapi_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Complete Phase 16 by exposing existing `internal/eval` and `internal/observability` behavior locally while keeping report state ephemeral and avoiding new service, persistence, model, billing, or monitoring claims.
+- How: Wired `eval.Run(eval.GoldenCases(), eval.DefaultThresholds())` into `GET /demo/eval/latest`, recorded `eval.score_recorded` through `observability.Recorder`, stored cloned observability events by trace ID, returned trace reports only for events recorded by the same handler process, and used `observability.RecordModelCall` with caller-supplied token counts for `POST /demo/budget/check`; verified `go test ./internal/httpapi` passed.
+
+### Task: Document Phase 16 Implemented Boundary
+
+- What: Added the Phase 16 behavior doc and synchronized phase tracking, compatibility phase pointer, demo roadmap, loopback API docs, eval plan, observability docs, demo package, overview, docs indexes, contributor guides, troubleshooting, testing docs, and root README.
+- Where: [docs/mvp/demo/eval-and-observability-reports.md](docs/mvp/demo/eval-and-observability-reports.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [docs/mvp/quality/observability-and-cost-controls.md](docs/mvp/quality/observability-and-cost-controls.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/README.md](docs/README.md), [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/testing.md](docs/testing.md), [docs/troubleshooting.md](docs/troubleshooting.md), [README.md](README.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep implemented-versus-planned wording accurate now that local eval, trace, and budget report routes exist, while preserving explicit limits around dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, model calls, model benchmarking, databases, identity, auth, Slack delivery, webhooks, production monitoring, production audit storage, and real external sharing.
+- How: Marked Phase 16 complete, linked the new behavior doc, documented route request and response contracts, updated latest eval summary numbers, added exact local `curl` examples, updated runtime summaries and test coverage descriptions, and changed stale “planned report surface” language to loopback-only implemented report language.
+
+### Task: Verify Phase 16 Eval And Observability Reports
+
+- What: Verified the report handler, related eval and observability packages, full Go suite, vet checks, coverage, Markdown whitespace, and local loopback `curl` sequence for eval, trace, and budget report routes.
+- Where: [internal/httpapi](internal/httpapi), [internal/eval](internal/eval), [internal/observability](internal/observability), [cmd/demo-api](cmd/demo-api), [docs/mvp/demo/eval-and-observability-reports.md](docs/mvp/demo/eval-and-observability-reports.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 16 is deterministic, locally repeatable, redacted, ephemeral, and still free of provider calls, persistence, billing reconciliation, dashboards, alerts, and external telemetry before closing the task.
+- How: Ran `go test ./internal/httpapi`, `go test ./internal/eval ./internal/observability ./internal/httpapi`, `go test ./...`, `go vet ./...`, `go test -cover ./...`, and a scoped `git diff --check` over the Phase 16 edit set; noted the broader `git diff --check -- README.md CHANGELOG.md docs internal` is blocked by pre-existing trailing whitespace in `docs/research/research-report.md`; started `go run ./cmd/demo-api -addr 127.0.0.1:18083`; verified `GET /demo/eval/latest` returned `case_count: 5`, `passed: true`, and perfect metric scores; verified `GET /demo/traces/trace-fic-syn-eval-report-20260506t160000z-001` returned `workflow.started` and `eval.score_recorded`; verified `POST /demo/budget/check` returned `budget_report.status: "budget_exceeded"` with `total_tokens: 110`; then stopped the local server.
+
 ## 2026-05-06 - Phase 15 Scoped Approval Demo Retry
 
 ### Task: Audit Phase 15 Scope With Parallel Agents

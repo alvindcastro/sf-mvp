@@ -22,6 +22,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Loopback-only local demo API for synthetic review requests.
 - [x] Dry-run Slack-shaped notification preview that remains blocked before scoped external-sharing approval.
 - [x] In-memory scoped approval retry that allows only the exact approved dry-run notification preview.
+- [x] Loopback-only local eval, trace, and caller-supplied budget report routes with ephemeral in-memory state.
 
 ## Out Of Scope
 
@@ -73,9 +74,9 @@ Implemented boundary as of Phase 6: `internal/brief` drafts structured human-rev
 
 Implemented boundary as of Phase 7: `internal/approval` creates in-memory approval requests for export, escalation, and external sharing; captures human decisions with approver, timestamp, reason, action, and scope; blocks missing, pending, denied, out-of-scope, and mismatched call-and-scope sensitive action callbacks; allows approved callbacks only within the exact approved scope; prevents final decisions from being rewritten in place; and returns append-only audit history copies. It does not implement persistence, identity, roles, real export, real escalation, external-sharing integrations, CLI, HTTP API, or external observability pipeline behavior.
 
-Implemented boundary as of Phase 8: `internal/eval` runs deterministic in-memory golden-case evals for `FIC-SYN-001` through `FIC-SYN-005`; scores severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior; and applies strict default release gates. It does not implement a CLI report, persistent eval history, HTTP API, database, model-provider calls, or real integrations.
+Implemented boundary as of Phase 8: `internal/eval` runs deterministic in-memory golden-case evals for `FIC-SYN-001` through `FIC-SYN-005`; scores severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior; and applies strict default release gates. Phase 16 exposes this through a loopback-only report route. It does not implement a CLI report, persistent eval history, database, model-provider calls, model benchmarking, or real integrations.
 
-Implemented boundary as of Phase 9: `internal/observability` creates deterministic trace IDs for synthetic incident workflows; records in-memory structured events for retrieval counts, retrieved source IDs, tool-call success, approval decisions, caller-supplied token usage, invalid token usage, latency, budget failures, and eval summaries; redacts configured sensitive terms and coordinate-like strings from event fields; defines budget limits; and records cache candidates plus hosted, smaller-model, and self-hosted routing notes. It does not implement an external telemetry backend, dashboards, alerts, persistent log storage, provider billing reconciliation, real model-provider calls, live model routing, cache storage, CLI, HTTP API, database behavior, or production audit/compliance guarantees.
+Implemented boundary as of Phase 9: `internal/observability` creates deterministic trace IDs for synthetic incident workflows; records in-memory structured events for retrieval counts, retrieved source IDs, tool-call success, approval decisions, caller-supplied token usage, invalid token usage, latency, budget failures, and eval summaries; redacts configured sensitive terms and coordinate-like strings from event fields; defines budget limits; and records cache candidates plus hosted, smaller-model, and self-hosted routing notes. Phase 16 exposes selected events through loopback-only trace and budget report routes. It does not implement an external telemetry backend, dashboards, alerts, persistent log storage, provider billing reconciliation, real model-provider calls, live model routing, cache storage, CLI, database behavior, or production audit/compliance guarantees.
 
 Implemented boundary as of Phase 12: `internal/demo` loads machine-readable synthetic fixtures through ingestion validation and composes one deterministic in-memory review result with validation status, retrieved citation refs, timeline entries, severity, recommendations, redacted brief fields, approval-required actions, and trace ID. It rejects non-synthetic or real-looking input before downstream composition and keeps export, escalation, and external sharing blocked without scoped approval. It does not implement an HTTP API, CLI, Slack behavior, webhook, database, persistence, live model calls, real export, real escalation, external sharing, or external observability behavior.
 
@@ -84,6 +85,8 @@ Implemented boundary as of Phase 13: `internal/httpapi` exposes `POST /demo/revi
 Implemented boundary as of Phase 14: `internal/notification` prepares a dry-run Slack-shaped payload from the redacted brief only, requires `delivery_mode: "dry_run"`, gates the preview as `external_sharing` against the existing approval package, returns blocked status plus prepared payload when approval is missing, and records a redacted tool-call observability event. It does not implement Slack delivery, Slack SDK usage, webhook URLs, tokens, environment secrets, outbound network calls, persistent approval storage, or real external sharing.
 
 Implemented boundary as of Phase 15: `internal/httpapi` exposes `POST /demo/approvals` and `POST /demo/approvals/decisions` through the loopback-only local server, stores approval state in memory for one server process, and reuses that gate when retrying `POST /demo/notifications/slack`. Missing, pending, denied, out-of-scope, and wrong-action approvals fail closed; only an exact approved `external_sharing` request for the same synthetic incident and `slack:<channel>` target allows the dry-run preview. It does not implement persistence, identity, roles, real Slack delivery, webhook calls, live external sharing, production API behavior, or production audit storage.
+
+Implemented boundary as of Phase 16: `internal/httpapi` exposes `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check` through the loopback-only local server. The eval route runs deterministic golden cases, the trace route returns redacted events already stored by the current handler process, and the budget route records caller-supplied token counts against caller-supplied limits. It does not implement dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, model calls, model benchmarking, database, identity, auth, production monitoring, or production audit storage.
 
 ## Demo Path
 
@@ -101,6 +104,7 @@ Implemented boundary as of Phase 15: `internal/httpapi` exposes `POST /demo/appr
 - [x] Call the loopback-only demo API for a synthetic incident review.
 - [x] Call the loopback-only dry-run notification preview and show external sharing remains blocked before scoped approval.
 - [x] Create an in-memory scoped approval and retry the dry-run notification preview without network delivery.
+- [x] Call the loopback-only eval report, trace report, and budget report routes.
 
 ## Definition Of MVP Done
 

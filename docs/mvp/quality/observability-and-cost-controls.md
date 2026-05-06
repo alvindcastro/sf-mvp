@@ -1,6 +1,6 @@
 # Observability And Cost Controls
 
-Phase 9 adds the first package-level observability and budget-control surface for Fleet Incident Copilot. The surface records structured in-memory workflow events for synthetic MVP workflows and defines cost-control planning notes. It does not add an external telemetry backend, dashboards, alerts, provider billing reconciliation, live model-provider calls, persistent cache storage, CLI, HTTP API, or database behavior.
+Phase 9 adds the first package-level observability and budget-control surface for Fleet Incident Copilot. The surface records structured in-memory workflow events for synthetic MVP workflows and defines cost-control planning notes. Phase 16 exposes selected in-memory events through `GET /demo/traces/{trace_id}` and caller-supplied budget checks through `POST /demo/budget/check`. It does not add an external telemetry backend, dashboards, alerts, provider billing reconciliation, live model-provider calls, persistent cache storage, CLI, database behavior, or production monitoring behavior.
 
 ## Phase 9 Checklist
 
@@ -17,10 +17,13 @@ Phase 9 adds the first package-level observability and budget-control surface fo
 - Recorder constructor: `NewRecorder(now func() time.Time, budget Budget) *Recorder`.
 - Workflow entry point: `StartWorkflow(incidentID string, sensitive SensitiveData) (Workflow, error)`.
 - Event history: `Events() []Event`.
+- Loopback trace route: `GET /demo/traces/{trace_id}`.
+- Loopback budget demo route: `POST /demo/budget/check`.
 - Budget error: `ErrBudgetExceeded`.
 - Invalid token usage error: `ErrInvalidTokenUsage`.
 - Cost-control plan: `DefaultCostPlan() CostPlan`.
 - Targeted test command: `go test ./internal/observability`.
+- Report route test command: `go test ./internal/httpapi`.
 - Full test command: `go test ./...`.
 
 The recorder is intentionally orchestration-facing. It observes existing Phase 2 through Phase 8 outputs without threading trace state through every package API.
@@ -77,7 +80,7 @@ Current tests cover vehicle identifiers, route names, private location labels, c
 
 `RecordModelCall` appends `model_call.recorded` when usage is non-negative and within budget. It appends `budget.exceeded` and returns `ErrBudgetExceeded` when a new call would exceed a configured limit. It appends `model_call.rejected` and returns `ErrInvalidTokenUsage` when caller-supplied input or output tokens are negative, and rejected calls do not consume model-call count or token budget.
 
-Token usage is caller-supplied because the MVP does not call a real model provider. The behavior is a local control surface, not billing reconciliation or provider-side enforcement.
+Token usage is caller-supplied because the MVP does not call a real model provider. Phase 16 exposes this as a local budget demo route. The behavior is a local control surface, not billing reconciliation or provider-side enforcement.
 
 ## Cache Candidates
 
@@ -111,8 +114,9 @@ The package records routing notes only. It does not select providers, call model
 ## Current Limits
 
 - The recorder is an in-memory package API, not a logging framework or telemetry exporter.
+- Phase 16 trace reports are in-memory views over events stored by the current loopback handler process.
 - Events are not persisted and are not shipped to OpenTelemetry, a metrics backend, dashboards, or alerts.
 - Budget controls use caller-supplied token usage; no real model-provider calls or provider billing reconciliation exists.
 - Cache candidates and routing notes are documentation-backed structs, not live cache or model-routing behavior.
-- This package does not implement CLI behavior, HTTP routes, database behavior, external observability pipelines, persistent audit stores, real export tools, real escalation tools, or external-sharing integrations.
+- This package does not implement CLI behavior, database behavior, external observability pipelines, persistent audit stores, real export tools, real escalation tools, or external-sharing integrations.
 - This phase does not provide production audit, compliance, retention, security, or cost-governance guarantees.

@@ -131,13 +131,26 @@ Fail-closed behavior is intentional for shareable outputs.
 {"request_id":"approval-001","approver":"fleet-safety-lead","decision":"approved","reason":"redacted brief approved for #fleet-safety dry-run"}
 ```
 
+`GET /demo/eval/latest` runs the deterministic local golden-case eval report.
+
+`GET /demo/traces/{trace_id}` returns redacted in-memory events for a trace recorded by the current server process.
+
+`POST /demo/budget/check` accepts caller-supplied token counts and local budget limits:
+
+```json
+{"incident_id":"FIC-SYN-001","provider":"hosted","model":"demo-review-model","input_tokens":90,"output_tokens":20,"max_total_tokens":100}
+```
+
 Common response codes:
 
 - `400 malformed_json`: the request body is not valid JSON.
 - `400 dry_run_required`: notification preview requests must use `delivery_mode: "dry_run"`.
 - `400 invalid_approval_request`: the approval request or decision payload is incomplete or unsupported.
+- `400 invalid_budget_report`: the budget report request is incomplete or cannot start a local trace.
+- `400 invalid_token_usage`: budget report token counts cannot be negative.
 - `404 approval_request_not_found`: the decision route used an unknown approval request ID.
 - `404 incident_not_found`: the synthetic incident ID is not in the demo fixture set.
+- `404 trace_not_found`: the trace ID is missing or was not recorded by the current local server process.
 - `405 method_not_allowed`: use `POST`.
 - `409 approval_already_decided`: final approval decisions cannot be rewritten.
 - `422 non_synthetic_input`: `synthetic_record` is false or the incident ID does not start with `FIC-SYN-`.
@@ -188,11 +201,15 @@ Inspect the failing `eval.CaseResult` fields:
 
 Default thresholds are strict. A small behavior change can fail the whole report when it affects citations, recommendations, redaction, or approval fail-closed behavior.
 
+For the loopback route, call `GET /demo/eval/latest` and then use the returned `trace_id` with `GET /demo/traces/{trace_id}` to inspect the local `eval.score_recorded` event.
+
 ## Observability Returns Budget Or Token Errors
 
 `observability.RecordModelCall` returns `ErrInvalidTokenUsage` when input or output token counts are negative.
 
 It returns `ErrBudgetExceeded` when the call would exceed the configured input, output, total token, or model-call budget. These are local budget checks; no provider billing lookup exists.
+
+For the loopback route, `POST /demo/budget/check` stores the local `model_call.recorded`, `model_call.rejected`, or `budget.exceeded` event in the current server process only. Restarting the server clears the trace report.
 
 ## `git diff --check` Reports Existing Files
 

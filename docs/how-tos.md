@@ -67,7 +67,7 @@ internal/eval          scores deterministic golden cases
 internal/observability records in-memory workflow events and budget signals
 ```
 
-Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route, Phase 14 dry-run notification route, and Phase 15 approval retry routes; `internal/notification` owns the dry-run Slack-shaped preview; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
+Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route, Phase 14 dry-run notification route, Phase 15 approval retry routes, and Phase 16 report routes; `internal/notification` owns the dry-run Slack-shaped preview; the eval package owns golden-case scoring through `GoldenCases` and `Run`; the observability package owns in-memory events and caller-supplied budget checks.
 
 ## How To Run The Loopback Demo API
 
@@ -118,6 +118,26 @@ curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/approvals/decisions \
 ```
 
 Retry the dry-run notification preview. It should return `notification_preview.status: "allowed"` only for the same incident, `external_sharing` action, and `#fleet-safety` channel, while still reporting `sent: false` and `network_delivery_attempted: false`.
+
+Call the local eval report endpoint:
+
+```bash
+curl -i --max-time 5 http://127.0.0.1:18080/demo/eval/latest
+```
+
+Use the returned `trace_id` with the trace endpoint:
+
+```bash
+curl -i --max-time 5 http://127.0.0.1:18080/demo/traces/trace-fic-syn-eval-report-20260506t160000z-001
+```
+
+Call the caller-supplied budget demo endpoint:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/budget/check \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","provider":"hosted","model":"demo-review-model","input_tokens":90,"output_tokens":20,"max_total_tokens":100}'
+```
 
 ## How To Update Documentation Safely
 

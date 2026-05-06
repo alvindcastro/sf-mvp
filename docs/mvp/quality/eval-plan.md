@@ -1,6 +1,6 @@
 # Eval Plan
 
-Phase 8 adds the first deterministic local eval harness for Fleet Incident Copilot. The harness runs in memory against synthetic golden cases and existing Phase 2 through Phase 7 package APIs. It does not add a CLI, HTTP API, database, logs, token tracking, model calls, or cost controls. Phase 9 can record an `eval.Report` summary through the separate observability package.
+Phase 8 adds the first deterministic local eval harness for Fleet Incident Copilot. The harness runs in memory against synthetic golden cases and existing Phase 2 through Phase 7 package APIs. Phase 16 exposes the same harness through the loopback-only `GET /demo/eval/latest` report route. The harness itself does not add a CLI, database, logs, token tracking, model calls, or cost controls. Phase 9 can record an `eval.Report` summary through the separate observability package.
 
 ## Phase 8 Checklist
 
@@ -19,7 +19,9 @@ Phase 8 adds the first deterministic local eval harness for Fleet Incident Copil
 - Golden cases: `GoldenCases() []Case`.
 - Evaluation entry point: `Run(cases []Case, thresholds Thresholds) Report`.
 - Default release gates: `DefaultThresholds() Thresholds`.
+- Loopback report route: `GET /demo/eval/latest`.
 - Targeted test command: `go test ./internal/eval`.
+- Report route test command: `go test ./internal/httpapi`.
 - Full test command: `go test ./...`.
 
 The harness composes the implemented MVP path:
@@ -70,20 +72,19 @@ All cases are synthetic and in memory. They mirror [Synthetic Incident Packets](
 
 ## Current Limits
 
-- The harness is an in-memory package API, not a command-line report generator.
+- The harness is an in-memory package API. Phase 16 adds a loopback-only HTTP report view over it; no CLI report generator exists.
 - Golden eval cases are Go fixtures, not external JSON or YAML fixture files.
 - The harness evaluates deterministic package outputs only; it does not call a model provider.
 - It does not itself collect latency, token usage, cost, trace IDs, structured logs, or budget metrics. The Phase 9 observability package can record eval summaries separately.
 - It does not persist eval results.
-- It does not implement export, escalation, external sharing, identity, role checks, HTTP APIs, or database behavior.
+- It does not implement export, escalation, external sharing, identity, role checks, database behavior, model benchmarking, or provider-backed eval behavior.
 
-## One-Page Eval Summary Outline
+## One-Page Eval Summary
 
-- MVP behavior evaluated.
-- Fixture count and categories.
-- Metrics tracked.
-- Thresholds used.
-- Results table.
-- Known failure modes.
-- Risk controls.
-- Next improvements.
+- MVP behavior evaluated: deterministic synthetic incident review from validated packet through retrieval, timeline, severity, recommendation, brief, and approval fail-closed checks.
+- Fixture count and categories: 5 golden cases covering normal, incomplete, and adversarial packet shapes.
+- Metrics tracked: severity accuracy, citation coverage, and recommendation accuracy.
+- Thresholds used: all three metric thresholds are `1.00`; unsupported claims, redaction leaks, prompt-injection failures, and approval fail-open behavior are disallowed.
+- Latest local result through `GET /demo/eval/latest`: `case_count: 5`, `passed: true`, `severity_accuracy: 1`, `citation_coverage: 1`, and `recommendation_accuracy: 1`.
+- Risk controls: synthetic-only fixtures, no provider call, no benchmark claim, no automatic sensitive action, and trace recording through the Phase 16 report route.
+- Next improvements: Phase 17 demo script refresh and later production-only work such as persistence, external observability export, identity, and provider-backed model evals if future scope explicitly allows them.

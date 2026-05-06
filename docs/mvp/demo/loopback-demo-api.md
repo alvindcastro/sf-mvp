@@ -1,6 +1,6 @@
 # Loopback Demo API
 
-Phase 13 added the first runnable local transport for Fleet Incident Copilot. Phase 14 extends the same loopback server with a dry-run Slack-shaped notification preview. Phase 15 adds in-memory scoped approval retry routes for the dry-run preview. The API is loopback-only, deterministic, and backed by the existing `internal/demo` review composer, `internal/notification`, and `internal/approval`. It is a hiring-manager demo surface, not a production API.
+Phase 13 added the first runnable local transport for Fleet Incident Copilot. Phase 14 extends the same loopback server with a dry-run Slack-shaped notification preview. Phase 15 adds in-memory scoped approval retry routes for the dry-run preview. Phase 16 adds local eval, trace, and caller-supplied budget report routes. The API is loopback-only, deterministic, and backed by the existing `internal/demo` review composer, `internal/notification`, `internal/approval`, `internal/eval`, and `internal/observability`. It is a hiring-manager demo surface, not a production API.
 
 ## Phase 13 Checklist
 
@@ -15,14 +15,14 @@ Phase 13 added the first runnable local transport for Fleet Incident Copilot. Ph
 
 - Handler package: [internal/httpapi](../../../internal/httpapi).
 - Local server command: [cmd/demo-api](../../../cmd/demo-api).
-- Routes: `POST /demo/review`, `POST /demo/approvals`, `POST /demo/approvals/decisions`, and `POST /demo/notifications/slack`.
+- Routes: `POST /demo/review`, `POST /demo/approvals`, `POST /demo/approvals/decisions`, `POST /demo/notifications/slack`, `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check`.
 - Default listen address: `127.0.0.1:8080`.
 - Loopback override: `-addr 127.0.0.1:<port>`.
 - Targeted handler test: `go test ./internal/httpapi`.
 - Server wiring test: `go test ./cmd/demo-api`.
 - Full test command: `go test ./...`.
 
-The server rejects non-loopback address overrides. If port `8080` is already in use, start the demo on another loopback port. Approval state is in memory and lasts only for the current server process.
+The server rejects non-loopback address overrides. If port `8080` is already in use, start the demo on another loopback port. Approval state and trace report state are in memory and last only for the current server process.
 
 ## Verified Local Commands
 
@@ -104,6 +104,55 @@ Retrying the same dry-run notification request returns:
 - `notification_preview.sent: false`.
 - `notification_preview.network_delivery_attempted: false`.
 
+Phase 16 verified the eval, trace, and budget report routes with this fresh-server sequence:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18083
+```
+
+In a second terminal:
+
+```bash
+curl -i --max-time 5 http://127.0.0.1:18083/demo/eval/latest
+```
+
+Expected eval response highlights:
+
+- HTTP `200`.
+- `eval_report.case_count: 5`.
+- `eval_report.passed: true`.
+- `eval_report.metrics.severity_accuracy: 1`.
+- `eval_report.metrics.citation_coverage: 1`.
+- `eval_report.metrics.recommendation_accuracy: 1`.
+
+The returned eval `trace_id` can be used immediately:
+
+```bash
+curl -i --max-time 5 http://127.0.0.1:18083/demo/traces/trace-fic-syn-eval-report-20260506t160000z-001
+```
+
+Expected trace response highlights:
+
+- HTTP `200`.
+- `trace_report.ephemeral: true`.
+- `trace_report.events` includes `workflow.started`.
+- `trace_report.events` includes `eval.score_recorded`.
+
+The caller-supplied budget demo uses local token counts only:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18083/demo/budget/check \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","provider":"hosted","model":"demo-review-model","input_tokens":90,"output_tokens":20,"max_total_tokens":100}'
+```
+
+Expected budget response highlights:
+
+- HTTP `200`.
+- `budget_report.status: "budget_exceeded"`.
+- `budget_report.reason: "total token budget exceeded"`.
+- `budget_report.token_usage.total_tokens: 110`.
+
 ## Request Contract
 
 Known synthetic fixture by ID:
@@ -158,6 +207,30 @@ Successful responses include:
 
 `POST /demo/approvals/decisions` successful responses include the updated `approval_request`, including `approver` and `decision_reason`, plus append-only `audit_history`.
 
+`GET /demo/eval/latest` successful responses include:
+
+- `trace_id`.
+- `eval_report.case_count`.
+- `eval_report.passed`.
+- `eval_report.metrics`.
+- `eval_report.thresholds`.
+- `eval_report.gates`.
+
+`GET /demo/traces/{trace_id}` successful responses include:
+
+- `trace_id`.
+- `trace_report.trace_id`.
+- `trace_report.incident_id`.
+- `trace_report.events`.
+- `trace_report.ephemeral: true`.
+
+`POST /demo/budget/check` successful responses include:
+
+- `trace_id`.
+- `budget_report.status`.
+- `budget_report.reason`.
+- `budget_report.token_usage`.
+
 Error responses use the shape:
 
 ```json
@@ -185,6 +258,9 @@ Status mappings:
 | Invalid approval request or decision | `400` | `invalid_approval_request` |
 | Unknown approval request ID | `404` | `approval_request_not_found` |
 | Approval decision rewrite | `409` | `approval_already_decided` |
+| Missing trace ID | `404` | `trace_not_found` |
+| Invalid budget report request | `400` | `invalid_budget_report` |
+| Negative token usage | `400` | `invalid_token_usage` |
 
 ## Current Limits
 
@@ -193,8 +269,8 @@ Status mappings:
 - No authentication, authorization, identity, roles, tenants, or production access control exists.
 - The Slack-shaped payload is dry-run only. No Slack webhook, token, SDK, network delivery, or real external sharing exists.
 - The approval retry demo is in-memory only. It is not an identity-backed workflow or persistent approval store.
-- No local eval report or trace lookup endpoint exists; Phase 16 owns those report surfaces.
-- No live model provider, vector database, hosted RAG service, real export, real escalation, external sharing, dashboard, alerting, or production audit store exists.
+- The eval, trace, and budget report routes are in-memory demo surfaces only. They are not dashboards, monitoring, persistent logs, billing reconciliation, model benchmarking, or production audit behavior.
+- No live model provider, vector database, hosted RAG service, real export, real escalation, external sharing, dashboard, alerting, OpenTelemetry export, persistent log store, or production audit store exists.
 
 ## Red-To-Green Evidence
 
@@ -204,3 +280,5 @@ Status mappings:
 - Added failing `cmd/demo-api` tests for default loopback binding, loopback override, and non-loopback rejection.
 - Observed `go test ./cmd/demo-api` fail because `newServer` did not exist, then implemented the thin local server wiring.
 - Verified with `go test ./internal/httpapi`, `go test ./cmd/demo-api`, related package tests, `go test ./...`, `go vet ./...`, and one local `curl` command.
+- Phase 16 red: added failing `internal/httpapi` tests for eval report generation, threshold pass/fail gates, trace lookup by trace ID, redacted event fields, missing trace behavior, budget-exceeded event display, notification preview tool-call event display, and per-handler ephemeral trace state; observed `go test ./internal/httpapi` fail with `404` for the missing report routes.
+- Phase 16 green: implemented the local report routes and in-memory trace store, then verified `go test ./internal/eval ./internal/observability ./internal/httpapi` and `go test ./internal/httpapi`.

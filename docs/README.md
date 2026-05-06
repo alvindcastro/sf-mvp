@@ -36,6 +36,7 @@ Workflow behavior:
 - [Loopback Demo API](mvp/demo/loopback-demo-api.md)
 - [Dry-Run Slack-Shaped Notification Preview](mvp/demo/dry-run-slack-preview.md)
 - [Scoped Approval Demo Retry](mvp/demo/scoped-approval-retry.md)
+- [Eval And Observability Demo Reports](mvp/demo/eval-and-observability-reports.md)
 
 Quality and operations:
 

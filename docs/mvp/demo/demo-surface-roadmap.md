@@ -1,6 +1,6 @@
 # Demo Surface Roadmap
 
-Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, Phase 14 implements a dry-run Slack-shaped notification preview, and Phase 15 implements an in-memory scoped approval retry demo. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
+Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, Phase 14 implements a dry-run Slack-shaped notification preview, Phase 15 implements an in-memory scoped approval retry demo, and Phase 16 implements local eval, trace, and budget report routes. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
 
 ## Current State
 
@@ -15,6 +15,9 @@ Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager 
 - [x] The repo has a dry-run Slack-shaped notification preview package in `internal/notification`.
 - [x] The loopback demo API exposes `POST /demo/notifications/slack` for blocked and exact-approved dry-run previews.
 - [x] The loopback demo API exposes `POST /demo/approvals` and `POST /demo/approvals/decisions` for in-memory scoped approval retry.
+- [x] The loopback demo API exposes `GET /demo/eval/latest` for deterministic golden-case eval reports.
+- [x] The loopback demo API exposes `GET /demo/traces/{trace_id}` for in-memory redacted trace reports.
+- [x] The loopback demo API exposes `POST /demo/budget/check` for caller-supplied token budget demos.
 - [ ] No general CLI workflow exists yet.
 - [ ] No real Slack integration exists yet.
 - [ ] No webhook or external notification delivery exists yet.
@@ -27,8 +30,8 @@ Build the smallest local demo surface that proves the workflow without implying 
 2. [x] `POST /demo/notifications/slack` prepares a Slack-shaped notification preview in `dry_run` mode and returns `blocked` before scoped approval.
 3. [x] `POST /demo/approvals` records an in-memory human approval for the exact synthetic incident, action, and channel target.
 4. [x] Retrying `POST /demo/notifications/slack` returns an allowed `dry_run` payload without sending a network request.
-5. [ ] `GET /demo/eval/latest` returns a local deterministic eval report with scores, thresholds, and pass/fail status.
-6. [ ] `GET /demo/traces/{trace_id}` returns redacted in-memory observability events for the review, approval, notification preview, eval summary, and budget path.
+5. [x] `GET /demo/eval/latest` returns a local deterministic eval report with scores, thresholds, gates, and pass/fail status.
+6. [x] `GET /demo/traces/{trace_id}` returns redacted in-memory observability events for review, notification preview, eval, and budget paths when those events are available in the current handler process.
 
 This arc shows a concrete API call, an integration-shaped action, human approval gating, eval evidence, and observability proof while staying synthetic and local.
 
@@ -38,8 +41,8 @@ Original build order, updated as phases land:
 
 - [x] Add machine-readable synthetic demo fixtures through strict TDD.
 - [x] Add the review composer.
-- [ ] Add a local eval report renderer over existing deterministic golden cases.
-- [ ] Add demo-surface observability events for fixture load, review, approval retry, notification preview, eval report, and budget paths.
+- [x] Add a local eval report renderer over existing deterministic golden cases.
+- [x] Add demo-surface observability events for review, notification preview, eval report, and budget paths.
 - [x] Add the loopback API.
 - [x] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
 - [x] Add the dry-run Slack-shaped notification preview.
@@ -152,6 +155,66 @@ Retrying `POST /demo/notifications/slack` for `FIC-SYN-001`, `external_sharing`,
 }
 ```
 
+## Verified Eval, Trace, And Budget Reports
+
+The Phase 16 report routes are implemented through the same loopback demo server. Start a fresh local server:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18083
+```
+
+Fetch the deterministic eval report:
+
+```bash
+curl -i --max-time 5 http://127.0.0.1:18083/demo/eval/latest
+```
+
+Expected response highlights:
+
+```json
+{
+  "eval_report": {
+    "case_count": 5,
+    "passed": true,
+    "metrics": {
+      "severity_accuracy": 1,
+      "citation_coverage": 1,
+      "recommendation_accuracy": 1
+    }
+  }
+}
+```
+
+Use the returned `trace_id` to fetch the in-memory trace report:
+
+```bash
+curl -i --max-time 5 http://127.0.0.1:18083/demo/traces/trace-fic-syn-eval-report-20260506t160000z-001
+```
+
+The trace report includes `workflow.started` and `eval.score_recorded` events and is marked `ephemeral: true`.
+
+Trigger a caller-supplied budget-exceeded report:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18083/demo/budget/check \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","provider":"hosted","model":"demo-review-model","input_tokens":90,"output_tokens":20,"max_total_tokens":100}'
+```
+
+Expected response highlights:
+
+```json
+{
+  "budget_report": {
+    "status": "budget_exceeded",
+    "reason": "total token budget exceeded",
+    "token_usage": {
+      "total_tokens": 110
+    }
+  }
+}
+```
+
 ## Surface Options
 
 | Option | Demo value | Risk | Recommendation |
@@ -160,8 +223,9 @@ Retrying `POST /demo/notifications/slack` for `FIC-SYN-001`, `external_sharing`,
 | CLI command | Simple to run and test | Less impressive than an API call for integration roles | Keep as fallback if HTTP surface is too much for the next code run. |
 | Dry-run Slack preview | Shows integration judgment and approval gating | Easy to overstate as real Slack delivery | Build as preview only; no token, secret, or network request. |
 | Real Slack notification | Visually memorable | Adds secrets, network dependency, and external-data risk | Defer until explicit future scope allows live external services. |
-| Local eval report | Shows quality gates beyond happy-path demo | Could look abstract without the API path | Add after review API, or expose through the API once composer exists. |
-| Trace report endpoint | Shows observability, redaction, and budget thinking | Needs careful wording around monitoring | Add as in-memory proof, not dashboard or telemetry platform. |
+| Local eval report | Shows quality gates beyond happy-path demo | Could look abstract without the API path | Implemented through `GET /demo/eval/latest`; keep framed as deterministic local eval, not model benchmarking. |
+| Trace report endpoint | Shows observability, redaction, and budget thinking | Needs careful wording around monitoring | Implemented through `GET /demo/traces/{trace_id}` as in-memory proof, not dashboard or telemetry platform. |
+| Budget check endpoint | Shows cost-control behavior without a provider call | Could be mistaken for billing reconciliation | Implemented through `POST /demo/budget/check` with caller-supplied token counts only. |
 
 ## Phase Checklist
 
@@ -215,11 +279,13 @@ Implemented output: [Scoped Approval Demo Retry](scoped-approval-retry.md), `POS
 
 ### Phase 16: Eval And Observability Demo Reports
 
-- [ ] Add a local eval report surface that runs deterministic golden cases and returns scores, thresholds, and pass/fail state.
-- [ ] Add an in-memory trace report surface that returns redacted workflow events by trace ID.
-- [ ] Include a budget-exceeded demo path using caller-supplied token counts.
-- [ ] Keep reports local and ephemeral; do not imply dashboards, alerts, OpenTelemetry export, or persisted history.
-- [ ] Update the one-page eval summary with numbers from the latest verified run.
+- [x] Add a local eval report surface that runs deterministic golden cases and returns scores, thresholds, and pass/fail state.
+- [x] Add an in-memory trace report surface that returns redacted workflow events by trace ID.
+- [x] Include a budget-exceeded demo path using caller-supplied token counts.
+- [x] Keep reports local and ephemeral; do not imply dashboards, alerts, OpenTelemetry export, or persisted history.
+- [x] Update the one-page eval summary with numbers from the latest verified run.
+
+Implemented output: [Eval And Observability Demo Reports](eval-and-observability-reports.md), `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, `POST /demo/budget/check`, and in-memory report state inside `internal/httpapi`. The report flow is local and ephemeral; no dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, model calls, model benchmarking, database, identity, auth, or production monitoring behavior exists.
 
 ### Phase 17: Demo Script Refresh
 
@@ -235,16 +301,17 @@ Use these phrases for current and planned surfaces:
 
 - **implemented dry-run Slack-shaped notification preview**, not Slack integration.
 - **implemented in-memory scoped approval demo**, not identity-backed approval workflow.
-- **planned local eval report over deterministic synthetic cases**, not model benchmark.
-- **planned in-memory observability proof**, not monitoring platform.
+- **implemented local eval report over deterministic synthetic cases**, not model benchmark.
+- **implemented in-memory observability proof**, not monitoring platform.
+- **implemented caller-supplied budget demo**, not provider billing reconciliation.
 
 Use these phrases after strict-TDD implementation proves the behavior:
 
 - **implemented loopback-only demo API** if tests and local commands prove the endpoint.
 - **implemented dry-run Slack-shaped preview** because no network delivery exists.
 - **implemented in-memory approval gate** for scoped action callbacks.
-- **implemented local eval report** if the report is generated from `internal/eval`.
-- **implemented in-memory trace report** if it returns package-level observability events.
+- **implemented local eval report** because the report is generated from `internal/eval`.
+- **implemented in-memory trace report** because it returns package-level observability events stored by the local handler.
 
 Always keep these deferred unless future scope explicitly changes:
 

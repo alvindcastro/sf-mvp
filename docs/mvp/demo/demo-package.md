@@ -49,13 +49,13 @@ Target length: 3 to 5 minutes. The current demo can include one loopback `curl` 
 | 2:10-2:45 | `internal/approval` tests | "Export, escalation, and external sharing are gated. Pending, denied, missing, and out-of-scope approvals fail closed. This is the current agent safety boundary." |
 | 2:45-3:25 | `docs/mvp/quality/eval-plan.md` and `internal/eval` tests | "The repo includes deterministic golden eval cases for severity, citation coverage, recommendation accuracy, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior." |
 | 3:25-4:10 | `docs/mvp/quality/observability-and-cost-controls.md` and `internal/observability` tests | "The observability package records in-memory trace, retrieval, tool-call, approval, latency, token, budget, and eval events. It also defines cache candidates and model-routing notes, but it does not call a live provider or reconcile billing." |
-| 4:10-4:45 | `docs/mvp/demo/loopback-demo-api.md`, `docs/mvp/demo/dry-run-slack-preview.md`, `docs/mvp/demo/scoped-approval-retry.md`, or `curl` output | "The local API wraps the deterministic review composer, dry-run notification preview, and in-memory approval retry for a concrete walkthrough. It stays loopback-only, keeps missing or out-of-scope approvals blocked, and allows only the exact approved dry-run payload without delivery." |
+| 4:10-4:45 | `docs/mvp/demo/loopback-demo-api.md`, `docs/mvp/demo/dry-run-slack-preview.md`, `docs/mvp/demo/scoped-approval-retry.md`, `docs/mvp/demo/eval-and-observability-reports.md`, or `curl` output | "The local API wraps the deterministic review composer, dry-run notification preview, in-memory approval retry, eval report, trace report, and budget demo for a concrete walkthrough. It stays loopback-only, keeps missing or out-of-scope approvals blocked, and allows only the exact approved dry-run payload without delivery." |
 
-Optional close: "The next production step would be local eval and trace reports for the demo surface, followed later by persistence, real observability export, model-provider integration, and a reviewer UI."
+Optional close: "The next demo step is a refreshed local API walkthrough script, followed later by persistence, real observability export, model-provider integration, and a reviewer UI if future scope explicitly allows them."
 
 ## Local Demo Surface
 
-The current local walkthrough is described in [Loopback Demo API](loopback-demo-api.md), [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-preview.md), [Scoped Approval Demo Retry](scoped-approval-retry.md), and [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`, dry-run notification preview is implemented in `internal/notification`, and the loopback-only API plus in-memory approval retry routes are implemented in `internal/httpapi` with a thin `cmd/demo-api` server. Eval report and trace report endpoints are still planned.
+The current local walkthrough is described in [Loopback Demo API](loopback-demo-api.md), [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-preview.md), [Scoped Approval Demo Retry](scoped-approval-retry.md), [Eval And Observability Demo Reports](eval-and-observability-reports.md), and [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`, dry-run notification preview is implemented in `internal/notification`, deterministic evals are implemented in `internal/eval`, observability and budget controls are implemented in `internal/observability`, and the loopback-only API plus in-memory approval retry and report routes are implemented in `internal/httpapi` with a thin `cmd/demo-api` server.
 
 The target hiring-manager arc is:
 
@@ -64,9 +64,9 @@ The target hiring-manager arc is:
 - [x] Attempt the dry-run Slack-shaped notification preview and show it is blocked before scoped approval.
 - [x] Record an in-memory approval for the exact incident, action, and channel.
 - [x] Retry the dry-run notification preview and show only the approved dry-run payload is allowed.
-- [ ] Show a planned local eval report and redacted trace report.
+- [x] Show a local eval report, redacted trace report, and caller-supplied budget-exceeded demo.
 
-Until the remaining integration-shaped phases are implemented with strict TDD, the current demo remains the docs, package-level composer, loopback review API, dry-run notification preview, scoped approval retry, code, and tests walkthrough above.
+Until the Phase 17 script refresh is complete, the current demo remains the docs, package-level composer, loopback review API, dry-run notification preview, scoped approval retry, local eval and trace report routes, budget demo route, code, and tests walkthrough above.
 
 ## Architecture Diagram Checklist
 
@@ -109,20 +109,19 @@ Show trust boundaries:
 - Sensitive actions fail closed at the approval gate.
 - Logs and shareable outputs redact sensitive fields.
 
-## One-Page Eval Summary Outline
+## One-Page Eval Summary
 
 Title: **Fleet Incident Copilot MVP Eval Summary**
-
-Use this one-page structure:
 
 - **Scope evaluated:** deterministic synthetic incident review path across ingestion, retrieval, timeline, severity, brief drafting, approval gating, eval scoring, and observability recording.
 - **Fixture set:** five synthetic golden cases: hard brake, stop-arm conflict, collision signal, incomplete evidence, and adversarial transcript.
 - **Metrics:** severity accuracy, citation coverage, recommendation accuracy, unsupported-claim absence, redaction leak absence, prompt-injection resistance, and approval fail-closed behavior.
 - **Release thresholds:** default deterministic thresholds require perfect scores for severity, citation coverage, recommendation accuracy, and safety checks.
-- **Current evidence source:** `internal/eval` package behavior and targeted Go tests; fill final numeric results from the latest test or eval run used for the demo recording.
+- **Current evidence source:** `internal/eval` package behavior, targeted Go tests, and `GET /demo/eval/latest`.
+- **Latest local result:** `case_count: 5`, `passed: true`, `severity_accuracy: 1`, `citation_coverage: 1`, and `recommendation_accuracy: 1`.
 - **Risk controls:** scoped retrieval, citations, unsupported-claim checks, redaction checks, approval gating, prompt-injection fixture, and strict budget behavior in observability.
-- **Known limits:** no live LLM, no model regression suite, no external eval report, no persisted eval history, no production monitoring, and no real-world incident data.
-- **Next improvements:** add CLI or API eval report, persist historical runs, add more adversarial fixtures, introduce model-provider eval comparisons, and wire eval summaries into CI and dashboards.
+- **Known limits:** no live LLM, no model regression suite, no external eval platform, no persisted eval history, no production monitoring, and no real-world incident data.
+- **Next improvements:** refresh the demo script, persist historical runs only if future scope allows it, add more adversarial fixtures, introduce model-provider eval comparisons, and wire eval summaries into CI and dashboards only as later production work.
 
 ## Interview Talking Points
 

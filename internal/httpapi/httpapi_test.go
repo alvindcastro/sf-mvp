@@ -402,6 +402,141 @@ func TestScopedApprovalRetryDoesNotTreatExportApprovalAsNotificationApproval(t *
 	}
 }
 
+func TestEvalReportEndpointRunsGoldenCasesAndStoresTrace(t *testing.T) {
+	handler := NewHandler()
+
+	reportRecorder, reportResponse := getJSON(t, handler, "/demo/eval/latest")
+	if reportRecorder.Code != http.StatusOK {
+		t.Fatalf("eval report status = %d, want %d; body = %#v", reportRecorder.Code, http.StatusOK, reportResponse)
+	}
+	if reportResponse.TraceID != "trace-fic-syn-eval-report-20260506t160000z-001" {
+		t.Fatalf("trace_id = %q, want deterministic eval trace", reportResponse.TraceID)
+	}
+	if reportResponse.EvalReport.CaseCount != 5 {
+		t.Fatalf("eval_report.case_count = %d, want 5", reportResponse.EvalReport.CaseCount)
+	}
+	if !reportResponse.EvalReport.Passed {
+		t.Fatalf("eval_report.passed = false, want true: %#v", reportResponse.EvalReport)
+	}
+	if reportResponse.EvalReport.Metrics.SeverityAccuracy != 1 || reportResponse.EvalReport.Metrics.CitationCoverage != 1 || reportResponse.EvalReport.Metrics.RecommendationAccuracy != 1 {
+		t.Fatalf("eval_report.metrics = %#v, want perfect deterministic metrics", reportResponse.EvalReport.Metrics)
+	}
+	if reportResponse.EvalReport.Thresholds.MinSeverityAccuracy != 1 || !reportResponse.EvalReport.Thresholds.RequireRedaction {
+		t.Fatalf("eval_report.thresholds = %#v, want default strict gates", reportResponse.EvalReport.Thresholds)
+	}
+	severityGate := findEvalGate(t, reportResponse.EvalReport.Gates, "severity_accuracy")
+	if severityGate.Actual != 1 || severityGate.Threshold != 1 || !severityGate.Passed {
+		t.Fatalf("severity gate = %#v, want 1.00 against 1.00 and passed", severityGate)
+	}
+	redactionGate := findEvalGate(t, reportResponse.EvalReport.Gates, "redaction")
+	if !redactionGate.Required || !redactionGate.Passed {
+		t.Fatalf("redaction gate = %#v, want required and passed", redactionGate)
+	}
+
+	traceRecorder, traceResponse := getJSON(t, handler, "/demo/traces/"+reportResponse.TraceID)
+	if traceRecorder.Code != http.StatusOK {
+		t.Fatalf("trace status = %d, want %d; body = %#v", traceRecorder.Code, http.StatusOK, traceResponse)
+	}
+	if traceResponse.TraceReport.TraceID != reportResponse.TraceID {
+		t.Fatalf("trace_report.trace_id = %q, want eval trace", traceResponse.TraceReport.TraceID)
+	}
+	assertTraceEventTypes(t, traceResponse.TraceReport.Events, "workflow.started", "eval.score_recorded")
+	evalEvent := findTraceEvent(t, traceResponse.TraceReport.Events, "eval.score_recorded")
+	if evalEvent.Fields["passed"] != "true" {
+		t.Fatalf("eval event passed field = %q, want true", evalEvent.Fields["passed"])
+	}
+	if evalEvent.Metrics["case_count"] != 5 {
+		t.Fatalf("eval event case_count = %.0f, want 5", evalEvent.Metrics["case_count"])
+	}
+}
+
+func TestTraceReportEndpointReturnsNotificationPreviewToolCallEvent(t *testing.T) {
+	handler := NewHandler()
+	previewRecorder, previewResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`)
+	if previewRecorder.Code != http.StatusOK {
+		t.Fatalf("preview status = %d, want %d; body = %#v", previewRecorder.Code, http.StatusOK, previewResponse)
+	}
+
+	traceRecorder, traceResponse := getJSON(t, handler, "/demo/traces/"+previewResponse.TraceID)
+	if traceRecorder.Code != http.StatusOK {
+		t.Fatalf("trace status = %d, want %d; body = %#v", traceRecorder.Code, http.StatusOK, traceResponse)
+	}
+	assertTraceEventTypes(t, traceResponse.TraceReport.Events, "workflow.started", "tool_call.completed")
+	toolEvent := findTraceEvent(t, traceResponse.TraceReport.Events, "tool_call.completed")
+	if toolEvent.Fields["tool_name"] != "notification.slack.preview" {
+		t.Fatalf("tool_name = %q, want notification.slack.preview", toolEvent.Fields["tool_name"])
+	}
+	if toolEvent.Fields["delivery_mode"] != "dry_run" || toolEvent.Fields["network_delivery_attempted"] != "false" {
+		t.Fatalf("tool event fields = %#v, want dry-run no-network proof", toolEvent.Fields)
+	}
+}
+
+func TestBudgetReportEndpointUsesCallerTokenCountsAndRedactsFields(t *testing.T) {
+	handler := NewHandler()
+
+	budgetRecorder, budgetResponse := postJSON(t, handler, "/demo/budget/check", `{
+		"incident_id": "FIC-SYN-001",
+		"provider": "hosted",
+		"model": "BUS-SECRET-214-review-model",
+		"input_tokens": 90,
+		"output_tokens": 20,
+		"max_total_tokens": 100,
+		"sensitive_terms": ["BUS-SECRET-214"]
+	}`)
+	if budgetRecorder.Code != http.StatusOK {
+		t.Fatalf("budget report status = %d, want %d; body = %#v", budgetRecorder.Code, http.StatusOK, budgetResponse)
+	}
+	if budgetResponse.BudgetReport.Status != "budget_exceeded" {
+		t.Fatalf("budget status = %q, want budget_exceeded", budgetResponse.BudgetReport.Status)
+	}
+	if budgetResponse.BudgetReport.TokenUsage.TotalTokens != 110 {
+		t.Fatalf("total tokens = %d, want caller-supplied 110", budgetResponse.BudgetReport.TokenUsage.TotalTokens)
+	}
+	if budgetResponse.BudgetReport.Reason != "total token budget exceeded" {
+		t.Fatalf("budget reason = %q, want total token budget exceeded", budgetResponse.BudgetReport.Reason)
+	}
+
+	traceRecorder, traceResponse := getJSON(t, handler, "/demo/traces/"+budgetResponse.TraceID)
+	if traceRecorder.Code != http.StatusOK {
+		t.Fatalf("trace status = %d, want %d; body = %#v", traceRecorder.Code, http.StatusOK, traceResponse)
+	}
+	budgetEvent := findTraceEvent(t, traceResponse.TraceReport.Events, "budget.exceeded")
+	if budgetEvent.TokenUsage.TotalTokens != 110 {
+		t.Fatalf("budget event token usage = %#v, want caller supplied token counts", budgetEvent.TokenUsage)
+	}
+	if strings.Contains(budgetEvent.Fields["model"], "BUS-SECRET-214") {
+		t.Fatalf("budget event model leaked sensitive term: %#v", budgetEvent.Fields)
+	}
+	if !strings.Contains(budgetEvent.Fields["model"], "[REDACTED]") {
+		t.Fatalf("budget event model = %q, want redaction marker", budgetEvent.Fields["model"])
+	}
+}
+
+func TestTraceReportEndpointReturnsNotFoundForMissingTrace(t *testing.T) {
+	recorder, response := getJSON(t, NewHandler(), "/demo/traces/trace-missing")
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want %d; body = %#v", recorder.Code, http.StatusNotFound, response)
+	}
+	if response.Error.Code != "trace_not_found" {
+		t.Fatalf("error.code = %q, want trace_not_found", response.Error.Code)
+	}
+}
+
+func TestTraceReportsAreInMemoryPerHandler(t *testing.T) {
+	firstHandler := NewHandler()
+	_, reportResponse := getJSON(t, firstHandler, "/demo/eval/latest")
+
+	recorder, response := getJSON(t, NewHandler(), "/demo/traces/"+reportResponse.TraceID)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want not found from a fresh handler; body = %#v", recorder.Code, response)
+	}
+}
+
 func TestDefaultListenAddressUsesLoopbackHost(t *testing.T) {
 	host, _, err := net.SplitHostPort(DefaultListenAddress())
 	if err != nil {
@@ -420,6 +555,9 @@ type testAPIResponse struct {
 	ApprovalRequest         testApprovalRequestResponse  `json:"approval_request"`
 	AuditHistory            []testAuditEventResponse     `json:"audit_history"`
 	EvalSummary             testEvalSummaryResponse      `json:"eval_summary"`
+	EvalReport              testEvalReportResponse       `json:"eval_report"`
+	TraceReport             testTraceReportResponse      `json:"trace_report"`
+	BudgetReport            testBudgetReportResponse     `json:"budget_report"`
 	Error                   testErrorResponse            `json:"error"`
 }
 
@@ -496,6 +634,67 @@ type testEvalSummaryResponse struct {
 	Ref       string `json:"ref"`
 }
 
+type testEvalReportResponse struct {
+	CaseCount  int                     `json:"case_count"`
+	Passed     bool                    `json:"passed"`
+	Metrics    testEvalMetricsResponse `json:"metrics"`
+	Thresholds testThresholdsResponse  `json:"thresholds"`
+	Gates      []testEvalGateResponse  `json:"gates"`
+}
+
+type testEvalMetricsResponse struct {
+	SeverityAccuracy       float64 `json:"severity_accuracy"`
+	CitationCoverage       float64 `json:"citation_coverage"`
+	RecommendationAccuracy float64 `json:"recommendation_accuracy"`
+}
+
+type testThresholdsResponse struct {
+	MinSeverityAccuracy              float64 `json:"min_severity_accuracy"`
+	MinCitationCoverage              float64 `json:"min_citation_coverage"`
+	MinRecommendationAccuracy        float64 `json:"min_recommendation_accuracy"`
+	RequireNoUnsupportedClaims       bool    `json:"require_no_unsupported_claims"`
+	RequireRedaction                 bool    `json:"require_redaction"`
+	RequirePromptInjectionResistance bool    `json:"require_prompt_injection_resistance"`
+	RequireApprovalFailSafe          bool    `json:"require_approval_fail_safe"`
+}
+
+type testEvalGateResponse struct {
+	Name      string  `json:"name"`
+	Actual    float64 `json:"actual"`
+	Threshold float64 `json:"threshold"`
+	Required  bool    `json:"required"`
+	Passed    bool    `json:"passed"`
+}
+
+type testTraceReportResponse struct {
+	TraceID    string                   `json:"trace_id"`
+	IncidentID string                   `json:"incident_id"`
+	Events     []testTraceEventResponse `json:"events"`
+	Ephemeral  bool                     `json:"ephemeral"`
+}
+
+type testTraceEventResponse struct {
+	Type       string             `json:"type"`
+	TraceID    string             `json:"trace_id"`
+	IncidentID string             `json:"incident_id"`
+	Fields     map[string]string  `json:"fields"`
+	Metrics    map[string]float64 `json:"metrics"`
+	SourceIDs  []string           `json:"source_ids"`
+	TokenUsage testTokenUsage     `json:"token_usage"`
+}
+
+type testBudgetReportResponse struct {
+	Status     string         `json:"status"`
+	Reason     string         `json:"reason"`
+	TokenUsage testTokenUsage `json:"token_usage"`
+}
+
+type testTokenUsage struct {
+	InputTokens  int `json:"input_tokens"`
+	OutputTokens int `json:"output_tokens"`
+	TotalTokens  int `json:"total_tokens"`
+}
+
 type testErrorResponse struct {
 	Code string `json:"code"`
 }
@@ -517,6 +716,47 @@ func postJSON(t *testing.T, handler http.Handler, path, body string) (*httptest.
 	request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
 	handler.ServeHTTP(recorder, request)
 	return recorder, decodeResponse(t, recorder)
+}
+
+func getJSON(t *testing.T, handler http.Handler, path string) (*httptest.ResponseRecorder, testAPIResponse) {
+	t.Helper()
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, path, nil)
+	handler.ServeHTTP(recorder, request)
+	return recorder, decodeResponse(t, recorder)
+}
+
+func assertTraceEventTypes(t *testing.T, events []testTraceEventResponse, want ...string) {
+	t.Helper()
+
+	for _, wantType := range want {
+		findTraceEvent(t, events, wantType)
+	}
+}
+
+func findTraceEvent(t *testing.T, events []testTraceEventResponse, eventType string) testTraceEventResponse {
+	t.Helper()
+
+	for _, event := range events {
+		if event.Type == eventType {
+			return event
+		}
+	}
+	t.Fatalf("event type %q not found in %#v", eventType, events)
+	return testTraceEventResponse{}
+}
+
+func findEvalGate(t *testing.T, gates []testEvalGateResponse, gateName string) testEvalGateResponse {
+	t.Helper()
+
+	for _, gate := range gates {
+		if gate.Name == gateName {
+			return gate
+		}
+	}
+	t.Fatalf("eval gate %q not found in %#v", gateName, gates)
+	return testEvalGateResponse{}
 }
 
 func assertAuditTypes(t *testing.T, events []testAuditEventResponse, want ...string) {
