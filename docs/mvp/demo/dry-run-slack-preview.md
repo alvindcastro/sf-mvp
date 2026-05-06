@@ -31,14 +31,14 @@ Phase 14 adds a local dry-run notification preview for Fleet Incident Copilot. I
 }
 ```
 
-The handler composes the known synthetic review through `internal/demo`, converts its redacted brief into the notification preview input, and uses an empty in-memory approval gate for Phase 14. Because Phase 15 has not added approval mutation or retry wiring yet, the route returns a blocked preview before approval.
+The handler composes the known synthetic review through `internal/demo`, converts its redacted brief into the notification preview input, and uses the local in-memory approval gate managed by `internal/httpapi`. Without a matching approved request, the route returns a blocked preview before approval. Phase 15 documents the retry path in [Scoped Approval Demo Retry](scoped-approval-retry.md).
 
 ## Response Contract
 
 Successful dry-run preview responses return HTTP `200` with:
 
 - `trace_id`.
-- `notification_preview.status`, currently `blocked` before Phase 15 approval retry wiring.
+- `notification_preview.status`, either `blocked` before exact approval or `allowed` after exact scoped approval.
 - `notification_preview.delivery_mode: "dry_run"`.
 - `notification_preview.reason`.
 - `notification_preview.prepared_payload.channel`.
@@ -89,7 +89,7 @@ Package-level tests prove:
 - Exact scoped approval allows the dry-run preview.
 - Allowed dry-run previews still do not send, call a network sender, or mark network delivery attempted.
 
-The HTTP route intentionally creates no approval request and records no approval decision. Phase 15 owns the local approval retry demo.
+The HTTP route does not infer approval from notification text or fixture names. Approval requests and human decisions are created through `POST /demo/approvals` and `POST /demo/approvals/decisions`; retry details live in [Scoped Approval Demo Retry](scoped-approval-retry.md).
 
 ## No-Delivery Boundary
 

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"sf-mvp/internal/approval"
@@ -14,17 +15,22 @@ import (
 	"sf-mvp/internal/ingestion"
 	"sf-mvp/internal/notification"
 	"sf-mvp/internal/observability"
+	"sf-mvp/internal/severity"
 )
 
 const (
 	reviewPath                   = "/demo/review"
+	approvalRequestPath          = "/demo/approvals"
+	approvalDecisionPath         = "/demo/approvals/decisions"
 	slackNotificationPreviewPath = "/demo/notifications/slack"
 	evalSummaryRef               = "docs/mvp/quality/eval-plan.md"
 	defaultListenAddr            = "127.0.0.1:8080"
 )
 
 type Handler struct {
-	now func() time.Time
+	now          func() time.Time
+	approvalMu   sync.Mutex
+	approvalGate *approval.Gate
 }
 
 type Option func(*Handler)
@@ -33,6 +39,9 @@ func NewHandler(options ...Option) http.Handler {
 	handler := &Handler{now: defaultNow}
 	for _, option := range options {
 		option(handler)
+	}
+	if handler.approvalGate == nil {
+		handler.approvalGate = approval.NewGate(handler.now)
 	}
 	return handler
 }
@@ -55,10 +64,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case reviewPath:
 		h.handleReview(w, r)
+	case approvalRequestPath:
+		h.handleApprovalRequest(w, r)
+	case approvalDecisionPath:
+		h.handleApprovalDecision(w, r)
 	case slackNotificationPreviewPath:
 		h.handleSlackNotificationPreview(w, r)
 	default:
-		writeError(w, http.StatusNotFound, "not_found", "supported paths are POST /demo/review and POST /demo/notifications/slack")
+		writeError(w, http.StatusNotFound, "not_found", "supported paths are POST /demo/review, POST /demo/approvals, POST /demo/approvals/decisions, and POST /demo/notifications/slack")
 	}
 }
 
@@ -84,6 +97,75 @@ func (h *Handler) handleReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, apiResponseFromReview(review))
+}
+
+func (h *Handler) handleApprovalRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is POST")
+		return
+	}
+
+	var request approvalCreateRequest
+	if !decodeRequestStruct(w, r, &request) {
+		return
+	}
+	if strings.TrimSpace(request.Channel) == "" {
+		h.writeApprovalError(w, errors.New("approval channel is required"))
+		return
+	}
+	if _, err := demo.ComposeIncident(request.IncidentID, demo.Options{Now: h.now}); err != nil {
+		h.writeComposeError(w, err)
+		return
+	}
+
+	h.approvalMu.Lock()
+	approvalRequest, err := h.approvalGate.CreateRequest(approval.RequestInput{
+		IncidentID: strings.TrimSpace(request.IncidentID),
+		Action:     request.Action,
+		Scope: approval.Scope{
+			IncidentID: strings.TrimSpace(request.IncidentID),
+			TargetRef:  notification.SlackTargetRef(request.Channel),
+		},
+		Reason: request.Reason,
+	})
+	audit := h.approvalGate.AuditHistory()
+	h.approvalMu.Unlock()
+	if err != nil {
+		h.writeApprovalError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, apiResponseFromApprovalRequest(approvalRequest, audit))
+}
+
+func (h *Handler) handleApprovalDecision(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "supported method is POST")
+		return
+	}
+
+	var request approvalDecisionRequest
+	if !decodeRequestStruct(w, r, &request) {
+		return
+	}
+
+	h.approvalMu.Lock()
+	approvalRequest, err := h.approvalGate.Decide(approval.DecisionInput{
+		RequestID: request.RequestID,
+		Approver:  request.Approver,
+		Decision:  request.Decision,
+		Reason:    request.Reason,
+	})
+	audit := h.approvalGate.AuditHistory()
+	h.approvalMu.Unlock()
+	if err != nil {
+		h.writeApprovalError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, apiResponseFromApprovalRequest(approvalRequest, audit))
 }
 
 func (h *Handler) handleSlackNotificationPreview(w http.ResponseWriter, r *http.Request) {
@@ -114,21 +196,24 @@ func (h *Handler) handleSlackNotificationPreview(w http.ResponseWriter, r *http.
 		writeError(w, http.StatusBadRequest, "invalid_notification_preview", "notification preview could not start a trace")
 		return
 	}
+	h.approvalMu.Lock()
 	preview, err := notification.PreviewSlack(notification.PreviewRequest{
 		IncidentID:   review.IncidentID,
 		Channel:      request.Channel,
 		DeliveryMode: request.DeliveryMode,
 		Brief:        briefResultFromReview(review),
-		Gate:         approval.NewGate(h.now),
+		Gate:         h.approvalGate,
 		Recorder:     recorder,
 		Workflow:     workflow,
 	})
+	audit := h.approvalGate.AuditHistory()
+	h.approvalMu.Unlock()
 	if err != nil {
 		h.writeNotificationError(w, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, apiResponseFromNotificationPreview(workflow.TraceID, preview, recorder.Events()))
+	writeJSON(w, http.StatusOK, apiResponseFromNotificationPreview(workflow.TraceID, preview, recorder.Events(), audit))
 }
 
 func decodeRequestObject(w http.ResponseWriter, r *http.Request) (map[string]json.RawMessage, bool) {
@@ -215,8 +300,33 @@ func (h *Handler) writeNotificationError(w http.ResponseWriter, err error) {
 	}
 }
 
+func (h *Handler) writeApprovalError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, approval.ErrRequestAlreadyDecided):
+		writeError(w, http.StatusConflict, "approval_already_decided", "approval request already has a final decision")
+	case strings.Contains(err.Error(), "not found"):
+		writeError(w, http.StatusNotFound, "approval_request_not_found", "approval request was not found")
+	default:
+		writeError(w, http.StatusBadRequest, "invalid_approval_request", "approval request could not be processed")
+	}
+}
+
 type incidentReviewRequest struct {
 	IncidentID string `json:"incident_id"`
+}
+
+type approvalCreateRequest struct {
+	IncidentID string                   `json:"incident_id"`
+	Action     severity.SensitiveAction `json:"action"`
+	Channel    string                   `json:"channel"`
+	Reason     string                   `json:"reason"`
+}
+
+type approvalDecisionRequest struct {
+	RequestID string            `json:"request_id"`
+	Approver  string            `json:"approver"`
+	Decision  approval.Decision `json:"decision"`
+	Reason    string            `json:"reason"`
 }
 
 type slackPreviewRequest struct {
@@ -301,6 +411,28 @@ type observabilityEventStatus struct {
 	TraceID string `json:"trace_id"`
 }
 
+type approvalRequestResponse struct {
+	ID             string `json:"id"`
+	IncidentID     string `json:"incident_id"`
+	Action         string `json:"action"`
+	TargetRef      string `json:"target_ref"`
+	Decision       string `json:"decision"`
+	Reason         string `json:"reason"`
+	Approver       string `json:"approver,omitempty"`
+	DecisionReason string `json:"decision_reason,omitempty"`
+}
+
+type auditEventResponse struct {
+	Type       string `json:"type"`
+	RequestID  string `json:"request_id,omitempty"`
+	IncidentID string `json:"incident_id,omitempty"`
+	Action     string `json:"action,omitempty"`
+	TargetRef  string `json:"target_ref,omitempty"`
+	Actor      string `json:"actor,omitempty"`
+	Decision   string `json:"decision,omitempty"`
+	Reason     string `json:"reason,omitempty"`
+}
+
 type evalSummaryResponse struct {
 	Available bool   `json:"available"`
 	Ref       string `json:"ref"`
@@ -323,6 +455,8 @@ type apiResponse struct {
 	Review                  *reviewResponse              `json:"review,omitempty"`
 	ApprovalRequiredActions []approvalActionResponse     `json:"approval_required_actions,omitempty"`
 	NotificationPreview     *notificationPreviewResponse `json:"notification_preview,omitempty"`
+	ApprovalRequest         *approvalRequestResponse     `json:"approval_request,omitempty"`
+	AuditHistory            []auditEventResponse         `json:"audit_history,omitempty"`
 	EvalSummary             *evalSummaryResponse         `json:"eval_summary,omitempty"`
 	Error                   *errorResponse               `json:"error,omitempty"`
 }
@@ -345,7 +479,7 @@ func apiResponseFromReview(review demo.ReviewResult) apiResponse {
 	}
 }
 
-func apiResponseFromNotificationPreview(traceID string, preview notification.PreviewResult, events []observability.Event) apiResponse {
+func apiResponseFromNotificationPreview(traceID string, preview notification.PreviewResult, events []observability.Event, audit []approval.AuditEvent) apiResponse {
 	return apiResponse{
 		TraceID: traceID,
 		NotificationPreview: &notificationPreviewResponse{
@@ -358,6 +492,14 @@ func apiResponseFromNotificationPreview(traceID string, preview notification.Pre
 			NetworkDeliveryAttempted: preview.NetworkDeliveryAttempted,
 			ObservabilityEvents:      observabilityEventStatuses(events),
 		},
+		AuditHistory: auditEventResponses(audit),
+	}
+}
+
+func apiResponseFromApprovalRequest(request approval.Request, audit []approval.AuditEvent) apiResponse {
+	return apiResponse{
+		ApprovalRequest: approvalRequestResponseFromApproval(request),
+		AuditHistory:    auditEventResponses(audit),
 	}
 }
 
@@ -502,6 +644,36 @@ func observabilityEventStatuses(events []observability.Event) []observabilityEve
 		responses[i] = observabilityEventStatus{
 			Type:    string(event.Type),
 			TraceID: event.TraceID,
+		}
+	}
+	return responses
+}
+
+func approvalRequestResponseFromApproval(request approval.Request) *approvalRequestResponse {
+	return &approvalRequestResponse{
+		ID:             request.ID,
+		IncidentID:     request.IncidentID,
+		Action:         string(request.Action),
+		TargetRef:      request.Scope.TargetRef,
+		Decision:       string(request.Decision),
+		Reason:         request.Reason,
+		Approver:       request.Approver,
+		DecisionReason: request.DecisionReason,
+	}
+}
+
+func auditEventResponses(events []approval.AuditEvent) []auditEventResponse {
+	responses := make([]auditEventResponse, len(events))
+	for i, event := range events {
+		responses[i] = auditEventResponse{
+			Type:       string(event.Type),
+			RequestID:  event.RequestID,
+			IncidentID: event.IncidentID,
+			Action:     string(event.Action),
+			TargetRef:  event.Scope.TargetRef,
+			Actor:      event.Actor,
+			Decision:   string(event.Decision),
+			Reason:     event.Reason,
 		}
 	}
 	return responses

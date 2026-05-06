@@ -18,7 +18,7 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 - [internal/observability](../internal/observability): records in-memory workflow events, redaction, token, budget, cache, and routing signals.
 - [internal/demo](../internal/demo): loads machine-readable synthetic demo fixtures and composes deterministic in-memory review results.
 - [internal/notification](../internal/notification): prepares dry-run Slack-shaped notification previews from redacted briefs and gates them as external sharing.
-- [internal/httpapi](../internal/httpapi): exposes the local `POST /demo/review` and `POST /demo/notifications/slack` handlers.
+- [internal/httpapi](../internal/httpapi): exposes the local `POST /demo/review`, `POST /demo/approvals`, `POST /demo/approvals/decisions`, and `POST /demo/notifications/slack` handlers.
 - [cmd/demo-api](../cmd/demo-api): starts the loopback-only local demo server.
 
 ## Design Principles
@@ -54,7 +54,7 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 
 `internal/notification` owns dry-run Slack-shaped preview behavior. It accepts a redacted brief, requires `delivery_mode: "dry_run"`, gates preview generation through `internal/approval` as `external_sharing`, records a redacted observability tool-call event, and must not introduce Slack SDKs, tokens, webhook URLs, environment secrets, network senders, or real delivery.
 
-`internal/httpapi` owns local transport behavior for the Phase 13 review route and Phase 14 notification preview route. It parses request JSON, delegates packet validation to `internal/ingestion`, delegates review composition to `internal/demo`, delegates preview generation to `internal/notification`, maps known errors to deterministic JSON responses, and must stay loopback-only, stateless, and free of production auth, persistence, Slack delivery, webhook, model-provider, export, escalation, or real external-sharing behavior.
+`internal/httpapi` owns local transport behavior for the Phase 13 review route, Phase 14 notification preview route, and Phase 15 scoped approval retry routes. It parses request JSON, delegates packet validation to `internal/ingestion`, delegates review composition to `internal/demo`, delegates preview generation to `internal/notification`, reuses an in-memory `internal/approval` gate for local retry state, maps known errors to deterministic JSON responses, and must stay loopback-only and free of production auth, persistence, Slack delivery, webhook, model-provider, export, escalation, or real external-sharing behavior.
 
 `cmd/demo-api` is thin server wiring. It should keep the default listen address on `127.0.0.1:8080`, allow only loopback overrides, and avoid business logic.
 

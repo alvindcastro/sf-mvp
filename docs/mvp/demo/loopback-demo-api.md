@@ -1,6 +1,6 @@
 # Loopback Demo API
 
-Phase 13 added the first runnable local transport for Fleet Incident Copilot. Phase 14 extends the same loopback server with a dry-run Slack-shaped notification preview. The API is loopback-only, stateless, deterministic, and backed by the existing `internal/demo` review composer plus `internal/notification`. It is a hiring-manager demo surface, not a production API.
+Phase 13 added the first runnable local transport for Fleet Incident Copilot. Phase 14 extends the same loopback server with a dry-run Slack-shaped notification preview. Phase 15 adds in-memory scoped approval retry routes for the dry-run preview. The API is loopback-only, deterministic, and backed by the existing `internal/demo` review composer, `internal/notification`, and `internal/approval`. It is a hiring-manager demo surface, not a production API.
 
 ## Phase 13 Checklist
 
@@ -15,14 +15,14 @@ Phase 13 added the first runnable local transport for Fleet Incident Copilot. Ph
 
 - Handler package: [internal/httpapi](../../../internal/httpapi).
 - Local server command: [cmd/demo-api](../../../cmd/demo-api).
-- Routes: `POST /demo/review` and `POST /demo/notifications/slack`.
+- Routes: `POST /demo/review`, `POST /demo/approvals`, `POST /demo/approvals/decisions`, and `POST /demo/notifications/slack`.
 - Default listen address: `127.0.0.1:8080`.
 - Loopback override: `-addr 127.0.0.1:<port>`.
 - Targeted handler test: `go test ./internal/httpapi`.
 - Server wiring test: `go test ./cmd/demo-api`.
 - Full test command: `go test ./...`.
 
-The server rejects non-loopback address overrides. If port `8080` is already in use, start the demo on another loopback port.
+The server rejects non-loopback address overrides. If port `8080` is already in use, start the demo on another loopback port. Approval state is in memory and lasts only for the current server process.
 
 ## Verified Local Commands
 
@@ -68,9 +68,39 @@ curl -i --max-time 5 -X POST http://127.0.0.1:18081/demo/notifications/slack \
 Expected response highlights:
 
 - HTTP `200`.
-- `notification_preview.status: "blocked"`.
+- `notification_preview.status: "blocked"` before approval.
 - `notification_preview.delivery_mode: "dry_run"`.
 - `notification_preview.prepared_payload.channel: "#fleet-safety"`.
+- `notification_preview.sent: false`.
+- `notification_preview.network_delivery_attempted: false`.
+
+Phase 15 verified the scoped approval retry route with this fresh-server sequence:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18082
+```
+
+In a second terminal:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18082/demo/approvals \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","action":"external_sharing","channel":"#fleet-safety","reason":"operator requested dry-run preview"}'
+```
+
+Then:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18082/demo/approvals/decisions \
+  -H "Content-Type: application/json" \
+  -d '{"request_id":"approval-001","approver":"fleet-safety-lead","decision":"approved","reason":"redacted brief approved for #fleet-safety dry-run"}'
+```
+
+Retrying the same dry-run notification request returns:
+
+- HTTP `200`.
+- `notification_preview.status: "allowed"`.
+- `notification_preview.approval_request_id: "approval-001"`.
 - `notification_preview.sent: false`.
 - `notification_preview.network_delivery_attempted: false`.
 
@@ -114,6 +144,19 @@ Successful responses include:
 - `notification_preview.sent`.
 - `notification_preview.network_delivery_attempted`.
 - `notification_preview.observability_events`.
+- `audit_history`.
+
+`POST /demo/approvals` successful responses include:
+
+- `approval_request.id`.
+- `approval_request.incident_id`.
+- `approval_request.action`.
+- `approval_request.target_ref`.
+- `approval_request.decision`.
+- `approval_request.reason`.
+- `audit_history`.
+
+`POST /demo/approvals/decisions` successful responses include the updated `approval_request`, including `approver` and `decision_reason`, plus append-only `audit_history`.
 
 Error responses use the shape:
 
@@ -139,6 +182,9 @@ Status mappings:
 | Non-synthetic packet or incident ID | `422` | `non_synthetic_input` |
 | Required evidence missing | `422` | `missing_evidence` |
 | Non-dry-run notification mode | `400` | `dry_run_required` |
+| Invalid approval request or decision | `400` | `invalid_approval_request` |
+| Unknown approval request ID | `404` | `approval_request_not_found` |
+| Approval decision rewrite | `409` | `approval_already_decided` |
 
 ## Current Limits
 
@@ -146,7 +192,7 @@ Status mappings:
 - State remains in memory; no database or persistence is added.
 - No authentication, authorization, identity, roles, tenants, or production access control exists.
 - The Slack-shaped payload is dry-run only. No Slack webhook, token, SDK, network delivery, or real external sharing exists.
-- No approval retry demo exists; Phase 15 owns local approval retry wiring.
+- The approval retry demo is in-memory only. It is not an identity-backed workflow or persistent approval store.
 - No local eval report or trace lookup endpoint exists; Phase 16 owns those report surfaces.
 - No live model provider, vector database, hosted RAG service, real export, real escalation, external sharing, dashboard, alerting, or production audit store exists.
 

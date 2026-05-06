@@ -119,28 +119,47 @@ Fail-closed behavior is intentional for shareable outputs.
 {"incident_id":"FIC-SYN-001","channel":"#fleet-safety","delivery_mode":"dry_run"}
 ```
 
+`POST /demo/approvals` accepts a known synthetic incident ID, sensitive action, target channel, and human reason:
+
+```json
+{"incident_id":"FIC-SYN-001","action":"external_sharing","channel":"#fleet-safety","reason":"operator requested dry-run preview"}
+```
+
+`POST /demo/approvals/decisions` records the human decision for an existing request:
+
+```json
+{"request_id":"approval-001","approver":"fleet-safety-lead","decision":"approved","reason":"redacted brief approved for #fleet-safety dry-run"}
+```
+
 Common response codes:
 
 - `400 malformed_json`: the request body is not valid JSON.
 - `400 dry_run_required`: notification preview requests must use `delivery_mode: "dry_run"`.
+- `400 invalid_approval_request`: the approval request or decision payload is incomplete or unsupported.
+- `404 approval_request_not_found`: the decision route used an unknown approval request ID.
 - `404 incident_not_found`: the synthetic incident ID is not in the demo fixture set.
 - `405 method_not_allowed`: use `POST`.
+- `409 approval_already_decided`: final approval decisions cannot be rewritten.
 - `422 non_synthetic_input`: `synthetic_record` is false or the incident ID does not start with `FIC-SYN-`.
 - `422 missing_evidence`: the underlying composer failed closed rather than returning a partial review.
 
 ## Dry-Run Notification Preview Is Blocked
 
-Blocked notification preview is expected before Phase 15 approval retry wiring. Phase 14 uses an empty in-memory approval gate at the HTTP route, so a valid dry-run request returns a prepared payload with `notification_preview.status: "blocked"`.
+Blocked notification preview is expected before exact scoped approval. Phase 15 keeps approval state in memory for one `cmd/demo-api` process, so restarting the server clears approval requests.
 
 Check:
 
 - `delivery_mode` is exactly `dry_run`.
 - The incident ID exists in the synthetic fixture set.
+- The approval request action is exactly `external_sharing`.
+- The approval request target ref is exactly `slack:<channel>`.
+- The decision is `approved`, not `pending` or `denied`.
+- The request was created in the same local server process as the retry.
 - The response still has `prepared_payload`.
 - `sent` is `false`.
 - `network_delivery_attempted` is `false`.
 
-Do not add Slack tokens, webhook URLs, SDKs, or network calls to fix a blocked preview. Scoped approval retry belongs to Phase 15.
+Do not add Slack tokens, webhook URLs, SDKs, or network calls to fix a blocked preview. Use `POST /demo/approvals` and `POST /demo/approvals/decisions` for the local approval retry demo.
 
 ## Sensitive Action Is Blocked
 

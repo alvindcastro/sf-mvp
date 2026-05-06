@@ -214,6 +214,194 @@ func TestSlackNotificationPreviewEndpointRequiresDryRunMode(t *testing.T) {
 	}
 }
 
+func TestScopedApprovalRetryCreatesRequestAndBlocksDryRunWhilePending(t *testing.T) {
+	handler := NewHandler()
+
+	createRecorder, createResponse := postJSON(t, handler, "/demo/approvals", `{
+		"incident_id": "FIC-SYN-001",
+		"action": "external_sharing",
+		"channel": "#fleet-safety",
+		"reason": "operator wants to preview the redacted brief"
+	}`)
+	if createRecorder.Code != http.StatusCreated {
+		t.Fatalf("create approval status = %d, want %d; body = %#v", createRecorder.Code, http.StatusCreated, createResponse)
+	}
+	if createResponse.ApprovalRequest.ID == "" {
+		t.Fatal("approval_request.id is empty")
+	}
+	if createResponse.ApprovalRequest.Decision != "pending" {
+		t.Fatalf("approval decision = %q, want pending", createResponse.ApprovalRequest.Decision)
+	}
+	if createResponse.ApprovalRequest.TargetRef != "slack:#fleet-safety" {
+		t.Fatalf("target_ref = %q, want slack:#fleet-safety", createResponse.ApprovalRequest.TargetRef)
+	}
+	assertAuditTypes(t, createResponse.AuditHistory, "approval.requested")
+
+	previewRecorder, previewResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`)
+	if previewRecorder.Code != http.StatusOK {
+		t.Fatalf("preview status = %d, want %d; body = %#v", previewRecorder.Code, http.StatusOK, previewResponse)
+	}
+	if previewResponse.NotificationPreview.Status != "blocked" {
+		t.Fatalf("notification status = %q, want blocked", previewResponse.NotificationPreview.Status)
+	}
+	if previewResponse.NotificationPreview.ApprovalRequestID != createResponse.ApprovalRequest.ID {
+		t.Fatalf("approval request id = %q, want %q", previewResponse.NotificationPreview.ApprovalRequestID, createResponse.ApprovalRequest.ID)
+	}
+	if !strings.Contains(previewResponse.NotificationPreview.Reason, "pending") {
+		t.Fatalf("reason = %q, want pending approval explanation", previewResponse.NotificationPreview.Reason)
+	}
+	if previewResponse.NotificationPreview.Sent || previewResponse.NotificationPreview.NetworkDeliveryAttempted {
+		t.Fatalf("notification preview = %#v, want no send and no network delivery", previewResponse.NotificationPreview)
+	}
+	assertAuditTypes(t, previewResponse.AuditHistory, "approval.requested", "sensitive_action.blocked")
+}
+
+func TestScopedApprovalRetryBlocksAfterDeniedDecision(t *testing.T) {
+	handler := NewHandler()
+	_, createResponse := postJSON(t, handler, "/demo/approvals", `{
+		"incident_id": "FIC-SYN-001",
+		"action": "external_sharing",
+		"channel": "#fleet-safety",
+		"reason": "operator wants to preview the redacted brief"
+	}`)
+
+	decisionRecorder, decisionResponse := postJSON(t, handler, "/demo/approvals/decisions", `{
+		"request_id": "`+createResponse.ApprovalRequest.ID+`",
+		"approver": "fleet-safety-lead",
+		"decision": "denied",
+		"reason": "redacted brief needs another review"
+	}`)
+	if decisionRecorder.Code != http.StatusOK {
+		t.Fatalf("decision status = %d, want %d; body = %#v", decisionRecorder.Code, http.StatusOK, decisionResponse)
+	}
+	if decisionResponse.ApprovalRequest.Decision != "denied" {
+		t.Fatalf("approval decision = %q, want denied", decisionResponse.ApprovalRequest.Decision)
+	}
+	assertAuditTypes(t, decisionResponse.AuditHistory, "approval.requested", "approval.decided")
+
+	previewRecorder, previewResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`)
+	if previewRecorder.Code != http.StatusOK {
+		t.Fatalf("preview status = %d, want %d; body = %#v", previewRecorder.Code, http.StatusOK, previewResponse)
+	}
+	if previewResponse.NotificationPreview.Status != "blocked" {
+		t.Fatalf("notification status = %q, want blocked", previewResponse.NotificationPreview.Status)
+	}
+	if !strings.Contains(previewResponse.NotificationPreview.Reason, "denied") {
+		t.Fatalf("reason = %q, want denied approval explanation", previewResponse.NotificationPreview.Reason)
+	}
+	if previewResponse.NotificationPreview.ApprovalRequestID != createResponse.ApprovalRequest.ID {
+		t.Fatalf("approval request id = %q, want %q", previewResponse.NotificationPreview.ApprovalRequestID, createResponse.ApprovalRequest.ID)
+	}
+	assertAuditTypes(t, previewResponse.AuditHistory, "approval.requested", "approval.decided", "sensitive_action.blocked")
+}
+
+func TestScopedApprovalRetryAllowsExactApprovedDryRunOnly(t *testing.T) {
+	handler := NewHandler()
+	_, createResponse := postJSON(t, handler, "/demo/approvals", `{
+		"incident_id": "FIC-SYN-001",
+		"action": "external_sharing",
+		"channel": "#fleet-safety",
+		"reason": "operator wants to preview the redacted brief"
+	}`)
+	_, decisionResponse := postJSON(t, handler, "/demo/approvals/decisions", `{
+		"request_id": "`+createResponse.ApprovalRequest.ID+`",
+		"approver": "fleet-safety-lead",
+		"decision": "approved",
+		"reason": "redacted brief is approved for this dry-run channel"
+	}`)
+	if decisionResponse.ApprovalRequest.Decision != "approved" {
+		t.Fatalf("approval decision = %q, want approved", decisionResponse.ApprovalRequest.Decision)
+	}
+
+	allowedRecorder, allowedResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`)
+	if allowedRecorder.Code != http.StatusOK {
+		t.Fatalf("allowed preview status = %d, want %d; body = %#v", allowedRecorder.Code, http.StatusOK, allowedResponse)
+	}
+	if allowedResponse.NotificationPreview.Status != "allowed" {
+		t.Fatalf("notification status = %q, want allowed", allowedResponse.NotificationPreview.Status)
+	}
+	if allowedResponse.NotificationPreview.ApprovalRequestID != createResponse.ApprovalRequest.ID {
+		t.Fatalf("approval request id = %q, want %q", allowedResponse.NotificationPreview.ApprovalRequestID, createResponse.ApprovalRequest.ID)
+	}
+	if allowedResponse.NotificationPreview.Sent || allowedResponse.NotificationPreview.NetworkDeliveryAttempted {
+		t.Fatalf("notification preview = %#v, want allowed dry-run without network delivery", allowedResponse.NotificationPreview)
+	}
+	assertAuditTypes(t, allowedResponse.AuditHistory, "approval.requested", "approval.decided", "sensitive_action.allowed")
+
+	outOfChannelRecorder, outOfChannelResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#dispatch-preview",
+		"delivery_mode": "dry_run"
+	}`)
+	if outOfChannelRecorder.Code != http.StatusOK {
+		t.Fatalf("out-of-channel status = %d, want %d; body = %#v", outOfChannelRecorder.Code, http.StatusOK, outOfChannelResponse)
+	}
+	if outOfChannelResponse.NotificationPreview.Status != "blocked" {
+		t.Fatalf("out-of-channel status = %q, want blocked", outOfChannelResponse.NotificationPreview.Status)
+	}
+	if outOfChannelResponse.NotificationPreview.ApprovalRequestID == createResponse.ApprovalRequest.ID {
+		t.Fatalf("out-of-channel preview reused request id %q", outOfChannelResponse.NotificationPreview.ApprovalRequestID)
+	}
+
+	outOfIncidentRecorder, outOfIncidentResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-002",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`)
+	if outOfIncidentRecorder.Code != http.StatusOK {
+		t.Fatalf("out-of-incident status = %d, want %d; body = %#v", outOfIncidentRecorder.Code, http.StatusOK, outOfIncidentResponse)
+	}
+	if outOfIncidentResponse.NotificationPreview.Status != "blocked" {
+		t.Fatalf("out-of-incident status = %q, want blocked", outOfIncidentResponse.NotificationPreview.Status)
+	}
+}
+
+func TestScopedApprovalRetryDoesNotTreatExportApprovalAsNotificationApproval(t *testing.T) {
+	handler := NewHandler()
+	_, createResponse := postJSON(t, handler, "/demo/approvals", `{
+		"incident_id": "FIC-SYN-001",
+		"action": "export",
+		"channel": "#fleet-safety",
+		"reason": "operator approved only export-shaped action"
+	}`)
+	_, decisionResponse := postJSON(t, handler, "/demo/approvals/decisions", `{
+		"request_id": "`+createResponse.ApprovalRequest.ID+`",
+		"approver": "fleet-safety-lead",
+		"decision": "approved",
+		"reason": "export approval is not notification approval"
+	}`)
+	if decisionResponse.ApprovalRequest.Action != "export" || decisionResponse.ApprovalRequest.Decision != "approved" {
+		t.Fatalf("approval request = %#v, want approved export", decisionResponse.ApprovalRequest)
+	}
+
+	previewRecorder, previewResponse := postJSON(t, handler, "/demo/notifications/slack", `{
+		"incident_id": "FIC-SYN-001",
+		"channel": "#fleet-safety",
+		"delivery_mode": "dry_run"
+	}`)
+	if previewRecorder.Code != http.StatusOK {
+		t.Fatalf("preview status = %d, want %d; body = %#v", previewRecorder.Code, http.StatusOK, previewResponse)
+	}
+	if previewResponse.NotificationPreview.Status != "blocked" {
+		t.Fatalf("notification status = %q, want blocked", previewResponse.NotificationPreview.Status)
+	}
+	if previewResponse.NotificationPreview.ApprovalRequestID == createResponse.ApprovalRequest.ID {
+		t.Fatalf("notification preview reused out-of-action approval request %q", previewResponse.NotificationPreview.ApprovalRequestID)
+	}
+}
+
 func TestDefaultListenAddressUsesLoopbackHost(t *testing.T) {
 	host, _, err := net.SplitHostPort(DefaultListenAddress())
 	if err != nil {
@@ -229,6 +417,8 @@ type testAPIResponse struct {
 	Review                  testReviewResponse           `json:"review"`
 	ApprovalRequiredActions []testApprovalActionResponse `json:"approval_required_actions"`
 	NotificationPreview     testNotificationPreview      `json:"notification_preview"`
+	ApprovalRequest         testApprovalRequestResponse  `json:"approval_request"`
+	AuditHistory            []testAuditEventResponse     `json:"audit_history"`
 	EvalSummary             testEvalSummaryResponse      `json:"eval_summary"`
 	Error                   testErrorResponse            `json:"error"`
 }
@@ -253,10 +443,32 @@ type testApprovalActionResponse struct {
 	Approved bool   `json:"approved"`
 }
 
+type testApprovalRequestResponse struct {
+	ID             string `json:"id"`
+	IncidentID     string `json:"incident_id"`
+	Action         string `json:"action"`
+	TargetRef      string `json:"target_ref"`
+	Decision       string `json:"decision"`
+	Approver       string `json:"approver"`
+	DecisionReason string `json:"decision_reason"`
+}
+
+type testAuditEventResponse struct {
+	Type       string `json:"type"`
+	RequestID  string `json:"request_id"`
+	IncidentID string `json:"incident_id"`
+	Action     string `json:"action"`
+	TargetRef  string `json:"target_ref"`
+	Actor      string `json:"actor"`
+	Decision   string `json:"decision"`
+	Reason     string `json:"reason"`
+}
+
 type testNotificationPreview struct {
 	Status                   string                     `json:"status"`
 	DeliveryMode             string                     `json:"delivery_mode"`
 	Reason                   string                     `json:"reason"`
+	ApprovalRequestID        string                     `json:"approval_request_id"`
 	PreparedPayload          testSlackPayload           `json:"prepared_payload"`
 	Sent                     bool                       `json:"sent"`
 	NetworkDeliveryAttempted bool                       `json:"network_delivery_attempted"`
@@ -296,6 +508,27 @@ func decodeResponse(t *testing.T, recorder *httptest.ResponseRecorder) testAPIRe
 		t.Fatalf("response JSON did not decode: %v\nbody: %s", err, recorder.Body.String())
 	}
 	return response
+}
+
+func postJSON(t *testing.T, handler http.Handler, path, body string) (*httptest.ResponseRecorder, testAPIResponse) {
+	t.Helper()
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+	handler.ServeHTTP(recorder, request)
+	return recorder, decodeResponse(t, recorder)
+}
+
+func assertAuditTypes(t *testing.T, events []testAuditEventResponse, want ...string) {
+	t.Helper()
+	if len(events) != len(want) {
+		t.Fatalf("audit history length = %d, want %d: %#v", len(events), len(want), events)
+	}
+	for i, event := range events {
+		if event.Type != want[i] {
+			t.Fatalf("audit[%d].type = %q, want %q; history = %#v", i, event.Type, want[i], events)
+		}
+	}
 }
 
 func syntheticPacketJSON() string {

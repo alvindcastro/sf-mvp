@@ -258,7 +258,7 @@ Goal: show an integration-shaped action while proving external sharing fails clo
 - [x] Record a redacted tool-call observability event for preview generation.
 - [x] Prove no Slack token, webhook URL, SDK, secret, or network request is used.
 
-Output: [Dry-Run Slack-Shaped Notification Preview](../demo/dry-run-slack-preview.md), the Go package [internal/notification](../../../internal/notification), and the route `POST /demo/notifications/slack` in [internal/httpapi](../../../internal/httpapi). Phase 14 is complete as of 2026-05-06 and added dry-run Slack-shaped payload generation plus a loopback-only blocked preview route. No Slack SDK, token, webhook URL, secret, network request, real Slack delivery, approval retry route, persistent approval store, or external-sharing integration exists yet.
+Output: [Dry-Run Slack-Shaped Notification Preview](../demo/dry-run-slack-preview.md), the Go package [internal/notification](../../../internal/notification), and the route `POST /demo/notifications/slack` in [internal/httpapi](../../../internal/httpapi). Phase 14 is complete as of 2026-05-06 and added dry-run Slack-shaped payload generation plus a loopback-only blocked preview route. No Slack SDK, token, webhook URL, secret, network request, real Slack delivery, persistent approval store, or external-sharing integration exists yet.
 
 Code-task prompt:
 
@@ -268,14 +268,14 @@ Code-task prompt:
 
 Goal: make the approval gate visible in the demo by showing blocked and allowed dry-run attempts.
 
-- [ ] Add a local approval request path for one synthetic incident, action, and target channel.
-- [ ] Show missing, pending, denied, and out-of-scope approvals fail closed.
-- [ ] Show approved dry-run notification preview succeeds only for the exact incident, action, and channel.
-- [ ] Preserve append-only in-memory audit history.
-- [ ] Keep approvals human-supplied and deterministic.
-- [ ] Do not infer approval from model output, notification text, fixture names, or test setup shortcuts.
+- [x] Add a local approval request path for one synthetic incident, action, and target channel.
+- [x] Show missing, pending, denied, and out-of-scope approvals fail closed.
+- [x] Show approved dry-run notification preview succeeds only for the exact incident, action, and channel.
+- [x] Preserve append-only in-memory audit history.
+- [x] Keep approvals human-supplied and deterministic.
+- [x] Do not infer approval from model output, notification text, fixture names, or test setup shortcuts.
 
-Planned output: local approval demo route or command integration, plus documentation updates after implementation exists.
+Output: [Scoped Approval Demo Retry](../demo/scoped-approval-retry.md), the routes `POST /demo/approvals` and `POST /demo/approvals/decisions` in [internal/httpapi](../../../internal/httpapi), and retry behavior through `POST /demo/notifications/slack`. Phase 15 is complete as of 2026-05-06 and added in-memory, loopback-only scoped approval retry. No persistent approval store, identity, auth, roles, Slack delivery, webhook, real external-sharing integration, or production audit behavior exists yet.
 
 Code-task prompt:
 

@@ -67,7 +67,7 @@ internal/eval          scores deterministic golden cases
 internal/observability records in-memory workflow events and budget signals
 ```
 
-Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route and Phase 14 dry-run notification route; `internal/notification` owns the dry-run Slack-shaped preview; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
+Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route, Phase 14 dry-run notification route, and Phase 15 approval retry routes; `internal/notification` owns the dry-run Slack-shaped preview; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
 
 ## How To Run The Loopback Demo API
 
@@ -100,6 +100,24 @@ curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/notifications/slack \
 ```
 
 The preview response should be blocked before scoped approval, include a prepared Slack-shaped payload, and report `sent: false` plus `network_delivery_attempted: false`.
+
+Create an in-memory scoped approval request:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/approvals \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","action":"external_sharing","channel":"#fleet-safety","reason":"operator requested dry-run preview"}'
+```
+
+On a fresh server process, approve the deterministic request ID:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/approvals/decisions \
+  -H "Content-Type: application/json" \
+  -d '{"request_id":"approval-001","approver":"fleet-safety-lead","decision":"approved","reason":"redacted brief approved for #fleet-safety dry-run"}'
+```
+
+Retry the dry-run notification preview. It should return `notification_preview.status: "allowed"` only for the same incident, `external_sharing` action, and `#fleet-safety` channel, while still reporting `sent: false` and `network_delivery_attempted: false`.
 
 ## How To Update Documentation Safely
 

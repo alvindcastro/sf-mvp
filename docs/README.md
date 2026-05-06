@@ -35,6 +35,7 @@ Workflow behavior:
 - [Review Composition Contract](mvp/demo/review-composition-contract.md)
 - [Loopback Demo API](mvp/demo/loopback-demo-api.md)
 - [Dry-Run Slack-Shaped Notification Preview](mvp/demo/dry-run-slack-preview.md)
+- [Scoped Approval Demo Retry](mvp/demo/scoped-approval-retry.md)
 
 Quality and operations:
 

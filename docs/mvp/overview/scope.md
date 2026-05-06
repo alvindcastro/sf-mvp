@@ -21,6 +21,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Backend implementation in Go introduced through strict-TDD code phases.
 - [x] Loopback-only local demo API for synthetic review requests.
 - [x] Dry-run Slack-shaped notification preview that remains blocked before scoped external-sharing approval.
+- [x] In-memory scoped approval retry that allows only the exact approved dry-run notification preview.
 
 ## Out Of Scope
 
@@ -80,7 +81,9 @@ Implemented boundary as of Phase 12: `internal/demo` loads machine-readable synt
 
 Implemented boundary as of Phase 13: `internal/httpapi` exposes `POST /demo/review` through a loopback-only local handler and `cmd/demo-api` starts a loopback server for a `curl` walkthrough. The endpoint accepts a known synthetic incident ID or synthetic packet JSON, calls the Phase 12 composer, returns deterministic review JSON with approval-required actions, an eval summary pointer, and a trace ID, and rejects malformed JSON, unknown incident IDs, non-synthetic input, unsupported methods, and unsupported paths. It does not implement production API behavior, auth, identity, database, persistence, Slack behavior, webhooks, live model calls, real export, real escalation, external sharing, dashboards, or external observability.
 
-Implemented boundary as of Phase 14: `internal/notification` prepares a dry-run Slack-shaped payload from the redacted brief only, requires `delivery_mode: "dry_run"`, gates the preview as `external_sharing` against the existing approval package, returns blocked status plus prepared payload when approval is missing, and records a redacted tool-call observability event. `internal/httpapi` exposes this through `POST /demo/notifications/slack` with an empty in-memory approval gate, so the local route returns a blocked dry-run preview before Phase 15 approval retry wiring. It does not implement Slack delivery, Slack SDK usage, webhook URLs, tokens, environment secrets, outbound network calls, approval creation routes, approval retry routes, persistent approval storage, or real external sharing.
+Implemented boundary as of Phase 14: `internal/notification` prepares a dry-run Slack-shaped payload from the redacted brief only, requires `delivery_mode: "dry_run"`, gates the preview as `external_sharing` against the existing approval package, returns blocked status plus prepared payload when approval is missing, and records a redacted tool-call observability event. It does not implement Slack delivery, Slack SDK usage, webhook URLs, tokens, environment secrets, outbound network calls, persistent approval storage, or real external sharing.
+
+Implemented boundary as of Phase 15: `internal/httpapi` exposes `POST /demo/approvals` and `POST /demo/approvals/decisions` through the loopback-only local server, stores approval state in memory for one server process, and reuses that gate when retrying `POST /demo/notifications/slack`. Missing, pending, denied, out-of-scope, and wrong-action approvals fail closed; only an exact approved `external_sharing` request for the same synthetic incident and `slack:<channel>` target allows the dry-run preview. It does not implement persistence, identity, roles, real Slack delivery, webhook calls, live external sharing, production API behavior, or production audit storage.
 
 ## Demo Path
 
@@ -97,6 +100,7 @@ Implemented boundary as of Phase 14: `internal/notification` prepares a dry-run 
 - [x] Compose the package-level review result for a synthetic incident.
 - [x] Call the loopback-only demo API for a synthetic incident review.
 - [x] Call the loopback-only dry-run notification preview and show external sharing remains blocked before scoped approval.
+- [x] Create an in-memory scoped approval and retry the dry-run notification preview without network delivery.
 
 ## Definition Of MVP Done
 

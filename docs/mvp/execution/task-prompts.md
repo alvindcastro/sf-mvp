@@ -202,27 +202,30 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Scoped Approval Retry Demo
 
-> Add approval-gated retry behavior for sensitive demo actions using strict TDD. Retrying after a denied or out-of-scope action must create or use a new approval request; it must not rewrite a final decision or mutate audit history.
+> Add or refine approval-gated retry behavior for sensitive demo actions using strict TDD. Phase 15 is implemented in `internal/httpapi` using `internal/approval` and `internal/notification`; keep retry state in memory and loopback-only unless future scope explicitly changes.
 >
-> Ownership suggestion: prefer `internal/approval` if the behavior is purely gate semantics. If orchestration is needed across notification or demo actions, add `internal/actions` and keep `approval.Gate` as the source of truth.
+> Ownership suggestion: prefer `internal/httpapi` when the behavior is demo route orchestration, and keep `approval.Gate` as the source of truth for request, decision, execute, and audit semantics. Prefer `internal/approval` only when the core gate semantics themselves need to change.
 >
 > Red:
 >
-> - Add or update `internal/approval/approval_test.go`.
-> - First failing test: `TestRetryAfterDeniedActionRequiresNewApprovalRequest`.
-> - Run `go test ./internal/approval -run TestRetryAfterDeniedActionRequiresNewApprovalRequest` and confirm failure is missing retry behavior.
-> - Add tests for pending retry remains blocked, approved retry executes once, denied original audit remains immutable, and out-of-scope retry cannot reuse approval.
+> - Add or update `internal/httpapi/httpapi_test.go` for route behavior, or `internal/approval/approval_test.go` for pure gate behavior.
+> - First failing handler test: `TestScopedApprovalRetryAllowsExactApprovedDryRunOnly` or the smallest missing retry behavior.
+> - Run `go test ./internal/httpapi -run TestScopedApprovalRetryAllowsExactApprovedDryRunOnly` and confirm failure is missing route or retry behavior.
+> - Add tests for missing approval, pending retry, denied retry, approved exact retry, out-of-channel retry, out-of-incident retry, wrong-action approval, audit history, and no network delivery.
 >
 > Green:
 >
-> - Implement the smallest API needed, such as `CreateRetryRequest` or an action-runner helper that creates a new request with a reason linking the previous request ID.
+> - Implement the smallest API needed, such as route wiring that creates an approval request, records a human decision, and passes the shared gate into the dry-run notification preview.
 > - Preserve existing final-decision immutability behavior.
 > - Append audit events; never edit prior decision records.
+> - Do not infer approval from model output, notification payload text, fixture names, or test setup shortcuts.
 >
 > Verify:
 >
-> - Run the targeted approval test.
+> - Run the targeted handler or approval test.
+> - Run `go test ./internal/httpapi`.
 > - Run `go test ./internal/approval`.
+> - Run `go test ./internal/notification`.
 > - Run `go test ./...`.
 > - Update demo docs only after the retry flow is locally proven.
 

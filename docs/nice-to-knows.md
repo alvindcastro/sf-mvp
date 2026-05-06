@@ -10,7 +10,7 @@ Useful context that prevents common wrong assumptions.
 - Most implementation remains Go package-level behavior under `internal`.
 - Most state is in memory and deterministic by design.
 - The module name is `sf-mvp`, even though the product narrative is Fleet Incident Copilot.
-- `internal/demo` composes package results in memory; `internal/notification` prepares dry-run Slack-shaped previews; `internal/httpapi` wraps those packages for local demo routes.
+- `internal/demo` composes package results in memory; `internal/notification` prepares dry-run Slack-shaped previews; `internal/httpapi` wraps those packages and the in-memory approval retry flow for local demo routes.
 
 ## Demo Boundaries
 
@@ -22,7 +22,7 @@ Useful context that prevents common wrong assumptions.
 - Approval requirements in severity output are not the same as executing a real export, escalation, or external share.
 - The approval package gates callbacks, but the callbacks are local function calls, not real integrations.
 - The dry-run Slack-shaped preview is not Slack delivery. It has no Slack SDK, token, webhook URL, environment secret, outbound network request, or real external-sharing behavior.
-- The notification preview route uses an empty in-memory approval gate in Phase 14, so it returns `blocked` before Phase 15 approval retry wiring.
+- The notification preview route uses in-memory approval state in Phase 15, so it returns `blocked` before approval and `allowed` only after an exact approved `external_sharing` request for the same incident and Slack-shaped target channel.
 
 ## Retrieval And Citations
 

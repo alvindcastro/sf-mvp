@@ -72,8 +72,8 @@ The returned `ReviewResult` includes:
 
 - The HTTP route and local server live in Phase 13; this package remains the in-memory composer.
 - Dry-run Slack-shaped notification preview behavior lives in Phase 14 under `internal/notification` and `POST /demo/notifications/slack`; this composer still performs no notification preview or delivery itself.
-- No Slack webhook, token, SDK, real network delivery, approval retry demo, or external-sharing integration exists.
-- No approval retry demo exists; Phase 15 owns local approval retry wiring.
+- Scoped approval retry behavior lives in Phase 15 under `internal/httpapi`; this composer still creates no approval requests and records no approval decisions.
+- No Slack webhook, token, SDK, real network delivery, persistent approval store, identity-backed approval workflow, or external-sharing integration exists.
 - No database, persistence, identity, authorization, live model provider, external telemetry backend, dashboard, or production audit store exists.
 - The mock guidance corpus is in-memory demo data, not a vector index or customer knowledge base.
 

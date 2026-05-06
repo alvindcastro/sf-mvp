@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-06 - Phase 15 Scoped Approval Demo Retry
+
+### Task: Audit Phase 15 Scope With Parallel Agents
+
+- What: Ran parallel read-only Codex explorer agents to inspect the Phase 15 acceptance criteria, existing approval and notification semantics, likely HTTP route shape, and stale documentation wording.
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/dry-run-slack-preview.md](docs/mvp/demo/dry-run-slack-preview.md), [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [internal/approval](internal/approval), [internal/notification](internal/notification), [internal/httpapi](internal/httpapi).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 15 should make the existing in-memory approval gate visible through the loopback demo without adding identity, persistence, real Slack delivery, webhooks, secrets, auth, production API behavior, or real external sharing.
+- How: Spawned two read-only explorer agents while the main thread read the phase tracker and handler code; used their findings to scope `POST /demo/approvals`, `POST /demo/approvals/decisions`, shared in-memory gate state, and the documentation update set.
+
+### Task: Add Phase 15 Scoped Approval Retry TDD Coverage
+
+- What: Added failing-first handler tests for creating an approval request, retrying a dry-run notification while pending, retrying after denial, retrying after exact scoped approval, blocking another channel, blocking another incident, blocking a wrong-action approval, preserving audit history, and proving allowed dry-run retry still performs no send or network delivery.
+- Where: [internal/httpapi/httpapi_test.go](internal/httpapi/httpapi_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Define the Phase 15 HTTP-boundary contract before production code and preserve fail-closed approval semantics at the local demo surface.
+- How: Added `httptest` coverage around `POST /demo/approvals`, `POST /demo/approvals/decisions`, and repeated `POST /demo/notifications/slack` calls; observed `go test ./internal/httpapi` fail with `404` for the missing approval routes after correcting the test decoder helper.
+
+### Task: Implement In-Memory Approval Retry Routes
+
+- What: Added shared in-memory approval gate state to the loopback handler, approval request and decision routes, approval and audit response projections, approval error mapping, and notification retry wiring that reuses the same gate.
+- Where: [internal/httpapi/httpapi.go](internal/httpapi/httpapi.go), [internal/httpapi/httpapi_test.go](internal/httpapi/httpapi_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Complete the Phase 15 retry behavior while keeping `internal/approval` as the source of truth for request, decision, execute, scope matching, and append-only audit semantics.
+- How: Added a mutex-protected `approval.Gate` to `Handler`, mapped approval target channels to `notification.SlackTargetRef`, validated known synthetic incidents through the existing demo composer, mapped final-decision rewrites to `409`, and passed the shared gate into `notification.PreviewSlack`; verified `go test ./internal/httpapi` passed.
+
+### Task: Document Phase 15 Implemented Boundary
+
+- What: Added the Phase 15 behavior doc and synchronized phase tracking, demo roadmap, loopback API docs, dry-run notification docs, demo package, overview, contributor guides, troubleshooting, docs indexes, compatibility phase pointer, task prompts, and root README.
+- Where: [docs/mvp/demo/scoped-approval-retry.md](docs/mvp/demo/scoped-approval-retry.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [docs/mvp/demo/dry-run-slack-preview.md](docs/mvp/demo/dry-run-slack-preview.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/demo/review-composition-contract.md](docs/mvp/demo/review-composition-contract.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [docs/README.md](docs/README.md), [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/testing.md](docs/testing.md), [docs/troubleshooting.md](docs/troubleshooting.md), [README.md](README.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep implemented-versus-planned wording accurate now that local approval retry exists, while preserving explicit limits around persistent approval stores, identity, roles, auth, real Slack delivery, webhooks, secrets, live external sharing, databases, production APIs, and production audit storage.
+- How: Marked Phase 15 complete, linked the new behavior doc, added route request and response contracts, added exact local `curl` examples, updated runtime summaries and test coverage descriptions, and changed stale “approval retry planned” language to in-memory implemented language.
+
+### Task: Verify Phase 15 Scoped Approval Retry
+
+- What: Verified the handler, approval and notification integration, full Go suite, vet checks, coverage, and local `curl` retry sequence against the loopback server.
+- Where: [internal/httpapi](internal/httpapi), [internal/approval](internal/approval), [internal/notification](internal/notification), [cmd/demo-api](cmd/demo-api), [docs/mvp/demo/scoped-approval-retry.md](docs/mvp/demo/scoped-approval-retry.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 15 is deterministic, locally repeatable, exact-scope, and still dry-run/no-network before closing the task.
+- How: Ran `go test ./internal/httpapi`, `go test ./internal/approval ./internal/notification ./internal/httpapi ./cmd/demo-api`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; started `go run ./cmd/demo-api -addr 127.0.0.1:18082`; verified missing approval returned `notification_preview.status: "blocked"`, created `approval-001` through `POST /demo/approvals`, verified pending retry stayed blocked with `approval_request_id: "approval-001"`, approved it through `POST /demo/approvals/decisions`, verified retry returned `notification_preview.status: "allowed"` with `sent: false` and `network_delivery_attempted: false`, then stopped the local server.
+
 ## 2026-05-06 - Phase 14 Dry-Run Slack-Shaped Notification Preview
 
 ### Task: Audit Phase 14 Scope With Parallel Agents

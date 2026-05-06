@@ -83,7 +83,7 @@ Every code task should follow [Strict TDD Rules](mvp/execution/tdd-rules.md):
 - `internal/observability`: trace IDs, structured events, redaction, token accounting, budget limits, invalid token usage, cache candidates, and routing notes.
 - `internal/demo`: machine-readable synthetic fixture loading, deterministic review composition, non-synthetic rejection, missing-evidence fail-closed behavior, citation and redaction preservation, approval-required action display, and trace propagation.
 - `internal/notification`: dry-run Slack-shaped preview formatting, mandatory dry-run mode, external-sharing approval gating, blocked/allowed preview states, redacted observability, and no network delivery.
-- `internal/httpapi`: loopback review and dry-run notification handler behavior, deterministic JSON response shape, malformed JSON, unknown ID, non-synthetic rejection, mandatory dry-run notification mode, unsupported methods, unknown paths, and loopback defaults.
+- `internal/httpapi`: loopback review, dry-run notification, and scoped approval retry handler behavior; deterministic JSON response shape; malformed JSON; unknown ID; non-synthetic rejection; mandatory dry-run notification mode; missing, pending, denied, out-of-scope, exact approved, and wrong-action approval retry states; unsupported methods; unknown paths; and loopback defaults.
 - `cmd/demo-api`: thin local server wiring, default loopback address, loopback override, and non-loopback rejection.
 
 ## Coverage

@@ -1,6 +1,6 @@
 # Demo Surface Roadmap
 
-Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, and Phase 14 implements a dry-run Slack-shaped notification preview. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
+Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 implements the loopback review API, Phase 14 implements a dry-run Slack-shaped notification preview, and Phase 15 implements an in-memory scoped approval retry demo. Real Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
 
 ## Current State
 
@@ -13,7 +13,8 @@ Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager 
 - [x] The repo has a loopback-only local review API in `internal/httpapi`.
 - [x] The repo has a thin local server command in `cmd/demo-api`.
 - [x] The repo has a dry-run Slack-shaped notification preview package in `internal/notification`.
-- [x] The loopback demo API exposes `POST /demo/notifications/slack` for blocked dry-run previews.
+- [x] The loopback demo API exposes `POST /demo/notifications/slack` for blocked and exact-approved dry-run previews.
+- [x] The loopback demo API exposes `POST /demo/approvals` and `POST /demo/approvals/decisions` for in-memory scoped approval retry.
 - [ ] No general CLI workflow exists yet.
 - [ ] No real Slack integration exists yet.
 - [ ] No webhook or external notification delivery exists yet.
@@ -24,8 +25,8 @@ Build the smallest local demo surface that proves the workflow without implying 
 
 1. [x] `POST /demo/review` accepts a synthetic incident ID or synthetic packet JSON and returns the composed incident review.
 2. [x] `POST /demo/notifications/slack` prepares a Slack-shaped notification preview in `dry_run` mode and returns `blocked` before scoped approval.
-3. [ ] `POST /demo/approvals` records an in-memory human approval for the exact synthetic incident, action, and channel target.
-4. [ ] Retrying `POST /demo/notifications/slack` returns an allowed `dry_run` payload without sending a network request.
+3. [x] `POST /demo/approvals` records an in-memory human approval for the exact synthetic incident, action, and channel target.
+4. [x] Retrying `POST /demo/notifications/slack` returns an allowed `dry_run` payload without sending a network request.
 5. [ ] `GET /demo/eval/latest` returns a local deterministic eval report with scores, thresholds, and pass/fail status.
 6. [ ] `GET /demo/traces/{trace_id}` returns redacted in-memory observability events for the review, approval, notification preview, eval summary, and budget path.
 
@@ -40,7 +41,7 @@ Original build order, updated as phases land:
 - [ ] Add a local eval report renderer over existing deterministic golden cases.
 - [ ] Add demo-surface observability events for fixture load, review, approval retry, notification preview, eval report, and budget paths.
 - [x] Add the loopback API.
-- [ ] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
+- [x] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
 - [x] Add the dry-run Slack-shaped notification preview.
 - [ ] Refresh the demo script with verified commands only after the surfaces exist.
 
@@ -91,7 +92,7 @@ Expected response highlights:
 
 ## Verified Dry-Run Notification Preview Endpoint
 
-The Phase 14 dry-run notification route is implemented and locally verified. It returns a prepared Slack-shaped payload with `status: "blocked"` before Phase 15 approval retry wiring exists.
+The Phase 14 dry-run notification route is implemented and locally verified. It returns a prepared Slack-shaped payload with `status: "blocked"` before exact scoped approval exists.
 
 ```bash
 go run ./cmd/demo-api -addr 127.0.0.1:18081
@@ -116,6 +117,35 @@ Expected blocked response highlights:
     "prepared_payload": {
       "channel": "#fleet-safety"
     },
+    "sent": false,
+    "network_delivery_attempted": false
+  }
+}
+```
+
+## Verified Scoped Approval Retry
+
+The Phase 15 approval retry routes are implemented and locally verified. A fresh server starts with no approval state; `approval-001` is deterministic only when this is the first approval request in that server process.
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18082/demo/approvals \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001","action":"external_sharing","channel":"#fleet-safety","reason":"operator requested dry-run preview"}'
+```
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18082/demo/approvals/decisions \
+  -H "Content-Type: application/json" \
+  -d '{"request_id":"approval-001","approver":"fleet-safety-lead","decision":"approved","reason":"redacted brief approved for #fleet-safety dry-run"}'
+```
+
+Retrying `POST /demo/notifications/slack` for `FIC-SYN-001`, `external_sharing`, and `#fleet-safety` returns:
+
+```json
+{
+  "notification_preview": {
+    "status": "allowed",
+    "approval_request_id": "approval-001",
     "sent": false,
     "network_delivery_attempted": false
   }
@@ -171,15 +201,17 @@ Implemented output: [Loopback Demo API](loopback-demo-api.md), `internal/httpapi
 - [x] Prove no network call, token, secret, webhook, or Slack SDK is used.
 - [x] Record a redacted tool-call observability event for preview generation.
 
-Implemented output: [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-preview.md), `internal/notification`, and `POST /demo/notifications/slack`. The route returns a blocked dry-run preview before scoped approval; Phase 15 owns approval request and retry wiring.
+Implemented output: [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-preview.md), `internal/notification`, and `POST /demo/notifications/slack`. The route returns a blocked dry-run preview before scoped approval and an allowed dry-run preview after the Phase 15 exact approval retry.
 
 ### Phase 15: Scoped Approval Retry
 
-- [ ] Demonstrate missing, pending, denied, and out-of-scope approvals fail closed.
-- [ ] Demonstrate an approved dry-run notification succeeds only for the exact incident, action, and target channel.
-- [ ] Preserve in-memory audit history for approval request and decision events.
-- [ ] Keep approval decisions human-supplied and deterministic.
-- [ ] Do not infer approval from model output, notification payload content, or test fixture names.
+- [x] Demonstrate missing, pending, denied, and out-of-scope approvals fail closed.
+- [x] Demonstrate an approved dry-run notification succeeds only for the exact incident, action, and target channel.
+- [x] Preserve in-memory audit history for approval request and decision events.
+- [x] Keep approval decisions human-supplied and deterministic.
+- [x] Do not infer approval from model output, notification payload content, or test fixture names.
+
+Implemented output: [Scoped Approval Demo Retry](scoped-approval-retry.md), `POST /demo/approvals`, `POST /demo/approvals/decisions`, and shared in-memory approval gate state inside `internal/httpapi`. The retry flow is local and ephemeral; no identity, persistence, Slack delivery, webhook, or real external-sharing integration exists.
 
 ### Phase 16: Eval And Observability Demo Reports
 
@@ -199,10 +231,10 @@ Implemented output: [Dry-Run Slack-Shaped Notification Preview](dry-run-slack-pr
 
 ## Wording Guardrails
 
-Use these phrases for surfaces that remain unimplemented:
+Use these phrases for current and planned surfaces:
 
 - **implemented dry-run Slack-shaped notification preview**, not Slack integration.
-- **planned in-memory scoped approval demo**, not identity-backed approval workflow.
+- **implemented in-memory scoped approval demo**, not identity-backed approval workflow.
 - **planned local eval report over deterministic synthetic cases**, not model benchmark.
 - **planned in-memory observability proof**, not monitoring platform.
 
