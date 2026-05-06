@@ -10,7 +10,7 @@ Common tasks for working on the Fleet Incident Copilot MVP.
 4. Check [Phases And Tasks](mvp/execution/phases.md) when a task belongs to a planned phase.
 5. Use [Strict TDD Rules](mvp/execution/tdd-rules.md) for every code change.
 
-If a behavior is not implemented in `internal`, describe it as planned or deferred. Do not imply a CLI, HTTP API, database, live model call, real export, real escalation, external sharing, identity, dashboards, or production compliance behavior exists.
+If a behavior is not implemented in `internal` or the thin `cmd/demo-api` loopback server, describe it as planned or deferred. Do not imply a general CLI workflow, production HTTP API, database, live model call, real export, real escalation, external sharing, identity, dashboards, or production compliance behavior exists.
 
 ## How To Add Or Change Package Behavior
 
@@ -35,6 +35,8 @@ go test ./internal/approval
 go test ./internal/eval
 go test ./internal/observability
 go test ./internal/demo
+go test ./internal/httpapi
+go test ./cmd/demo-api
 ```
 
 ## How To Add A Synthetic Incident Fixture
@@ -64,7 +66,29 @@ internal/eval          scores deterministic golden cases
 internal/observability records in-memory workflow events and budget signals
 ```
 
-Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
+Use tests for examples of how packages are composed. The demo package owns the Phase 12 review composition contract through `ComposeIncident` and `ComposePacket`; `internal/httpapi` owns the Phase 13 loopback review route; the eval package owns golden-case scoring through `GoldenCases` and `Run`.
+
+## How To Run The Loopback Demo API
+
+Start the default loopback server when port `8080` is free:
+
+```bash
+go run ./cmd/demo-api
+```
+
+Use a loopback override when port `8080` is occupied:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18080
+```
+
+Then call the review endpoint from another terminal:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/review \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001"}'
+```
 
 ## How To Update Documentation Safely
 

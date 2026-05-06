@@ -1,17 +1,18 @@
 # Demo Surface Roadmap
 
-Phase 11 is a documentation-only brainstorm for adding a concrete hiring-manager demo surface in a future code run. No API, CLI, Slack delivery, webhook, database, persistent store, live model call, or external integration is implemented by this document.
+Phase 11 began as a documentation-only brainstorm for a concrete hiring-manager demo surface. Phase 13 now implements the loopback review API; Slack delivery, webhooks, database, persistent store, live model calls, and external integrations remain unimplemented.
 
 ## Current State
 
 - [x] The implemented runtime is package-level Go code under `internal`.
 - [x] The current proof command is `go test ./...`.
-- [x] The current demo package is a docs, code, package-level composer, and tests walkthrough.
+- [x] The current demo package is a docs, code, package-level composer, loopback API, and tests walkthrough.
 - [x] The repo has in-memory approval, eval, and observability packages.
 - [x] The repo has an in-memory demo review composer in `internal/demo`.
 - [x] Machine-readable demo fixtures exist under `internal/demo/testdata`.
-- [ ] No local HTTP API exists yet.
-- [ ] No CLI exists yet.
+- [x] The repo has a loopback-only local review API in `internal/httpapi`.
+- [x] The repo has a thin local server command in `cmd/demo-api`.
+- [ ] No general CLI workflow exists yet.
 - [ ] No Slack integration exists yet.
 - [ ] No webhook or external notification delivery exists yet.
 
@@ -19,7 +20,7 @@ Phase 11 is a documentation-only brainstorm for adding a concrete hiring-manager
 
 Build the smallest local demo surface that proves the workflow without implying production integrations:
 
-1. [ ] `POST /demo/review` accepts a synthetic incident ID or synthetic packet JSON and returns the composed incident review.
+1. [x] `POST /demo/review` accepts a synthetic incident ID or synthetic packet JSON and returns the composed incident review.
 2. [ ] `POST /demo/notifications/slack` prepares a Slack-shaped notification preview in `dry_run` mode and returns `blocked` before scoped approval.
 3. [ ] `POST /demo/approvals` records an in-memory human approval for the exact synthetic incident, action, and channel target.
 4. [ ] Retrying `POST /demo/notifications/slack` returns an allowed `dry_run` payload without sending a network request.
@@ -30,47 +31,65 @@ This arc shows a concrete API call, an integration-shaped action, human approval
 
 ## Recommended Build Order
 
-Build the supporting proof surfaces before the external-looking adapter:
+Original build order, updated as phases land:
 
 - [x] Add machine-readable synthetic demo fixtures through strict TDD.
 - [x] Add the review composer.
 - [ ] Add a local eval report renderer over existing deterministic golden cases.
 - [ ] Add demo-surface observability events for fixture load, review, approval retry, notification preview, eval report, and budget paths.
-- [ ] Add the loopback API.
+- [x] Add the loopback API.
 - [ ] Add scoped approval retry behavior if the current approval package needs a clearer retry path.
 - [ ] Add the dry-run Slack-shaped notification preview.
 - [ ] Refresh the demo script with verified commands only after the surfaces exist.
 
-## Planned Endpoint Sketch
+## Verified Loopback Review Endpoint
 
-These commands are planned examples only. They must not be documented as runnable until a future strict-TDD code phase implements and verifies them.
+The Phase 13 loopback review endpoint is implemented and locally verified. Port `8080` was occupied during verification, so this exact command uses the loopback override:
 
 ```bash
-curl -s -X POST http://localhost:8080/demo/review \
+go run ./cmd/demo-api -addr 127.0.0.1:18080
+```
+
+In a second terminal:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/review \
   -H "Content-Type: application/json" \
   -d '{"incident_id":"FIC-SYN-001"}'
 ```
 
-Expected response shape:
+Expected response highlights:
 
 ```json
 {
-  "incident_id": "FIC-SYN-001",
-  "trace_id": "trace-demo-001",
-  "severity": "medium",
-  "timeline": [],
-  "brief": {},
-  "citations": [],
+  "trace_id": "trace-fic-syn-001-20260506t160000z-001",
+  "review": {
+    "validation_status": "accepted",
+    "incident_id": "FIC-SYN-001",
+    "severity": {
+      "level": "low"
+    },
+    "redacted_brief": {
+      "status": "draft"
+    }
+  },
   "approval_required_actions": [
     {
-      "action": "external_sharing",
-      "target": "slack:#fleet-safety",
+      "action": "export",
       "status": "blocked",
-      "reason": "human approval required"
+      "approved": false
     }
-  ]
+  ],
+  "eval_summary": {
+    "available": true,
+    "ref": "docs/mvp/quality/eval-plan.md"
+  }
 }
 ```
+
+## Planned Endpoint Sketch
+
+The remaining commands are planned examples only. They must not be documented as runnable until a future strict-TDD code phase implements and verifies them.
 
 ```bash
 curl -s -X POST http://localhost:8080/demo/notifications/slack \
@@ -121,15 +140,17 @@ Expected blocked response shape before approval:
 - [x] Preserve citations and redactions from existing package contracts.
 - [x] Record package-level observability events without adding persistent logs.
 
-Implemented output: [Review Composition Contract](review-composition-contract.md), `internal/demo`, and `internal/demo/testdata/demo-fixtures.json`. This remains package-level and in-memory; no local server, route, notification preview, persistence, or external integration exists yet.
+Implemented output: [Review Composition Contract](review-composition-contract.md), `internal/demo`, and `internal/demo/testdata/demo-fixtures.json`. Phase 12 itself remains package-level and in-memory; Phase 13 adds the local server route.
 
 ### Phase 13: Loopback Demo API
 
-- [ ] Add `POST /demo/review` behind a local demo server or equivalent local-only transport.
-- [ ] Return deterministic JSON suitable for a hiring-manager `curl` demo.
-- [ ] Cover malformed JSON, unknown incident ID, non-synthetic input, and unsupported method paths.
-- [ ] Keep the API stateless or in-memory unless a later phase explicitly adds persistence.
-- [ ] Document commands only after tests prove they work.
+- [x] Add `POST /demo/review` behind a local demo server or equivalent local-only transport.
+- [x] Return deterministic JSON suitable for a hiring-manager `curl` demo.
+- [x] Cover malformed JSON, unknown incident ID, non-synthetic input, and unsupported method paths.
+- [x] Keep the API stateless or in-memory unless a later phase explicitly adds persistence.
+- [x] Document commands only after tests prove they work.
+
+Implemented output: [Loopback Demo API](loopback-demo-api.md), `internal/httpapi`, and `cmd/demo-api`. The route remains loopback-only and stateless; no auth, persistence, Slack behavior, webhook, live model call, export, escalation, or external-sharing integration exists.
 
 ### Phase 14: Dry-Run Slack Preview
 
@@ -165,15 +186,14 @@ Implemented output: [Review Composition Contract](review-composition-contract.md
 
 ## Wording Guardrails
 
-Use these phrases before implementation:
+Use these phrases for surfaces that remain unimplemented:
 
-- **planned local demo API**, not production API.
 - **planned dry-run Slack-shaped notification preview**, not Slack integration.
 - **planned in-memory scoped approval demo**, not identity-backed approval workflow.
 - **planned local eval report over deterministic synthetic cases**, not model benchmark.
 - **planned in-memory observability proof**, not monitoring platform.
 
-Use these phrases after future strict-TDD implementation proves the behavior:
+Use these phrases after strict-TDD implementation proves the behavior:
 
 - **implemented loopback-only demo API** if tests and local commands prove the endpoint.
 - **implemented dry-run Slack-shaped preview** if no network delivery exists.

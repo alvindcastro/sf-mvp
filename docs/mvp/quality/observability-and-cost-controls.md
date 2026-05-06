@@ -114,5 +114,5 @@ The package records routing notes only. It does not select providers, call model
 - Events are not persisted and are not shipped to OpenTelemetry, a metrics backend, dashboards, or alerts.
 - Budget controls use caller-supplied token usage; no real model-provider calls or provider billing reconciliation exists.
 - Cache candidates and routing notes are documentation-backed structs, not live cache or model-routing behavior.
-- No CLI, HTTP API, database, external observability pipeline, persistent audit store, real export tool, real escalation tool, or external-sharing integration exists.
+- This package does not implement CLI behavior, HTTP routes, database behavior, external observability pipelines, persistent audit stores, real export tools, real escalation tools, or external-sharing integrations.
 - This phase does not provide production audit, compliance, retention, security, or cost-governance guarantees.

@@ -1,0 +1,131 @@
+# Loopback Demo API
+
+Phase 13 adds the first runnable local transport for Fleet Incident Copilot. The API is loopback-only, stateless, deterministic, and backed by the existing `internal/demo` review composer. It is a hiring-manager demo surface, not a production API.
+
+## Phase 13 Checklist
+
+- [x] Add `POST /demo/review` for synthetic incident ID or synthetic packet JSON input.
+- [x] Return deterministic JSON with review output, approval-required actions, eval summary pointer, and trace ID.
+- [x] Reject malformed JSON, unknown incident IDs, non-synthetic input, unsupported methods, and unsupported paths.
+- [x] Keep the API loopback-only and stateless or in-memory.
+- [x] Do not add auth, database, identity, live model calls, or external integrations.
+- [x] Add exact run and `curl` commands only after tests and local verification pass.
+
+## Runtime Surface
+
+- Handler package: [internal/httpapi](../../../internal/httpapi).
+- Local server command: [cmd/demo-api](../../../cmd/demo-api).
+- Route: `POST /demo/review`.
+- Default listen address: `127.0.0.1:8080`.
+- Loopback override: `-addr 127.0.0.1:<port>`.
+- Targeted handler test: `go test ./internal/httpapi`.
+- Server wiring test: `go test ./cmd/demo-api`.
+- Full test command: `go test ./...`.
+
+The server rejects non-loopback address overrides. If port `8080` is already in use, start the demo on another loopback port.
+
+## Verified Local Commands
+
+Port `8080` was occupied during local verification, so this exact command was verified with the loopback override:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18080
+```
+
+In a second terminal:
+
+```bash
+curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/review \
+  -H "Content-Type: application/json" \
+  -d '{"incident_id":"FIC-SYN-001"}'
+```
+
+Expected response highlights:
+
+- HTTP `200`.
+- Top-level `trace_id`, such as `trace-fic-syn-001-20260506t160000z-001`.
+- `review.validation_status: "accepted"`.
+- `review.incident_id: "FIC-SYN-001"`.
+- `review.severity.level: "low"`.
+- `review.redacted_brief.status: "draft"`.
+- `approval_required_actions` for `export`, `escalation`, and `external_sharing`, all `blocked` and not approved.
+- `eval_summary.ref: "docs/mvp/quality/eval-plan.md"`.
+
+If `127.0.0.1:8080` is free, the default startup command is:
+
+```bash
+go run ./cmd/demo-api
+```
+
+## Request Contract
+
+Known synthetic fixture by ID:
+
+```json
+{
+  "incident_id": "FIC-SYN-001"
+}
+```
+
+Synthetic packet JSON input uses the same packet shape accepted by `internal/ingestion`. The body must include `synthetic_record: true`, an incident ID with the `FIC-SYN-` prefix, telemetry samples, synthetic media refs, and the required packet fields.
+
+The handler uses `ingestion.IngestJSON` for packet requests and does not duplicate packet validation rules.
+
+## Response Contract
+
+Successful responses include:
+
+- `trace_id`.
+- `review.validation_status`.
+- `review.incident_id`.
+- `review.retrieved_citation_refs`.
+- `review.timeline_entries`.
+- `review.severity`.
+- `review.recommendations`.
+- `review.redacted_brief`.
+- `review.observability_events`.
+- `approval_required_actions`.
+- `eval_summary`, currently a pointer to the deterministic local eval documentation and command.
+
+Error responses use the shape:
+
+```json
+{
+  "error": {
+    "code": "non_synthetic_input",
+    "message": "only synthetic FIC-SYN incident input is accepted"
+  }
+}
+```
+
+Status mappings:
+
+| Condition | Status | Code |
+| --- | --- | --- |
+| Malformed JSON | `400` | `malformed_json` |
+| Empty request | `400` | `empty_request` |
+| Invalid request shape | `400` | `invalid_request` |
+| Unknown path | `404` | `not_found` |
+| Unknown incident ID | `404` | `incident_not_found` |
+| Unsupported method | `405` | `method_not_allowed` |
+| Non-synthetic packet or incident ID | `422` | `non_synthetic_input` |
+| Required evidence missing | `422` | `missing_evidence` |
+
+## Current Limits
+
+- The API is loopback-only and demo-only.
+- State remains in memory; no database or persistence is added.
+- No authentication, authorization, identity, roles, tenants, or production access control exists.
+- No Slack payload, webhook, token, SDK, or network delivery exists; Phase 14 owns dry-run notification preview behavior.
+- No approval retry demo exists; Phase 15 owns local approval retry wiring.
+- No local eval report or trace lookup endpoint exists; Phase 16 owns those report surfaces.
+- No live model provider, vector database, hosted RAG service, real export, real escalation, external sharing, dashboard, alerting, or production audit store exists.
+
+## Red-To-Green Evidence
+
+- Added failing `internal/httpapi` tests for valid synthetic incident ID, valid synthetic packet JSON, malformed JSON, unknown incident ID, non-synthetic packet input, unsupported method, unknown path, and loopback default address.
+- Observed `go test ./internal/httpapi` fail because `NewHandler` and `DefaultListenAddress` did not exist.
+- Implemented the smallest handler that calls `internal/demo` and maps known demo errors to deterministic JSON status responses.
+- Added failing `cmd/demo-api` tests for default loopback binding, loopback override, and non-loopback rejection.
+- Observed `go test ./cmd/demo-api` fail because `newServer` did not exist, then implemented the thin local server wiring.
+- Verified with `go test ./internal/httpapi`, `go test ./cmd/demo-api`, related package tests, `go test ./...`, `go vet ./...`, and one local `curl` command.

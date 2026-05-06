@@ -1,6 +1,6 @@
 # Review Composition Contract
 
-Phase 12 adds the first deterministic demo composition boundary for Fleet Incident Copilot. It is implemented as package-level Go code under `internal/demo`; it is not an HTTP API, CLI, database-backed service, Slack integration, webhook, live model call, or external service.
+Phase 12 adds the first deterministic demo composition boundary for Fleet Incident Copilot. It is implemented as package-level Go code under `internal/demo`; Phase 12 itself is not an HTTP API, CLI, database-backed service, Slack integration, webhook, live model call, or external service. Phase 13 wraps this composer with the loopback-only local API documented in [Loopback Demo API](loopback-demo-api.md).
 
 ## Phase 12 Checklist
 
@@ -70,7 +70,7 @@ The returned `ReviewResult` includes:
 
 ## Current Limits
 
-- No HTTP route or local server exists; Phase 13 owns the loopback API.
+- The HTTP route and local server live in Phase 13; this package remains the in-memory composer.
 - No Slack payload, webhook, token, SDK, or network delivery exists; Phase 14 owns dry-run notification preview behavior.
 - No approval retry demo exists; Phase 15 owns local approval retry wiring.
 - No database, persistence, identity, authorization, live model provider, external telemetry backend, dashboard, or production audit store exists.

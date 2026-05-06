@@ -12,9 +12,21 @@ go vet ./...
 go test -cover ./...
 ```
 
-## No App Starts
+## Demo API Does Not Start
 
-The repo does not currently include a server, CLI, frontend, worker, container setup, or database runtime. The runnable surface is the Go package test suite.
+The repo includes only a loopback demo server, not a production app stack. Start it with:
+
+```bash
+go run ./cmd/demo-api
+```
+
+If `127.0.0.1:8080` is already occupied, use another loopback port:
+
+```bash
+go run ./cmd/demo-api -addr 127.0.0.1:18080
+```
+
+Non-loopback addresses such as `0.0.0.0:8080` are rejected by design. There is no frontend, worker, container setup, database runtime, or production service entry point.
 
 ## Import Errors
 
@@ -96,6 +108,18 @@ Fail-closed behavior is intentional for shareable outputs.
 `demo.ComposePacket` returns `demo.ErrNonSyntheticInput` before downstream composition when the packet is not synthetic or the incident ID does not start with `FIC-SYN-`.
 
 `demo.ErrMissingEvidence` means the composer reached the existing fail-closed brief contract and did not return a partial review result. Check the same missing-evidence causes listed for brief drafting.
+
+## Demo API Request Fails
+
+`POST /demo/review` accepts either `{"incident_id":"FIC-SYN-001"}` or a full synthetic packet JSON body.
+
+Common response codes:
+
+- `400 malformed_json`: the request body is not valid JSON.
+- `404 incident_not_found`: the synthetic incident ID is not in the demo fixture set.
+- `405 method_not_allowed`: use `POST`.
+- `422 non_synthetic_input`: `synthetic_record` is false or the incident ID does not start with `FIC-SYN-`.
+- `422 missing_evidence`: the underlying composer failed closed rather than returning a partial review.
 
 ## Sensitive Action Is Blocked
 

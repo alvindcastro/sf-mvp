@@ -145,7 +145,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Loopback Demo API
 
-> Add the first local HTTP API demo surface using strict TDD. Do not add persistence, auth, live model calls, Slack, webhooks, or external integrations.
+> Add or refine the local HTTP API demo surface using strict TDD. Phase 13 is implemented in `internal/httpapi` and `cmd/demo-api`; do not add persistence, auth, live model calls, Slack, webhooks, or external integrations.
 >
 > Ownership suggestion: add `internal/httpapi` for handlers tested with `httptest`; add `cmd/demo-api` only after handler tests are green, as thin local wiring.
 >
@@ -166,6 +166,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 > Verify:
 >
 > - Run `go test ./internal/httpapi`.
+> - Run `go test ./cmd/demo-api`.
 > - Run `go test ./...`.
 > - Run `go vet ./...`.
 > - Verify one local `curl` command only after the server wiring exists.

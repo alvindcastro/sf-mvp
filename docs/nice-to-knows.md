@@ -5,11 +5,12 @@ Useful context that prevents common wrong assumptions.
 ## Runtime Surface
 
 - There is no Makefile in this repo.
-- There is no CLI command, HTTP server, database, frontend, worker, queue, or container runtime.
-- The current implementation is Go package-level behavior under `internal`.
+- There is a thin loopback-only demo API command at `cmd/demo-api`.
+- There is no general CLI workflow, database, frontend, worker, queue, or container runtime.
+- Most implementation remains Go package-level behavior under `internal`.
 - Most state is in memory and deterministic by design.
 - The module name is `sf-mvp`, even though the product narrative is Fleet Incident Copilot.
-- `internal/demo` composes package results in memory; it is not a transport layer or runnable app.
+- `internal/demo` composes package results in memory; `internal/httpapi` wraps that composer for the local review route.
 
 ## Demo Boundaries
 
@@ -17,6 +18,7 @@ Useful context that prevents common wrong assumptions.
 - A checked item in a planning doc means the repo has some supporting artifact or package behavior, not necessarily production readiness.
 - The demo package is for explaining architecture and judgment; it is not a deployable app.
 - Machine-readable demo fixtures live under `internal/demo/testdata` and are loaded through ingestion validation.
+- `cmd/demo-api` is a local walkthrough server, not a production service.
 - Approval requirements in severity output are not the same as executing a real export, escalation, or external share.
 - The approval package gates callbacks, but the callbacks are local function calls, not real integrations.
 

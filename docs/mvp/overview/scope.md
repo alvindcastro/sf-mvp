@@ -19,6 +19,7 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [x] Runtime event-field redaction and tool-call observability checks.
 - [x] Cost controls for token budgets, caching candidates, and model-routing decisions.
 - [x] Backend implementation in Go introduced through strict-TDD code phases.
+- [x] Loopback-only local demo API for synthetic review requests.
 
 ## Out Of Scope
 
@@ -76,6 +77,8 @@ Implemented boundary as of Phase 9: `internal/observability` creates determinist
 
 Implemented boundary as of Phase 12: `internal/demo` loads machine-readable synthetic fixtures through ingestion validation and composes one deterministic in-memory review result with validation status, retrieved citation refs, timeline entries, severity, recommendations, redacted brief fields, approval-required actions, and trace ID. It rejects non-synthetic or real-looking input before downstream composition and keeps export, escalation, and external sharing blocked without scoped approval. It does not implement an HTTP API, CLI, Slack behavior, webhook, database, persistence, live model calls, real export, real escalation, external sharing, or external observability behavior.
 
+Implemented boundary as of Phase 13: `internal/httpapi` exposes `POST /demo/review` through a loopback-only local handler and `cmd/demo-api` starts a loopback server for a `curl` walkthrough. The endpoint accepts a known synthetic incident ID or synthetic packet JSON, calls the Phase 12 composer, returns deterministic review JSON with approval-required actions, an eval summary pointer, and a trace ID, and rejects malformed JSON, unknown incident IDs, non-synthetic input, unsupported methods, and unsupported paths. It does not implement production API behavior, auth, identity, database, persistence, Slack behavior, webhooks, live model calls, real export, real escalation, external sharing, dashboards, or external observability.
+
 ## Demo Path
 
 - [x] Select a synthetic incident packet.
@@ -89,6 +92,7 @@ Implemented boundary as of Phase 12: `internal/demo` loads machine-readable synt
 - [x] Show deterministic eval summary.
 - [x] Show package-level observability summary.
 - [x] Compose the package-level review result for a synthetic incident.
+- [x] Call the loopback-only demo API for a synthetic incident review.
 
 ## Definition Of MVP Done
 

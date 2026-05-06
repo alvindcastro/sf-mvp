@@ -1,6 +1,6 @@
 # Developer Guide
 
-This repository is a Go package workspace for the Fleet Incident Copilot MVP. It demonstrates deterministic, synthetic fleet-incident review behavior through package APIs and tests. It is not currently an application server, CLI, database-backed service, live model integration, or production evidence system.
+This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonstrates deterministic, synthetic fleet-incident review behavior through package APIs, tests, and a thin loopback-only demo API. It is not a database-backed service, live model integration, production API, or production evidence system.
 
 ## Repository Layout
 
@@ -17,6 +17,8 @@ This repository is a Go package workspace for the Fleet Incident Copilot MVP. It
 - [internal/eval](../internal/eval): runs deterministic in-memory golden-case evals.
 - [internal/observability](../internal/observability): records in-memory workflow events, redaction, token, budget, cache, and routing signals.
 - [internal/demo](../internal/demo): loads machine-readable synthetic demo fixtures and composes deterministic in-memory review results.
+- [internal/httpapi](../internal/httpapi): exposes the local `POST /demo/review` handler around the demo composer.
+- [cmd/demo-api](../cmd/demo-api): starts the loopback-only local demo server.
 
 ## Design Principles
 
@@ -48,6 +50,10 @@ This repository is a Go package workspace for the Fleet Incident Copilot MVP. It
 `internal/observability` records package-level workflow events in memory. It does not send telemetry externally or reconcile provider billing.
 
 `internal/demo` composes the implemented package path for synthetic demo review results. It owns fixture-facing helpers, review response projection, and package-level composition glue; it must not move validation, retrieval, timeline, severity, brief, approval, or observability business rules out of their owning packages.
+
+`internal/httpapi` owns local transport behavior for the Phase 13 review route. It parses request JSON, delegates packet validation to `internal/ingestion`, delegates review composition to `internal/demo`, maps known errors to deterministic JSON responses, and must stay loopback-only, stateless, and free of production auth, persistence, Slack, webhook, model-provider, export, escalation, or external-sharing behavior.
+
+`cmd/demo-api` is thin server wiring. It should keep the default listen address on `127.0.0.1:8080`, allow only loopback overrides, and avoid business logic.
 
 ## Development Workflow
 

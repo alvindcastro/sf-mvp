@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-05-06 - Phase 13 Loopback Demo API
+
+### Task: Audit Phase 13 Scope With Parallel Agents
+
+- What: Ran parallel read-only Codex explorer agents to inspect Phase 13 acceptance criteria, related docs, existing demo composer APIs, likely handler and server wiring, guardrails, and verification commands.
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/review-composition-contract.md](docs/mvp/demo/review-composition-contract.md), [internal/demo](internal/demo).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 13 should wrap the existing deterministic demo composer with a loopback-only local API without adding auth, persistence, Slack, webhooks, live model calls, export, escalation, or external sharing.
+- How: Spawned two read-only explorer agents while the main thread inspected the phase plan, demo docs, and package APIs; used their findings to scope `internal/httpapi`, `cmd/demo-api`, and the documentation update set.
+
+### Task: Add Phase 13 Handler TDD Coverage
+
+- What: Added failing-first handler tests for `POST /demo/review` with a known synthetic incident ID, full synthetic packet JSON, malformed JSON, unknown incident ID, non-synthetic packet input, unsupported method, unknown path, and loopback default address.
+- Where: [internal/httpapi/httpapi_test.go](internal/httpapi/httpapi_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Define the loopback API behavior at the HTTP boundary before adding production handler code and preserve the synthetic-only, deterministic, no-external-action contract.
+- How: Created `httptest` coverage around `NewHandler` and `DefaultListenAddress`; ran `go test ./internal/httpapi`; observed the expected red build failure for missing handler and address APIs.
+
+### Task: Implement The Loopback Review Handler
+
+- What: Added an `internal/httpapi` package with `POST /demo/review`, deterministic JSON response projection, eval summary pointer, approval-required action display, loopback default address, and stable error mapping for malformed JSON, unknown IDs, non-synthetic input, missing evidence, unsupported methods, and unknown paths.
+- Where: [internal/httpapi/httpapi.go](internal/httpapi/httpapi.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Complete the Phase 13 handler surface by exposing the existing demo review composer through a local HTTP boundary without duplicating ingestion validation or broadening business behavior.
+- How: Parsed request JSON, routed packet-shaped requests through `ingestion.IngestJSON`, routed incident-ID requests through `demo.ComposeIncident`, mapped `demo` sentinel errors to JSON status responses, projected review fields into lower_snake_case JSON, and kept approval-required actions blocked.
+
+### Task: Add Thin Local Server Wiring
+
+- What: Added `cmd/demo-api` to start the loopback review server, keep the default bind address at `127.0.0.1:8080`, allow loopback-only address overrides, and reject non-loopback binds such as `0.0.0.0:8080`.
+- Where: [cmd/demo-api/main.go](cmd/demo-api/main.go), [cmd/demo-api/main_test.go](cmd/demo-api/main_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide a real local process for the verified `curl` walkthrough while preserving the Phase 13 local-only guardrail.
+- How: Added a failing server-wiring test for `newServer`, implemented the minimal `http.Server` setup with `httpapi.NewHandler`, added `-addr` flag parsing, validated loopback IP addresses, and used the override after port `8080` was already occupied locally.
+
+### Task: Document Phase 13 Implemented Boundary
+
+- What: Added the Phase 13 loopback API contract and synchronized phase tracking, demo roadmap, demo package, overview, contributor guides, testing docs, troubleshooting docs, and root README.
+- Where: [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/demo/review-composition-contract.md](docs/mvp/demo/review-composition-contract.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/README.md](docs/README.md), [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/testing.md](docs/testing.md), [docs/troubleshooting.md](docs/troubleshooting.md), [README.md](README.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep implemented-versus-planned wording accurate now that a loopback review API exists, while preserving explicit limits around production APIs, auth, database, persistence, Slack, webhooks, live providers, export, escalation, external sharing, dashboards, and external observability.
+- How: Marked Phase 13 complete, added verified `go run` and `curl` commands, linked `internal/httpapi` and `cmd/demo-api`, changed stale “no HTTP API” wording where it applied to current repo state, and left Phase 14 through Phase 17 behavior documented as planned.
+
+### Task: Verify Phase 13 Loopback API
+
+- What: Verified the new handler, server command, related package set, full Go suite, vet checks, and one local `curl` request against the loopback review endpoint.
+- Where: [internal/httpapi](internal/httpapi), [cmd/demo-api](cmd/demo-api), [internal/demo](internal/demo), [internal/ingestion](internal/ingestion), [docs/mvp/demo/loopback-demo-api.md](docs/mvp/demo/loopback-demo-api.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Confirm Phase 13 is locally repeatable, deterministic, and does not regress earlier package contracts before documenting runnable commands.
+- How: Ran `go test ./internal/httpapi`, `go test ./cmd/demo-api`, `go test ./internal/demo ./internal/ingestion ./internal/httpapi ./cmd/demo-api`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; started `go run ./cmd/demo-api -addr 127.0.0.1:18080` because `127.0.0.1:8080` was occupied; verified `curl -i --max-time 5 -X POST http://127.0.0.1:18080/demo/review -H "Content-Type: application/json" -d '{"incident_id":"FIC-SYN-001"}'` returned HTTP `200` with the deterministic trace ID and blocked approval actions; stopped the local server; and ran whitespace checks on the Phase 13 tracked and new-file edit set.
+
 ## 2026-05-06 - Phase 12 Review Composition Contract
 
 ### Task: Audit Phase 12 Scope With Parallel Agents

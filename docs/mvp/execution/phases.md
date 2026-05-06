@@ -203,7 +203,7 @@ Goal: brainstorm a concrete local demo surface without adding runtime code or ov
 - [x] Add detailed future-agent prompts for strict-TDD code tasks.
 - [x] Confirm this phase adds Markdown planning artifacts only.
 
-Output: [Demo Surface Roadmap](../demo/demo-surface-roadmap.md). Phase 11 is complete as of 2026-05-06 and added Markdown planning artifacts only. No API, CLI, Slack integration, webhook, live provider call, database, or persistent store exists yet.
+Output: [Demo Surface Roadmap](../demo/demo-surface-roadmap.md). Phase 11 is complete as of 2026-05-06 and added Markdown planning artifacts only. Phase 11 itself did not add API, CLI, Slack integration, webhook, live provider call, database, or persistent store behavior.
 
 Prompt:
 
@@ -220,7 +220,7 @@ Goal: compose the existing package-level workflow into one deterministic demo re
 - [x] Keep the composer in-memory and deterministic.
 - [x] Document behavior only after tests prove it.
 
-Output: [Review Composition Contract](../demo/review-composition-contract.md), the Go package [internal/demo](../../../internal/demo), and machine-readable synthetic fixtures in [internal/demo/testdata/demo-fixtures.json](../../../internal/demo/testdata/demo-fixtures.json). Phase 12 is complete as of 2026-05-06 and added an in-memory deterministic demo review composer only. No HTTP API, CLI, Slack behavior, database, persistence, live model call, webhook, export, escalation, or external-sharing integration exists yet.
+Output: [Review Composition Contract](../demo/review-composition-contract.md), the Go package [internal/demo](../../../internal/demo), and machine-readable synthetic fixtures in [internal/demo/testdata/demo-fixtures.json](../../../internal/demo/testdata/demo-fixtures.json). Phase 12 is complete as of 2026-05-06 and added an in-memory deterministic demo review composer only. Phase 12 itself did not add HTTP API, CLI, Slack behavior, database, persistence, live model call, webhook, export, escalation, or external-sharing integration behavior.
 
 Code-task prompt:
 
@@ -234,14 +234,14 @@ Fixture-task prompt:
 
 Goal: expose the demo review result through a local-only API suitable for a `curl` walkthrough.
 
-- [ ] Add `POST /demo/review` for synthetic incident ID or synthetic packet JSON input.
-- [ ] Return deterministic JSON with review output, approval-required actions, eval summary pointer if available, and trace ID.
-- [ ] Reject malformed JSON, unknown incident IDs, non-synthetic input, unsupported methods, and unsupported paths.
-- [ ] Keep the API loopback-only and stateless or in-memory.
-- [ ] Do not add auth, database, identity, live model calls, or external integrations.
-- [ ] Add exact run and `curl` commands only after tests and local verification pass.
+- [x] Add `POST /demo/review` for synthetic incident ID or synthetic packet JSON input.
+- [x] Return deterministic JSON with review output, approval-required actions, eval summary pointer if available, and trace ID.
+- [x] Reject malformed JSON, unknown incident IDs, non-synthetic input, unsupported methods, and unsupported paths.
+- [x] Keep the API loopback-only and stateless or in-memory.
+- [x] Do not add auth, database, identity, live model calls, or external integrations.
+- [x] Add exact run and `curl` commands only after tests and local verification pass.
 
-Planned output: a local demo API package or command, plus documentation updates after implementation exists.
+Output: [Loopback Demo API](../demo/loopback-demo-api.md), the Go package [internal/httpapi](../../../internal/httpapi), and the local server command [cmd/demo-api](../../../cmd/demo-api). Phase 13 is complete as of 2026-05-06 and added a loopback-only stateless demo route for deterministic review JSON. No auth, database, identity, Slack behavior, webhook, live model call, real export, real escalation, external-sharing integration, dashboard, external observability pipeline, or production API behavior exists yet.
 
 Code-task prompt:
 

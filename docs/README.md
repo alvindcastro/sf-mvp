@@ -33,6 +33,7 @@ Workflow behavior:
 - [Shareable Incident Brief Drafting](mvp/workflow/incident-brief-drafting.md)
 - [Human Approval Workflow](mvp/workflow/human-approval-workflow.md)
 - [Review Composition Contract](mvp/demo/review-composition-contract.md)
+- [Loopback Demo API](mvp/demo/loopback-demo-api.md)
 
 Quality and operations:
 

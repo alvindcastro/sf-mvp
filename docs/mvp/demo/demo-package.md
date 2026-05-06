@@ -6,9 +6,9 @@ Phase 10 packages the Fleet Incident Copilot MVP for a short review or interview
 
 Use this wording rule across the repo narrative, video, diagram, and interview answers:
 
-- Say **implemented** only for behavior backed by current docs, Go packages, and tests under `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, `internal/eval`, and `internal/observability`.
-- Say **package-level** or **in-memory** when describing current runtime behavior unless a future phase adds a CLI, HTTP API, database, persistent store, external telemetry pipeline, or UI.
-- Say **planned** for live model-provider calls, vector databases, hosted RAG services, real export tools, real escalation tools, external sharing, identity, roles, dashboards, alerts, billing reconciliation, production audit/compliance guarantees, and live fleet integrations.
+- Say **implemented** only for behavior backed by current docs, Go packages, and tests under `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, `internal/eval`, `internal/observability`, `internal/demo`, `internal/httpapi`, and `cmd/demo-api`.
+- Say **package-level**, **in-memory**, or **loopback-only local API** when describing current runtime behavior. Do not imply persistence, production deployment, identity, live integrations, or external delivery.
+- Say **planned** for live model-provider calls, vector databases, hosted RAG services, real export tools, real escalation tools, external sharing, identity, roles, dashboards, alerts, billing reconciliation, production audit/compliance guarantees, production APIs, and live fleet integrations.
 - Say **agent-ready boundaries** or **constrained action gates** for the current approval and tool-call surfaces. Do not claim a live autonomous agent loop exists.
 - Say **production-readiness case** for the demo's governance, eval, monitoring, security, and cost-control design. Do not claim the repository is production deployed.
 
@@ -18,7 +18,7 @@ Fleet Incident Copilot is a synthetic fleet-safety incident review MVP for a fle
 
 The current repository demonstrates the backend core of that workflow with deterministic Go packages. A synthetic incident packet is validated, approved mock SOP guidance is retrieved with citations, a cited timeline is built, severity and recommended actions are derived, a redacted draft brief is produced, sensitive actions are blocked unless a human approval record matches scope, deterministic evals score golden cases, and in-memory observability records trace, retrieval, tool-call, approval, token, budget, and eval signals.
 
-This is not a production fleet platform. There is no CLI, HTTP API, database, UI, real model call, vector database, telemetry backend, live export, live escalation, external-sharing integration, identity provider, or real customer evidence processing. The demo is valuable because it shows how a production-minded AI workflow would be grounded, constrained, measured, observed, and cost-controlled before connecting real integrations.
+This is not a production fleet platform. It has a loopback-only local demo API, but no general CLI workflow, database, UI, real model call, vector database, telemetry backend, live export, live escalation, external-sharing integration, identity provider, production API, or real customer evidence processing. The demo is valuable because it shows how a production-minded AI workflow would be grounded, constrained, measured, observed, and cost-controlled before connecting real integrations.
 
 ## Target Role Mapping
 
@@ -37,7 +37,7 @@ For a fleet safety operator, the MVP maps to these review responsibilities:
 
 ## Demo Video Outline And Script
 
-Target length: 3 to 5 minutes. The current demo should be framed as a docs, code, and tests walkthrough, not a live app demo.
+Target length: 3 to 5 minutes. The current demo can include one loopback `curl` walkthrough, but should still frame the repo as a local demo and tests walkthrough rather than a deployed app.
 
 | Time | Screen | Script |
 | --- | --- | --- |
@@ -48,24 +48,24 @@ Target length: 3 to 5 minutes. The current demo should be framed as a docs, code
 | 2:10-2:45 | `internal/approval` tests | "Export, escalation, and external sharing are gated. Pending, denied, missing, and out-of-scope approvals fail closed. This is the current agent safety boundary." |
 | 2:45-3:25 | `docs/mvp/quality/eval-plan.md` and `internal/eval` tests | "The repo includes deterministic golden eval cases for severity, citation coverage, recommendation accuracy, unsupported claims, redaction, prompt-injection resistance, and approval fail-closed behavior." |
 | 3:25-4:10 | `docs/mvp/quality/observability-and-cost-controls.md` and `internal/observability` tests | "The observability package records in-memory trace, retrieval, tool-call, approval, latency, token, budget, and eval events. It also defines cache candidates and model-routing notes, but it does not call a live provider or reconcile billing." |
-| 4:10-4:45 | This file | "The production-readiness case is the architecture discipline: grounded inputs, constrained actions, eval gates, redacted logs, budget limits, and clear known limits before external integrations are added." |
+| 4:10-4:45 | `docs/mvp/demo/loopback-demo-api.md` or `curl` output | "The local API wraps the deterministic review composer for a concrete walkthrough. It stays loopback-only and returns blocked approval-required actions; it is not a production API or integration layer." |
 
-Optional close: "The next production step would be a thin local API or CLI around the implemented demo composer, followed by persistence, real observability export, model-provider integration, and a reviewer UI."
+Optional close: "The next production step would be dry-run notification preview and scoped approval retry, followed later by persistence, real observability export, model-provider integration, and a reviewer UI."
 
-## Future Local Demo Surface
+## Local Demo Surface
 
-The recommended next demo improvement is a local, loopback-only walkthrough described in [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`; the local API, notification preview, approval retry, eval report endpoint, and trace report endpoint are still planned.
+The current local walkthrough is described in [Loopback Demo API](loopback-demo-api.md) and [Demo Surface Roadmap](demo-surface-roadmap.md). The package-level review composer is implemented in `internal/demo`, and the loopback-only review API is implemented in `internal/httpapi` with a thin `cmd/demo-api` server. Notification preview, approval retry, eval report endpoint, and trace report endpoint are still planned.
 
 The target hiring-manager arc is:
 
-- [ ] Call a planned local review endpoint with a synthetic incident ID or packet.
+- [x] Call the implemented local review endpoint with a synthetic incident ID or packet.
 - [x] Show the composed review output at package level: validation, citations, timeline, severity, recommendations, redacted brief, approval-required actions, and trace ID.
 - [ ] Attempt a planned dry-run Slack-shaped notification preview and show it is blocked before scoped approval.
 - [ ] Record a planned in-memory approval for the exact incident, action, and channel.
 - [ ] Retry the dry-run notification preview and show only the approved dry-run payload is allowed.
 - [ ] Show a planned local eval report and redacted trace report.
 
-Until the API and integration-shaped phases are implemented with strict TDD, the current demo remains the docs, package-level composer, code, and tests walkthrough above.
+Until the remaining integration-shaped phases are implemented with strict TDD, the current demo remains the docs, package-level composer, loopback review API, code, and tests walkthrough above.
 
 ## Architecture Diagram Checklist
 
@@ -80,11 +80,12 @@ Include these boxes and labels:
 - Cited timeline builder: implemented by `internal/timeline`.
 - Severity and recommended-action engine: implemented by `internal/severity`.
 - Shareable brief drafting: implemented by `internal/brief`; label as structured draft data, not rendered export.
-- Demo review composer: implemented by `internal/demo`; label as deterministic package-level composition, not an HTTP API.
+- Demo review composer: implemented by `internal/demo`; label as deterministic package-level composition.
+- Loopback review API: implemented by `internal/httpapi` and `cmd/demo-api`; label as demo-only and local, not a production API.
 - Human approval gate: implemented by `internal/approval`; label export, escalation, and external sharing as blocked unless approved in scope.
 - Eval harness: implemented by `internal/eval` over deterministic synthetic golden cases.
 - Observability and cost controls: implemented by `internal/observability` as in-memory events, token-budget checks, cache candidates, and routing notes.
-- Planned API boundary: mark CLI, HTTP API, persistence, identity, real integrations, dashboards, and provider calls as planned, not implemented.
+- Planned production boundary: mark general CLI workflows, persistence, identity, real integrations, dashboards, provider calls, and production API behavior as planned, not implemented.
 
 Use edge labels:
 
@@ -136,8 +137,8 @@ Use this one-page structure:
 
 ### Backend APIs
 
-- Implemented: explicit Go package APIs for ingestion, retrieval, timeline building, severity, brief drafting, approval, evals, and observability.
-- Planned: loopback-only hiring-manager demo API, CLI fallback, database, durable jobs, authentication, authorization, and integration adapters.
+- Implemented: explicit Go package APIs for ingestion, retrieval, timeline building, severity, brief drafting, approval, evals, observability, demo composition, and the loopback-only review demo API.
+- Planned: production API, general CLI fallback, database, durable jobs, authentication, authorization, and integration adapters.
 - Key point: the current code favors testable domain boundaries before service transport.
 
 ### Evals
@@ -167,7 +168,7 @@ Use this one-page structure:
 ### Production Readiness
 
 - Implemented: clear scope, deterministic package contracts, strict-TDD evidence, approval gates, evals, redaction, observability, and cost-control planning.
-- Planned: transport layer, persistence, identity, integrations, operational telemetry, incident response, deployment hardening, and compliance review.
+- Planned: production transport layer, persistence, identity, integrations, operational telemetry, incident response, deployment hardening, and compliance review.
 - Key point: the repo is not production-ready software; it is a production-readiness demonstration for a narrowly scoped applied-AI workflow.
 
 ## Final Packaging Checklist
