@@ -44,3 +44,4 @@ Execution and packaging:
 - [Task Prompts](mvp/execution/task-prompts.md)
 - [Strict TDD Rules](mvp/execution/tdd-rules.md)
 - [Demo Package](mvp/demo/demo-package.md)
+- [Demo Surface Roadmap](mvp/demo/demo-surface-roadmap.md)

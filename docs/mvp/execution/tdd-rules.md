@@ -23,6 +23,10 @@ These rules apply to every future coding task in the Fleet Incident Copilot MVP.
 - [ ] Approval tasks cover pending, denied, granted, out-of-scope, and immutable audit history.
 - [ ] Eval tasks cover normal, adversarial, and incomplete fixtures.
 - [ ] Observability tasks cover trace propagation, structured event fields, budget limits, and log redaction.
+- [ ] Demo composition tasks cover deterministic synthetic fixtures, package composition, citation preservation, redaction preservation, approval-required actions, and no hidden side effects.
+- [ ] API tasks cover status codes, methods, content type, malformed JSON, unknown IDs, synthetic-only rejection, deterministic response schema, and no external network dependency.
+- [ ] Notification-preview tasks cover dry-run-only behavior, redacted payloads, approval gating, no secrets, no webhook calls, and observable tool-call records.
+- [ ] Demo report tasks cover eval thresholds, trace lookup, missing trace behavior, budget-exceeded display, redaction, and no persistent storage.
 
 ## Red / Green / Refactor Flow
 
@@ -42,4 +46,5 @@ These rules apply to every future coding task in the Fleet Incident Copilot MVP.
 - [ ] Do not use real fleet, student, passenger, driver, law-enforcement, or customer data.
 - [ ] Do not connect live external services unless a future scope document explicitly allows it.
 - [ ] Do not allow model output alone to approve, export, escalate, or externally share evidence.
-
+- [ ] Do not document a local API, CLI command, notification preview, eval report, or trace report as runnable until tests and a local verification command prove it.
+- [ ] Do not call a dry-run notification preview a Slack integration unless real delivery is explicitly scoped, implemented, and tested.

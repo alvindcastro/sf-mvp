@@ -52,6 +52,21 @@ Target length: 3 to 5 minutes. The current demo should be framed as a docs, code
 
 Optional close: "The next production step would be a thin API or CLI around these package contracts, followed by persistence, real observability export, model-provider integration, and a reviewer UI."
 
+## Future Local Demo Surface
+
+The recommended next demo improvement is a local, loopback-only walkthrough described in [Demo Surface Roadmap](demo-surface-roadmap.md). It is planned, not implemented.
+
+The target hiring-manager arc is:
+
+- [ ] Call a planned local review endpoint with a synthetic incident ID or packet.
+- [ ] Show the composed review output: validation, citations, timeline, severity, recommendations, redacted brief, approval-required actions, and trace ID.
+- [ ] Attempt a planned dry-run Slack-shaped notification preview and show it is blocked before scoped approval.
+- [ ] Record a planned in-memory approval for the exact incident, action, and channel.
+- [ ] Retry the dry-run notification preview and show only the approved dry-run payload is allowed.
+- [ ] Show a planned local eval report and redacted trace report.
+
+Until those phases are implemented with strict TDD, the current demo remains the docs, code, and tests walkthrough above.
+
 ## Architecture Diagram Checklist
 
 Diagram title: **Fleet Incident Copilot MVP: Synthetic Incident Review With Safety Gates**
@@ -121,7 +136,7 @@ Use this one-page structure:
 ### Backend APIs
 
 - Implemented: explicit Go package APIs for ingestion, retrieval, timeline building, severity, brief drafting, approval, evals, and observability.
-- Planned: CLI, HTTP API, database, durable jobs, authentication, authorization, and integration adapters.
+- Planned: loopback-only hiring-manager demo API, CLI fallback, database, durable jobs, authentication, authorization, and integration adapters.
 - Key point: the current code favors testable domain boundaries before service transport.
 
 ### Evals

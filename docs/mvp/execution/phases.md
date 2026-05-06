@@ -191,3 +191,126 @@ Output: [Demo Package](../demo/demo-package.md). Phase 10 is complete as of 2026
 Prompt:
 
 > Create the Fleet Incident Copilot demo packaging materials. Include a repo narrative, short demo video script, architecture diagram checklist, one-page eval summary outline, and interview talking points. Tie the artifacts to RAG, agents, backend APIs, evals, monitoring, security, cost, and production readiness. Do not claim implementation that does not exist.
+
+## Phase 11: Hiring-Manager Demo Surface Roadmap
+
+Goal: brainstorm a concrete local demo surface without adding runtime code or overstating current implementation.
+
+- [x] Compare API, CLI, dry-run Slack notification, approval retry, eval report, and observability proof options.
+- [x] Choose a local loopback API plus dry-run Slack-shaped notification preview as the recommended future demo arc.
+- [x] Keep real Slack delivery, webhooks, model calls, persistence, identity, dashboards, and production compliance claims out of scope.
+- [x] Add future phase checklists for the demo surface.
+- [x] Add detailed future-agent prompts for strict-TDD code tasks.
+- [x] Confirm this phase adds Markdown planning artifacts only.
+
+Output: [Demo Surface Roadmap](../demo/demo-surface-roadmap.md). Phase 11 is complete as of 2026-05-06 and added Markdown planning artifacts only. No API, CLI, Slack integration, webhook, live provider call, database, or persistent store exists yet.
+
+Prompt:
+
+> Brainstorm a hiring-manager demo surface for Fleet Incident Copilot without writing code. Compare a local API, CLI, dry-run Slack-shaped notification preview, approval retry flow, eval report, and observability proof. Create or update Markdown docs with tickable phase tasks, detailed future-agent prompts, and implemented-versus-planned wording guardrails. Every future code task must require strict TDD. Do not claim the demo surface is implemented unless code and tests already prove it.
+
+## Phase 12: Review Composition Contract
+
+Goal: compose the existing package-level workflow into one deterministic demo review result.
+
+- [ ] Add machine-readable synthetic demo fixtures only after failing tests define fixture-loading expectations.
+- [ ] Define the smallest review response that includes validation status, retrieved citation refs, timeline entries, severity, recommendations, redacted brief, approval-required actions, and trace ID.
+- [ ] Reject non-synthetic or real-looking incident input before downstream composition.
+- [ ] Preserve existing citation, redaction, approval, eval, and observability package contracts.
+- [ ] Keep the composer in-memory and deterministic.
+- [ ] Document behavior only after tests prove it.
+
+Planned output: a small demo composition package or command boundary, plus documentation updates after implementation exists.
+
+Code-task prompt:
+
+> Implement a demo review composition contract using strict TDD. Start by naming the smallest observable behavior: composing one known synthetic incident into a review result with incident ID, trace ID, severity, citation refs, redacted brief fields, and approval-required actions. Add failing tests before production code for the happy path, unknown incident ID, non-synthetic input, missing evidence, citation preservation, redaction preservation, and approval-required action display. Confirm red for the expected reason. Implement only enough in-memory composition logic to pass using existing `internal/ingestion`, `internal/retrieval`, `internal/timeline`, `internal/severity`, `internal/brief`, `internal/approval`, and `internal/observability` contracts. Run the targeted tests and then `go test ./...`. Do not add an HTTP server, Slack behavior, database, persistence, live model call, or external service in this phase.
+
+Fixture-task prompt:
+
+> Add synthetic machine-readable demo fixtures using strict TDD before demo adapters depend on fixtures. Add a failing test such as `TestLoadDemoFixturesReturnsSyntheticNormalIncompleteAndAdversarialPackets`; confirm the targeted package test fails because the loader does not exist. Add rejection tests for non-synthetic fixture data, malformed JSON, missing media refs, and incident IDs without `FIC-SYN-`. Implement only a small loader that returns typed `ingestion.Packet` values by reusing `ingestion.IngestJSON`; do not bypass validation or duplicate business rules. Verify with the targeted fixture package test, `go test ./internal/ingestion ./internal/eval`, and `go test ./...`.
+
+## Phase 13: Loopback Demo API
+
+Goal: expose the demo review result through a local-only API suitable for a `curl` walkthrough.
+
+- [ ] Add `POST /demo/review` for synthetic incident ID or synthetic packet JSON input.
+- [ ] Return deterministic JSON with review output, approval-required actions, eval summary pointer if available, and trace ID.
+- [ ] Reject malformed JSON, unknown incident IDs, non-synthetic input, unsupported methods, and unsupported paths.
+- [ ] Keep the API loopback-only and stateless or in-memory.
+- [ ] Do not add auth, database, identity, live model calls, or external integrations.
+- [ ] Add exact run and `curl` commands only after tests and local verification pass.
+
+Planned output: a local demo API package or command, plus documentation updates after implementation exists.
+
+Code-task prompt:
+
+> Implement the loopback demo API using strict TDD. First add failing tests around the HTTP handler or local server boundary for `POST /demo/review`: valid synthetic incident ID, valid synthetic packet JSON, malformed JSON, unknown incident ID, non-synthetic input, wrong method, and unknown path. Confirm the tests fail before production code. Implement only enough handler wiring to call the demo review composer and return deterministic JSON. Keep the server local-only and do not add auth, persistence, Slack, webhooks, model providers, or external network calls. Verify with targeted tests, `go test ./...`, and one local `curl` command before documenting the command.
+
+## Phase 14: Dry-Run Slack-Shaped Notification Preview
+
+Goal: show an integration-shaped action while proving external sharing fails closed and no network delivery occurs.
+
+- [ ] Generate a Slack-shaped payload from the redacted brief only.
+- [ ] Require `delivery_mode: "dry_run"` for notification previews.
+- [ ] Block notification preview as external sharing unless a scoped approval exists.
+- [ ] Return blocked status, reason, and prepared payload when approval is missing.
+- [ ] Record a redacted tool-call observability event for preview generation.
+- [ ] Prove no Slack token, webhook URL, SDK, secret, or network request is used.
+
+Planned output: a dry-run notification preview package or API route, plus documentation updates after implementation exists.
+
+Code-task prompt:
+
+> Implement a dry-run Slack-shaped notification preview using strict TDD. Start with failing tests for payload generation from a redacted brief, mandatory `dry_run` delivery mode, missing approval blocked, denied approval blocked, out-of-scope approval blocked, scoped approval allowed, redacted observability event emission, and proof that no network sender is invoked. Confirm red before production changes. Implement only enough preview logic to return a Slack-shaped payload and approval status. Do not use Slack tokens, webhook URLs, SDKs, environment secrets, or outbound network calls. Run targeted tests and `go test ./...`; document the route or command only after local verification passes.
+
+## Phase 15: Scoped Approval Demo Retry
+
+Goal: make the approval gate visible in the demo by showing blocked and allowed dry-run attempts.
+
+- [ ] Add a local approval request path for one synthetic incident, action, and target channel.
+- [ ] Show missing, pending, denied, and out-of-scope approvals fail closed.
+- [ ] Show approved dry-run notification preview succeeds only for the exact incident, action, and channel.
+- [ ] Preserve append-only in-memory audit history.
+- [ ] Keep approvals human-supplied and deterministic.
+- [ ] Do not infer approval from model output, notification text, fixture names, or test setup shortcuts.
+
+Planned output: local approval demo route or command integration, plus documentation updates after implementation exists.
+
+Code-task prompt:
+
+> Implement the scoped approval retry demo using strict TDD. Add failing tests for creating an approval request, recording a human decision, retrying a dry-run notification while pending, retrying after denial, retrying with out-of-scope incident/action/channel, and retrying after exact scoped approval. Confirm failures before production changes. Implement only enough API or command wiring to use the existing approval gate semantics and preserve append-only audit history. Sensitive actions must fail closed by default. Run targeted tests and `go test ./...`; update demo docs only after the retry flow is locally proven.
+
+## Phase 16: Eval And Observability Demo Reports
+
+Goal: expose quality and operations proof through local reports.
+
+- [ ] Add a local eval report surface that runs deterministic golden cases and returns case count, metric scores, thresholds, and pass/fail status.
+- [ ] Add an in-memory trace report surface that returns redacted events by trace ID.
+- [ ] Include a budget-exceeded demo path using caller-supplied token counts.
+- [ ] Include eval summary and notification preview tool-call events when available.
+- [ ] Keep reports local and ephemeral.
+- [ ] Do not imply dashboards, alerts, OpenTelemetry export, persistent logs, provider billing reconciliation, or model benchmarking.
+
+Planned output: local eval and trace report routes or commands, plus documentation updates after implementation exists.
+
+Code-task prompt:
+
+> Implement local eval and observability demo reports using strict TDD. Start with failing tests for eval report generation, threshold pass/fail fields, deterministic case count, trace lookup by trace ID, redacted event fields, missing trace behavior, budget-exceeded event display, and no persistent storage. Confirm red before production changes. Implement only enough report logic to expose existing `internal/eval` and `internal/observability` behavior locally. Do not add dashboards, alerts, OpenTelemetry export, provider billing reconciliation, model calls, or persisted history. Run targeted tests and `go test ./...`; update the one-page eval summary and demo commands only after verification passes.
+
+## Phase 17: Demo Script Refresh
+
+Goal: convert the interview demo from a code/tests walkthrough to a local API walkthrough after the demo surface exists.
+
+- [ ] Update [Demo Package](../demo/demo-package.md) with verified local startup and `curl` commands.
+- [ ] Add a fallback path that still works with `go test ./...`.
+- [ ] Show one happy-path review, one blocked dry-run notification, one exact scoped approval retry, one eval report, and one trace report.
+- [ ] Fill the eval summary with numbers from the latest verified local run.
+- [ ] Update `README.md`, `docs/mvp/README.md`, and contributor guides only for commands that exist.
+- [ ] Confirm implemented-versus-planned wording is synchronized.
+
+Planned output: refreshed demo package and how-to documentation after Phases 12 through 16 are implemented.
+
+Documentation prompt:
+
+> Refresh the Fleet Incident Copilot demo package after the local demo surface is implemented. Use only verified commands and code-backed behavior. Include a short local startup path, exact `curl` commands, expected response highlights, a fallback `go test ./...` walkthrough, recording script, and implemented-versus-planned wording. Do not describe Slack delivery, production API behavior, persistence, live model calls, dashboards, identity, or external integrations unless those features are implemented and tested.

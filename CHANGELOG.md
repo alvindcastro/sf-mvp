@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-06 - Phase 11 Demo Surface Roadmap
+
+### Task: Plan Hiring-Manager Demo Surfaces
+
+- What: Added a documentation-only roadmap for future local demo surfaces: loopback review API, dry-run Slack-shaped notification preview, scoped approval retry, local eval report, and redacted trace report.
+- Why: Give the project a concrete hiring-manager demo path beyond `go test ./...` while preserving the current boundary that no API, CLI, Slack delivery, webhook, database, live model call, or external integration exists yet.
+- Where: [docs/mvp/demo/demo-surface-roadmap.md](docs/mvp/demo/demo-surface-roadmap.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [docs/mvp/execution/tdd-rules.md](docs/mvp/execution/tdd-rules.md), [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/README.md](docs/README.md), [README.md](README.md).
+- Validation: ran `git diff --check -- README.md CHANGELOG.md docs/mvp/README.md docs/README.md docs/mvp/demo/demo-package.md docs/mvp/demo/demo-surface-roadmap.md docs/mvp/execution/phases.md docs/mvp/execution/task-prompts.md docs/mvp/execution/tdd-rules.md` and `go test ./...`.
+
 ## 2026-05-06 - Contributor Guides
 
 ### Task: Add Local Developer Documentation Set
