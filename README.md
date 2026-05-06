@@ -2,7 +2,7 @@
 
 This workspace turns [research-report.md](research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, and Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags. No CLI, HTTP API, database, brief generator, approval workflow, export, escalation, or external sharing exists yet.
+The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags, and Phase 6 adds a strict-TDD Go brief package that returns cited, redacted, draft incident briefs for human review. No CLI, HTTP API, database, approval workflow, export, escalation, or external sharing exists yet.
 
 ## Planning Artifacts
 
@@ -13,6 +13,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [RAG Corpus And Grounding](docs/mvp/rag-corpus-and-grounding.md)
 - [Incident Timeline Builder](docs/mvp/incident-timeline-builder.md)
 - [Severity Classification And Recommended Actions](docs/mvp/severity-classification-and-recommended-actions.md)
+- [Shareable Incident Brief Drafting](docs/mvp/incident-brief-drafting.md)
 - [Scope And Guardrails](docs/mvp/scope.md)
 - [Phases And Tasks](docs/mvp/phases.md)
 - [Task Prompts](docs/mvp/task-prompts.md)
@@ -31,6 +32,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [x] Retrieve approved mock guidance with citation metadata and scope filtering.
 - [x] Build cited synthetic incident timelines from validated packet data.
 - [x] Classify severity and recommend next actions with deterministic rules.
+- [x] Draft cited, redacted incident briefs for human review.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
 
@@ -41,5 +43,6 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - Retrieval package: [internal/retrieval](internal/retrieval).
 - Timeline package: [internal/timeline](internal/timeline).
 - Severity package: [internal/severity](internal/severity).
-- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, and `go test ./internal/severity`.
+- Brief package: [internal/brief](internal/brief).
+- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, and `go test ./internal/brief`.
 - Full Go test command: `go test ./...`.

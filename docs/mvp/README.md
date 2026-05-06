@@ -15,11 +15,11 @@ Given a synthetic fleet incident packet, the system should:
 - [x] Build a cited incident timeline.
 - [x] Classify severity with rationale.
 - [x] Recommend next actions grounded in retrieved guidance.
-- [ ] Draft a shareable incident brief with citations and redactions.
+- [x] Draft a shareable incident brief with citations and redactions.
 - [ ] Require human approval before export, escalation, or external sharing.
 - [ ] Emit observability and eval signals for traces, retrieval quality, latency, token use, tool calls, and safety checks.
 
-This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, the Phase 3 Go retrieval package for approved mock guidance, the Phase 4 Go timeline package for cited synthetic incident timelines, and the Phase 5 Go severity package for deterministic classification, SOP-grounded recommendations, and approval-required flags. No CLI, HTTP API, database, brief, approval workflow, eval harness, export, escalation, or external-sharing runtime exists yet.
+This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, the Phase 3 Go retrieval package for approved mock guidance, the Phase 4 Go timeline package for cited synthetic incident timelines, the Phase 5 Go severity package for deterministic classification, SOP-grounded recommendations, and approval-required flags, and the Phase 6 Go brief package for cited, redacted draft incident briefs. No CLI, HTTP API, database, approval workflow, eval harness, export, escalation, or external-sharing runtime exists yet.
 
 ## Primary User
 
@@ -44,6 +44,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [RAG Corpus And Grounding](rag-corpus-and-grounding.md): Phase 3 mock guidance corpus, citation rules, scope filtering, no-match behavior, prompt-injection fixture, eval questions, and retrieval test evidence.
 - [Incident Timeline Builder](incident-timeline-builder.md): Phase 4 timeline output format, source-reference rules, uncertainty behavior, unsupported-claim behavior, test commands, and red-to-green evidence.
 - [Severity Classification And Recommended Actions](severity-classification-and-recommended-actions.md): Phase 5 deterministic severity rules, recommendation output, approval-required flags, test commands, and red-to-green evidence.
+- [Shareable Incident Brief Drafting](incident-brief-drafting.md): Phase 6 structured draft brief sections, citation rules, redaction behavior, fail-closed behavior, approval-state display, test commands, and red-to-green evidence.
 - [Scope And Guardrails](scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
 - [Phases And Tasks](phases.md): tickable phase plan with prompts.
 - [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.

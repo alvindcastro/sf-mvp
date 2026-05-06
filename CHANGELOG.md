@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 6 Shareable Incident Brief
+
+### Task: Add Phase 6 Brief TDD Coverage
+
+- What: Added failing-first brief tests for complete draft output, citation coverage, sensitive-field redaction, missing-evidence fail-closed behavior, uncertainty labeling, approval-state display, and unsupported-claim omission.
+- Where: [internal/brief/brief_test.go](internal/brief/brief_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 6 with strict TDD and make cited, redacted, human-reviewable brief behavior observable before adding production drafting logic.
+- How: Created synthetic in-test packet fixtures using the existing ingestion, retrieval, timeline, and severity contracts; ran `go test ./internal/brief`; observed the expected red build failure for missing `Draft`, `StatusDraft`, result, section, redaction, approval-state, and fail-closed error types.
+
+### Task: Implement Structured Brief Drafting
+
+- What: Added a brief package that drafts structured incident summaries, cited timelines, severity rationale, recommended actions, and approval-state sections; carries source references; redacts vehicle, route, location, GPS-label, sensitive transcript, sensitive still-frame, and coordinate-like text; labels uncertainty; and fails closed when required evidence is missing.
+- Where: [internal/brief/brief.go](internal/brief/brief.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide the first Phase 6 shareable draft surface without rendering documents, approving actions, exporting evidence, escalating incidents, or sharing externally.
+- How: Implemented `Draft(packet ingestion.Packet, timelineResult timeline.Result, severityResult severity.Result) (Result, error)` with deterministic section assembly, source conversion, required-evidence validation, `MissingEvidenceError`, structured redaction tracking, blocked approval-state display, and `StatusDraft`; then confirmed `go test ./internal/brief` passed.
+
+### Task: Document Phase 6 Brief Contract
+
+- What: Added the Phase 6 brief drafting contract, runtime surface, section list, citation rules, redaction rules, approval-state behavior, current limits, test command, and red-to-green evidence.
+- Where: [docs/mvp/incident-brief-drafting.md](docs/mvp/incident-brief-drafting.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, eval planning, future-agent prompts, and behavior documentation synchronized after adding brief drafting runtime behavior.
+- How: Created the dedicated Phase 6 artifact, checked off the Phase 6 tracker, linked the new Go package, added Phase 6 eval mappings for citations, redaction, fail-closed behavior, uncertainty, and approval-state display, and pointed the reusable brief prompt at the new contract.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview and scope language to include the Phase 6 brief package and targeted test command without claiming a renderer, approval workflow, eval harness, export, escalation, external sharing, CLI, HTTP API, database, or persistence exists.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Avoid stale statements that said no brief generator existed while preserving the remaining workflow boundaries and later-phase limits.
+- How: Added the Phase 6 artifact to documentation maps, marked cited and redacted draft brief behavior as implemented, recorded the shareable-output redaction trust boundary, and kept human approval workflow and sensitive-action execution out of implemented scope.
+
 ## 2026-05-06 - Phase 5 Severity Classification And Recommended Actions
 
 ### Task: Add Phase 5 Severity TDD Coverage

@@ -72,7 +72,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Incident Brief
 
-> Implement incident brief drafting using strict TDD. Add failing tests for a complete brief, citation inclusion, sensitive-field redaction, missing-evidence failure, uncertainty labeling, and approval-state display. Confirm the tests fail before production changes. Then implement the smallest drafting layer needed to pass. Acceptance requires no uncited factual claims, no sensitive leakage in shareable output, and tests showing draft creation fails closed when required evidence is absent.
+> Implement or refine incident brief drafting using strict TDD. Use `docs/mvp/incident-brief-drafting.md` as the current Phase 6 behavior contract. Add failing tests for a complete brief, citation inclusion, sensitive-field redaction, missing-evidence failure, uncertainty labeling, and approval-state display. Confirm the tests fail before production changes. Then implement the smallest drafting layer needed to pass. Acceptance requires no uncited factual claims, no sensitive leakage in shareable output, and tests showing draft creation fails closed when required evidence is absent.
 
 ## Code Prompt: Approval Workflow
 

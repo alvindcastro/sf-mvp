@@ -107,14 +107,16 @@ Code-task prompt:
 
 ## Phase 6: Shareable Incident Brief
 
-Goal: future implementation drafts a concise, cited, redacted brief for human review.
+Goal: draft a concise, cited, redacted brief for human review.
 
-- [ ] Include incident summary, cited timeline, severity, rationale, next actions, and approval state.
-- [ ] Include citations for factual claims.
-- [ ] Redact sensitive fields from shareable output.
-- [ ] Fail closed when required evidence is missing.
-- [ ] Label uncertainty clearly.
-- [ ] Keep the brief draft human-reviewable, not final by default.
+- [x] Include incident summary, cited timeline, severity, rationale, next actions, and approval state.
+- [x] Include citations for factual claims.
+- [x] Redact sensitive fields from shareable output.
+- [x] Fail closed when required evidence is missing.
+- [x] Label uncertainty clearly.
+- [x] Keep the brief draft human-reviewable, not final by default.
+
+Output: [Shareable Incident Brief Drafting](incident-brief-drafting.md) and the Go package [internal/brief](../../internal/brief). Phase 6 is complete as of 2026-05-06 and added the first strict-TDD structured draft brief implementation for cited, redacted human-review output only.
 
 Code-task prompt:
 
