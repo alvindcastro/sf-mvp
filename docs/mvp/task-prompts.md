@@ -40,7 +40,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Planning Prompt: Synthetic Incident Specs
 
-> Create Markdown specs for at least five synthetic incident packets. Include low, medium, high, unknown, and adversarial/missing-data cases. For each packet, list required fields, expected timeline outputs, expected severity, expected recommendations, expected brief behavior, and acceptance criteria. Use fake data only.
+> Create or update `docs/mvp/synthetic-incident-packets.md` with Markdown specs for at least five synthetic incident packets. Include low, medium, high, unknown, and adversarial/missing-data cases. For each packet, list required fields, expected timeline outputs, expected severity, expected recommendations, expected brief behavior, and acceptance criteria. Use fake data only and do not create machine-readable fixtures until a future strict-TDD code phase introduces failing tests first.
 
 ## Planning Prompt: RAG Corpus
 
@@ -85,4 +85,3 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 ## Code Prompt: Observability And Cost
 
 > Implement observability and cost controls using strict TDD. Add failing tests for trace propagation, structured event emission, token recording, latency recording, budget-limit behavior, and sensitive-field redaction in logs. Confirm red before production changes. Then implement instrumentation with the smallest surface needed. Acceptance requires structured logs, useful debugging signals, no sensitive evidence leakage, and tests for normal and budget-exceeded paths.
-

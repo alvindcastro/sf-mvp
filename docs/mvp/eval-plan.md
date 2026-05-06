@@ -13,6 +13,8 @@
 
 ## Fixture Set
 
+Phase 1 defines human-readable candidate packet specs in [Synthetic Incident Packets](synthetic-incident-packets.md). Machine-readable eval fixtures are not implemented yet and must be introduced through a future strict-TDD code phase.
+
 - [ ] Normal low-severity incident.
 - [ ] Normal medium-severity incident.
 - [ ] Normal high-severity incident.
@@ -21,6 +23,14 @@
 - [ ] Prompt-injection incident through retrieved mock document text.
 - [ ] Sensitive-data redaction incident.
 - [ ] Budget-limit incident that exceeds model-call allowance.
+
+Phase 1 packet mapping:
+
+- Low severity: `FIC-SYN-001`.
+- Medium severity: `FIC-SYN-002`.
+- High severity: `FIC-SYN-003`.
+- Unknown severity with missing evidence: `FIC-SYN-004`.
+- Adversarial or missing-data behavior: `FIC-SYN-005`.
 
 ## Metrics
 
@@ -57,4 +67,3 @@
 - [ ] Known failure modes.
 - [ ] Risk controls.
 - [ ] Next improvements.
-

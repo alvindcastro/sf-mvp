@@ -23,12 +23,14 @@ Prompt:
 
 Goal: define realistic fake incidents and expected workflow outputs without introducing real data.
 
-- [ ] Design at least five synthetic incident packets.
-- [ ] Include incident ID, vehicle ID, route, timestamp, location label, event type, telemetry samples, media references, transcript notes, and still-frame notes.
-- [ ] Include low, medium, high, unknown, and adversarial/missing-data cases.
-- [ ] Define expected timeline, severity, recommended actions, and brief requirements for each packet.
-- [ ] Mark all records as synthetic.
-- [ ] Confirm no implementation code is needed until fixtures and acceptance criteria are settled.
+- [x] Design at least five synthetic incident packets.
+- [x] Include incident ID, vehicle ID, route, timestamp, location label, event type, telemetry samples, media references, transcript notes, and still-frame notes.
+- [x] Include low, medium, high, unknown, and adversarial/missing-data cases.
+- [x] Define expected timeline, severity, recommended actions, and brief requirements for each packet.
+- [x] Mark all records as synthetic.
+- [x] Confirm no implementation code is needed until fixtures and acceptance criteria are settled.
+
+Output: [Synthetic Incident Packets](synthetic-incident-packets.md). Phase 1 is complete as of 2026-05-06 and added Markdown planning artifacts only.
 
 Prompt:
 
