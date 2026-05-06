@@ -68,7 +68,7 @@ Use these prompts for future agents. Documentation prompts may edit Markdown onl
 
 ## Code Prompt: Severity And Actions
 
-> Implement severity classification and recommended next actions using strict TDD. First add failing tests for low, medium, high, unknown, conflicting-signal, explanation, and approval-required scenarios. Confirm red before writing production code. Implement deterministic rules first and keep any model-dependent behavior out of the initial path unless it is already covered by tests. Acceptance requires explainable outputs, SOP-grounded recommendations, approval flags for sensitive actions, and tests proving no escalation or export occurs automatically.
+> Implement or refine severity classification and recommended next actions using strict TDD. Use `docs/mvp/severity-classification-and-recommended-actions.md` as the current Phase 5 behavior contract. First add failing tests for low, medium, high, unknown, conflicting-signal, explanation, and approval-required scenarios. Confirm red before writing production code. Implement deterministic rules first and keep any model-dependent behavior out of the initial path unless it is already covered by tests. Acceptance requires explainable outputs, SOP-grounded recommendations, approval flags for sensitive actions, and tests proving no escalation or export occurs automatically.
 
 ## Code Prompt: Incident Brief
 

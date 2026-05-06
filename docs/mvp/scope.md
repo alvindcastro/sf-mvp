@@ -9,8 +9,8 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [ ] Transcript notes or still-frame descriptions instead of real video processing.
 - [ ] Small mock RAG corpus made from public-product-style notes, mock SOPs, and troubleshooting guidance.
 - [x] Grounded timeline generation with citations.
-- [ ] Severity classification with rationale.
-- [ ] Recommended next actions tied to retrieved guidance.
+- [x] Severity classification with rationale.
+- [x] Recommended next actions tied to retrieved guidance.
 - [ ] Shareable incident brief drafting with redaction.
 - [ ] Human approval before export, escalation, or external sharing.
 - [ ] Structured logs for traces, retrieval, tool calls, latency, token use, approval decisions, and eval outcomes.
@@ -54,13 +54,15 @@ These checklists define MVP scope and guardrails. Unless an item is specifically
 - [ ] Sensitive actions fail closed unless a human approval record exists.
 - [ ] Shareable outputs must redact sensitive fields by default.
 - [ ] Logs must be useful without leaking sensitive evidence.
-- [ ] Model output must not be the only source of truth for severity, approval, export, or escalation.
+- [x] Model output must not be the only source of truth for severity, approval, export, or escalation.
 
 Implemented boundary as of Phase 2: `internal/ingestion` validates synthetic packet JSON, rejects non-synthetic records and non-synthetic media references, and returns accepted or rejected audit events.
 
-Implemented boundary as of Phase 3: `internal/retrieval` filters mock guidance by exact workflow and scope before ranking, returns stable citation metadata, returns no matches instead of invented guidance, and marks retrieved snippets as `retrieved_data`. Later workflow phases still need severity, recommendation, approval, persistence, and observability boundaries.
+Implemented boundary as of Phase 3: `internal/retrieval` filters mock guidance by exact workflow and scope before ranking, returns stable citation metadata, returns no matches instead of invented guidance, and marks retrieved snippets as `retrieved_data`. Downstream reasoning uses these citations as data rather than instructions.
 
-Implemented boundary as of Phase 4: `internal/timeline` builds deterministic timeline entries from validated synthetic packet data, preserves structured source references for factual claims, carries approved retrieved citation references as guidance metadata, labels unavailable or conflicting evidence as uncertain, and does not infer visual facts, approval, export, escalation, injury, plate, or external-sharing claims. Later phases still need severity, recommendations, brief drafting, approval, persistence, observability, and eval boundaries.
+Implemented boundary as of Phase 4: `internal/timeline` builds deterministic timeline entries from validated synthetic packet data, preserves structured source references for factual claims, carries approved retrieved citation references as guidance metadata, labels unavailable or conflicting evidence as uncertain, and does not infer visual facts, approval, export, escalation, injury, plate, or external-sharing claims.
+
+Implemented boundary as of Phase 5: `internal/severity` classifies low, medium, high, and unknown severity with deterministic rules, returns recommendation explanations with packet and retrieved-guidance source references, marks conflicting timeline signals as unknown, treats adversarial transcript content as untrusted data, and flags export, escalation, and external sharing as approval-required but not approved. Later phases still need brief drafting, human approval records and enforcement, persistence, observability, and eval boundaries.
 
 ## Demo Path
 
@@ -68,10 +70,10 @@ Implemented boundary as of Phase 4: `internal/timeline` builds deterministic tim
 - [ ] Validate and load packet contents.
 - [ ] Retrieve mock SOPs and troubleshooting notes.
 - [ ] Produce a cited timeline.
-- [ ] Classify severity and explain the basis.
-- [ ] Recommend next actions.
+- [x] Classify severity and explain the basis.
+- [x] Recommend next actions.
 - [ ] Draft a shareable brief.
-- [ ] Show approval is required before export or escalation.
+- [x] Show approval is required before export or escalation.
 - [ ] Show eval and observability summary.
 
 ## Definition Of MVP Done

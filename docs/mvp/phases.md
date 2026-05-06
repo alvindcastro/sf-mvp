@@ -90,14 +90,16 @@ Code-task prompt:
 
 ## Phase 5: Severity Classification And Recommended Actions
 
-Goal: future implementation classifies severity and recommends next actions through explainable rules before optional model judgment.
+Goal: classify severity and recommend next actions through explainable rules before optional model judgment.
 
-- [ ] Define low, medium, high, and unknown severity rules.
-- [ ] Prefer deterministic rule output for the MVP.
-- [ ] Isolate model-dependent judgment behind an interface if added later.
-- [ ] Tie recommendations to severity, event type, and retrieved SOPs.
-- [ ] Explain why each recommendation was made.
-- [ ] Flag export, escalation, and external sharing as approval-required.
+- [x] Define low, medium, high, and unknown severity rules.
+- [x] Prefer deterministic rule output for the MVP.
+- [x] Isolate model-dependent judgment behind an interface if added later.
+- [x] Tie recommendations to severity, event type, and retrieved SOPs.
+- [x] Explain why each recommendation was made.
+- [x] Flag export, escalation, and external sharing as approval-required.
+
+Output: [Severity Classification And Recommended Actions](severity-classification-and-recommended-actions.md) and the Go package [internal/severity](../../internal/severity). Phase 5 is complete as of 2026-05-06 and added the first strict-TDD deterministic severity and recommendation implementation for synthetic packet review only.
 
 Code-task prompt:
 
