@@ -13,11 +13,11 @@ Goal: establish the product promise, scope, trust boundaries, and review criteri
 - [x] Define the demo narrative and success criteria.
 - [x] Confirm no code is needed for this phase.
 
-Output: [Product Frame](product-frame.md). Phase 0 is complete as of 2026-05-06 and added Markdown planning artifacts only.
+Output: [Product Frame](../overview/product-frame.md). Phase 0 is complete as of 2026-05-06 and added Markdown planning artifacts only.
 
 Prompt:
 
-> Using `research-report.md`, write or refine the product frame for Fleet Incident Copilot. Include the user, problem, demo promise, scope boundaries, approval gates, success criteria, and explicit non-goals. Do not write code. Keep the output in Markdown and preserve a checklist that future implementation agents can follow.
+> Using `docs/research/research-report.md`, write or refine the product frame for Fleet Incident Copilot. Include the user, problem, demo promise, scope boundaries, approval gates, success criteria, and explicit non-goals. Do not write code. Keep the output in Markdown and preserve a checklist that future implementation agents can follow.
 
 ## Phase 1: Synthetic Evidence And Workflow Contract
 
@@ -30,7 +30,7 @@ Goal: define realistic fake incidents and expected workflow outputs without intr
 - [x] Mark all records as synthetic.
 - [x] Confirm no implementation code is needed until fixtures and acceptance criteria are settled.
 
-Output: [Synthetic Incident Packets](synthetic-incident-packets.md). Phase 1 is complete as of 2026-05-06 and added Markdown planning artifacts only.
+Output: [Synthetic Incident Packets](../workflow/synthetic-incident-packets.md). Phase 1 is complete as of 2026-05-06 and added Markdown planning artifacts only.
 
 Prompt:
 
@@ -47,7 +47,7 @@ Goal: validate synthetic incident packets before any reasoning step can use them
 - [x] Emit an ingestion audit event.
 - [x] Keep all examples synthetic.
 
-Output: [Incident Packet Ingestion](incident-packet-ingestion.md) and the Go package [internal/ingestion](../../internal/ingestion). Phase 2 is complete as of 2026-05-06 and added the first strict-TDD runtime implementation for synthetic packet validation only.
+Output: [Incident Packet Ingestion](../workflow/incident-packet-ingestion.md) and the Go package [internal/ingestion](../../../internal/ingestion). Phase 2 is complete as of 2026-05-06 and added the first strict-TDD runtime implementation for synthetic packet validation only.
 
 Code-task prompt:
 
@@ -65,7 +65,7 @@ Goal: future implementation retrieves only approved mock guidance and preserves 
 - [x] Include a prompt-injection document fixture that must be treated as untrusted content.
 - [x] Define retrieval eval questions before implementation.
 
-Output: [RAG Corpus And Grounding](rag-corpus-and-grounding.md) and the Go package [internal/retrieval](../../internal/retrieval). Phase 3 is complete as of 2026-05-06 and added the first strict-TDD retrieval implementation for approved mock guidance only.
+Output: [RAG Corpus And Grounding](../workflow/rag-corpus-and-grounding.md) and the Go package [internal/retrieval](../../../internal/retrieval). Phase 3 is complete as of 2026-05-06 and added the first strict-TDD retrieval implementation for approved mock guidance only.
 
 Code-task prompt:
 
@@ -82,7 +82,7 @@ Goal: future implementation builds a chronological, grounded account from packet
 - [x] Avoid unsupported claims.
 - [x] Produce a timeline format suitable for the incident brief.
 
-Output: [Incident Timeline Builder](incident-timeline-builder.md) and the Go package [internal/timeline](../../internal/timeline). Phase 4 is complete as of 2026-05-06 and added the first strict-TDD timeline implementation for grounded synthetic packet timelines only.
+Output: [Incident Timeline Builder](../workflow/incident-timeline-builder.md) and the Go package [internal/timeline](../../../internal/timeline). Phase 4 is complete as of 2026-05-06 and added the first strict-TDD timeline implementation for grounded synthetic packet timelines only.
 
 Code-task prompt:
 
@@ -99,7 +99,7 @@ Goal: classify severity and recommend next actions through explainable rules bef
 - [x] Explain why each recommendation was made.
 - [x] Flag export, escalation, and external sharing as approval-required.
 
-Output: [Severity Classification And Recommended Actions](severity-classification-and-recommended-actions.md) and the Go package [internal/severity](../../internal/severity). Phase 5 is complete as of 2026-05-06 and added the first strict-TDD deterministic severity and recommendation implementation for synthetic packet review only.
+Output: [Severity Classification And Recommended Actions](../workflow/severity-classification-and-recommended-actions.md) and the Go package [internal/severity](../../../internal/severity). Phase 5 is complete as of 2026-05-06 and added the first strict-TDD deterministic severity and recommendation implementation for synthetic packet review only.
 
 Code-task prompt:
 
@@ -116,7 +116,7 @@ Goal: draft a concise, cited, redacted brief for human review.
 - [x] Label uncertainty clearly.
 - [x] Keep the brief draft human-reviewable, not final by default.
 
-Output: [Shareable Incident Brief Drafting](incident-brief-drafting.md) and the Go package [internal/brief](../../internal/brief). Phase 6 is complete as of 2026-05-06 and added the first strict-TDD structured draft brief implementation for cited, redacted human-review output only.
+Output: [Shareable Incident Brief Drafting](../workflow/incident-brief-drafting.md) and the Go package [internal/brief](../../../internal/brief). Phase 6 is complete as of 2026-05-06 and added the first strict-TDD structured draft brief implementation for cited, redacted human-review output only.
 
 Code-task prompt:
 
@@ -133,11 +133,11 @@ Goal: block sensitive actions until a human decision exists.
 - [x] Allow approved actions only within the approved scope.
 - [x] Preserve append-only audit history.
 
-Output: [Human Approval Workflow](human-approval-workflow.md) and the Go package [internal/approval](../../internal/approval). Phase 7 is complete as of 2026-05-06 and added the first strict-TDD in-memory human approval gate for scoped sensitive-action callbacks only.
+Output: [Human Approval Workflow](../workflow/human-approval-workflow.md) and the Go package [internal/approval](../../../internal/approval). Phase 7 is complete as of 2026-05-06 and added the first strict-TDD in-memory human approval gate for scoped sensitive-action callbacks only.
 
 Code-task prompt:
 
-> Implement or refine the human approval gate using strict TDD. Use `docs/mvp/human-approval-workflow.md` as the current Phase 7 behavior contract. First add or update failing tests for pending approval creation, denied approval, granted approval, blocked action before approval, scoped approval, and immutable audit history. Confirm red before production code. Then implement the smallest workflow that passes. Acceptance requires sensitive actions to fail closed, audit records to be append-only, final decisions to avoid in-place rewrites, and tests proving denied or out-of-scope actions cannot execute.
+> Implement or refine the human approval gate using strict TDD. Use `docs/mvp/workflow/human-approval-workflow.md` as the current Phase 7 behavior contract. First add or update failing tests for pending approval creation, denied approval, granted approval, blocked action before approval, scoped approval, and immutable audit history. Confirm red before production code. Then implement the smallest workflow that passes. Acceptance requires sensitive actions to fail closed, audit records to be append-only, final decisions to avoid in-place rewrites, and tests proving denied or out-of-scope actions cannot execute.
 
 ## Phase 8: Eval Harness
 
@@ -152,11 +152,11 @@ Goal: measure groundedness, citations, severity, recommendations, safety, approv
 - [x] Check redaction behavior.
 - [x] Define release thresholds.
 
-Output: [Eval Plan](eval-plan.md) and the Go package [internal/eval](../../internal/eval). Phase 8 is complete as of 2026-05-06 and added a strict-TDD in-memory eval harness for deterministic synthetic golden cases only.
+Output: [Eval Plan](../quality/eval-plan.md) and the Go package [internal/eval](../../../internal/eval). Phase 8 is complete as of 2026-05-06 and added a strict-TDD in-memory eval harness for deterministic synthetic golden cases only.
 
 Code-task prompt:
 
-> Implement or refine the MVP eval harness using strict TDD. Use `docs/mvp/eval-plan.md` as the current Phase 8 behavior contract. Start with failing tests for loading eval cases, scoring expected severity, checking citation coverage, detecting unsupported claims, verifying redaction, checking recommendation accuracy, checking approval fail-closed behavior, and handling prompt-injection fixtures. Confirm failures before implementation. Then implement the smallest evaluator. Acceptance requires repeatable local evals, clear pass/fail thresholds, normal/adversarial/incomplete fixtures, and a test summary showing what went red and green.
+> Implement or refine the MVP eval harness using strict TDD. Use `docs/mvp/quality/eval-plan.md` as the current Phase 8 behavior contract. Start with failing tests for loading eval cases, scoring expected severity, checking citation coverage, detecting unsupported claims, verifying redaction, checking recommendation accuracy, checking approval fail-closed behavior, and handling prompt-injection fixtures. Confirm failures before implementation. Then implement the smallest evaluator. Acceptance requires repeatable local evals, clear pass/fail thresholds, normal/adversarial/incomplete fixtures, and a test summary showing what went red and green.
 
 ## Phase 9: Observability And Cost Controls
 
@@ -169,11 +169,11 @@ Goal: expose enough runtime signals to explain quality, safety, latency, and spe
 - [x] Define caching candidates.
 - [x] Define model-routing notes for hosted, smaller, or self-hosted models.
 
-Output: [Observability And Cost Controls](observability-and-cost-controls.md) and the Go package [internal/observability](../../internal/observability). Phase 9 is complete as of 2026-05-06 and added a strict-TDD package-level observability and budget-control surface for synthetic MVP workflows only.
+Output: [Observability And Cost Controls](../quality/observability-and-cost-controls.md) and the Go package [internal/observability](../../../internal/observability). Phase 9 is complete as of 2026-05-06 and added a strict-TDD package-level observability and budget-control surface for synthetic MVP workflows only.
 
 Code-task prompt:
 
-> Implement or refine observability and cost controls using strict TDD. Use `docs/mvp/observability-and-cost-controls.md` as the current Phase 9 behavior contract. Add failing tests for trace propagation, structured event emission, token recording, latency recording, budget-limit behavior, and sensitive-field redaction in logs. Confirm red before production changes. Then implement instrumentation with the smallest surface needed. Acceptance requires structured logs, useful debugging signals, no sensitive evidence leakage, and tests for normal and budget-exceeded paths.
+> Implement or refine observability and cost controls using strict TDD. Use `docs/mvp/quality/observability-and-cost-controls.md` as the current Phase 9 behavior contract. Add failing tests for trace propagation, structured event emission, token recording, latency recording, budget-limit behavior, and sensitive-field redaction in logs. Confirm red before production changes. Then implement instrumentation with the smallest surface needed. Acceptance requires structured logs, useful debugging signals, no sensitive evidence leakage, and tests for normal and budget-exceeded paths.
 
 ## Phase 10: Demo Package
 
@@ -186,7 +186,7 @@ Goal: package the MVP so it communicates production readiness clearly.
 - [x] Prepare interview talking points for RAG, agents, backend APIs, evals, monitoring, security, cost, and production readiness.
 - [x] Confirm no feature is described as implemented unless it exists.
 
-Output: [Demo Package](demo-package.md). Phase 10 is complete as of 2026-05-06 and added Markdown demo packaging materials only: a repo narrative, target-role mapping, short demo script, architecture diagram checklist, one-page eval summary outline, interview talking points, and implemented-versus-planned wording rules.
+Output: [Demo Package](../demo/demo-package.md). Phase 10 is complete as of 2026-05-06 and added Markdown demo packaging materials only: a repo narrative, target-role mapping, short demo script, architecture diagram checklist, one-page eval summary outline, interview talking points, and implemented-versus-planned wording rules.
 
 Prompt:
 

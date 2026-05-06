@@ -15,7 +15,7 @@ Phase 8 adds the first deterministic local eval harness for Fleet Incident Copil
 
 ## Runtime Surface
 
-- Package: [internal/eval](../../internal/eval).
+- Package: [internal/eval](../../../internal/eval).
 - Golden cases: `GoldenCases() []Case`.
 - Evaluation entry point: `Run(cases []Case, thresholds Thresholds) Report`.
 - Default release gates: `DefaultThresholds() Thresholds`.
@@ -31,7 +31,7 @@ The harness composes the implemented MVP path:
 
 ## Golden Eval Cases
 
-All cases are synthetic and in memory. They mirror [Synthetic Incident Packets](synthetic-incident-packets.md) and use the approved mock guidance corpus expected by [RAG Corpus And Grounding](rag-corpus-and-grounding.md).
+All cases are synthetic and in memory. They mirror [Synthetic Incident Packets](../workflow/synthetic-incident-packets.md) and use the approved mock guidance corpus expected by [RAG Corpus And Grounding](../workflow/rag-corpus-and-grounding.md).
 
 | Case | Kind | Expected severity | Expected recommendation checks | Expected guidance refs |
 | --- | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ All cases are synthetic and in memory. They mirror [Synthetic Incident Packets](
 ## Red-To-Green Evidence
 
 - Red: `go test ./internal/eval` initially failed because `GoldenCases`, `CaseKind`, `Run`, and `DefaultThresholds` did not exist.
-- Green: after implementing [internal/eval/eval.go](../../internal/eval/eval.go), `go test ./internal/eval` passed.
+- Green: after implementing [internal/eval/eval.go](../../../internal/eval/eval.go), `go test ./internal/eval` passed.
 
 ## Current Limits
 

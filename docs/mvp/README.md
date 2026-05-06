@@ -39,18 +39,29 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 
 ## Artifact Map
 
-- [Product Frame](product-frame.md): Phase 0 product promise, primary user, approval gates, non-goals, demo narrative, and success criteria.
-- [Synthetic Incident Packets](synthetic-incident-packets.md): Phase 1 synthetic evidence records and workflow-output contract.
-- [Incident Packet Ingestion](incident-packet-ingestion.md): Phase 2 packet schema, validation rules, audit events, test commands, and red-to-green evidence.
-- [RAG Corpus And Grounding](rag-corpus-and-grounding.md): Phase 3 mock guidance corpus, citation rules, scope filtering, no-match behavior, prompt-injection fixture, eval questions, and retrieval test evidence.
-- [Incident Timeline Builder](incident-timeline-builder.md): Phase 4 timeline output format, source-reference rules, uncertainty behavior, unsupported-claim behavior, test commands, and red-to-green evidence.
-- [Severity Classification And Recommended Actions](severity-classification-and-recommended-actions.md): Phase 5 deterministic severity rules, recommendation output, approval-required flags, test commands, and red-to-green evidence.
-- [Shareable Incident Brief Drafting](incident-brief-drafting.md): Phase 6 structured draft brief sections, citation rules, redaction behavior, fail-closed behavior, approval-state display, test commands, and red-to-green evidence.
-- [Human Approval Workflow](human-approval-workflow.md): Phase 7 approval request model, decision capture, scoped enforcement rules, append-only audit behavior, test commands, and red-to-green evidence.
-- [Eval Plan](eval-plan.md): Phase 8 local eval harness behavior, golden cases, scoring rules, release thresholds, test commands, and red-to-green evidence.
-- [Observability And Cost Controls](observability-and-cost-controls.md): Phase 9 trace IDs, structured events, latency, token usage, invalid token usage, budget limits, redaction behavior, cache candidates, model-routing notes, test commands, and red-to-green evidence.
-- [Scope And Guardrails](scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
-- [Phases And Tasks](phases.md): tickable phase plan with prompts.
-- [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.
-- [Strict TDD Rules](tdd-rules.md): non-negotiable rules for code tasks.
-- [Demo Package](demo-package.md): Phase 10 repo narrative, target-role mapping, demo video script, architecture diagram checklist, one-page eval summary outline, interview talking points, and implemented-versus-planned wording rules.
+Product and scope:
+
+- [Product Frame](overview/product-frame.md): Phase 0 product promise, primary user, approval gates, non-goals, demo narrative, and success criteria.
+- [Scope And Guardrails](overview/scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
+
+Workflow behavior:
+
+- [Synthetic Incident Packets](workflow/synthetic-incident-packets.md): Phase 1 synthetic evidence records and workflow-output contract.
+- [Incident Packet Ingestion](workflow/incident-packet-ingestion.md): Phase 2 packet schema, validation rules, audit events, test commands, and red-to-green evidence.
+- [RAG Corpus And Grounding](workflow/rag-corpus-and-grounding.md): Phase 3 mock guidance corpus, citation rules, scope filtering, no-match behavior, prompt-injection fixture, eval questions, and retrieval test evidence.
+- [Incident Timeline Builder](workflow/incident-timeline-builder.md): Phase 4 timeline output format, source-reference rules, uncertainty behavior, unsupported-claim behavior, test commands, and red-to-green evidence.
+- [Severity Classification And Recommended Actions](workflow/severity-classification-and-recommended-actions.md): Phase 5 deterministic severity rules, recommendation output, approval-required flags, test commands, and red-to-green evidence.
+- [Shareable Incident Brief Drafting](workflow/incident-brief-drafting.md): Phase 6 structured draft brief sections, citation rules, redaction behavior, fail-closed behavior, approval-state display, test commands, and red-to-green evidence.
+- [Human Approval Workflow](workflow/human-approval-workflow.md): Phase 7 approval request model, decision capture, scoped enforcement rules, append-only audit behavior, test commands, and red-to-green evidence.
+
+Quality and operations:
+
+- [Eval Plan](quality/eval-plan.md): Phase 8 local eval harness behavior, golden cases, scoring rules, release thresholds, test commands, and red-to-green evidence.
+- [Observability And Cost Controls](quality/observability-and-cost-controls.md): Phase 9 trace IDs, structured events, latency, token usage, invalid token usage, budget limits, redaction behavior, cache candidates, model-routing notes, test commands, and red-to-green evidence.
+
+Execution and packaging:
+
+- [Phases And Tasks](execution/phases.md): tickable phase plan with prompts.
+- [Task Prompts](execution/task-prompts.md): reusable prompts for future implementation or documentation work.
+- [Strict TDD Rules](execution/tdd-rules.md): non-negotiable rules for code tasks.
+- [Demo Package](demo/demo-package.md): Phase 10 repo narrative, target-role mapping, demo video script, architecture diagram checklist, one-page eval summary outline, interview talking points, and implemented-versus-planned wording rules.

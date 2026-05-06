@@ -13,7 +13,7 @@ Phase 0 establishes the product promise, scope, trust boundaries, and review cri
 
 ## Source Basis
 
-The product frame is grounded in [research-report.md](../../research-report.md). The report positions the strongest demo as a senior applied-AI engineering workflow for fleet safety: onboard evidence, telemetry, policy retrieval, controlled automation, approval gates, evals, observability, security, and cost controls.
+The product frame is grounded in [research-report.md](../../research/research-report.md). The report positions the strongest demo as a senior applied-AI engineering workflow for fleet safety: onboard evidence, telemetry, policy retrieval, controlled automation, approval gates, evals, observability, security, and cost controls.
 
 The frame intentionally keeps the MVP tighter than a production fleet platform. It uses synthetic incident packets, mock SOP or troubleshooting content, and reviewable outputs so the demo can prove architecture and product judgment without using real customer, driver, passenger, student, law-enforcement, or fleet evidence data.
 

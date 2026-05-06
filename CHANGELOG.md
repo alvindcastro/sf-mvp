@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-06 - Contributor Guides
+
+### Task: Add Local Developer Documentation Set
+
+- What: Added standalone contributor guides for how-tos, developer workflow, nice-to-know repo context, testing commands, and troubleshooting.
+- Why: Give future local work a direct entry point for common commands, package boundaries, synthetic-data guardrails, strict-TDD expectations, and common failure modes without overstating the current package-level runtime surface.
+- Where: [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/testing.md](docs/testing.md), [docs/troubleshooting.md](docs/troubleshooting.md), [docs/README.md](docs/README.md), [README.md](README.md).
+- Validation: ran `git diff --check -- CHANGELOG.md README.md docs/README.md docs/how-tos.md docs/developer-guide.md docs/nice-to-knows.md docs/testing.md docs/troubleshooting.md` and `go test ./...`.
+
+## 2026-05-06 - Documentation Organization
+
+### Task: Group Markdown Artifacts By Purpose
+
+- What: Moved the source research report under `docs/research`, grouped MVP docs under `overview`, `workflow`, `quality`, `execution`, and `demo`, and added a top-level documentation index.
+- Why: Make the Markdown set easier to scan and maintain without changing the implemented runtime surface.
+- Where: [docs/README.md](docs/README.md), [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp](docs/mvp), [docs/research/research-report.md](docs/research/research-report.md).
+- Validation: checked relative Markdown links, ran `git diff --check -- README.md CHANGELOG.md docs`, and ran `go test ./...`.
+
 ## 2026-05-06 - Phase 10 Demo Package
 
 ### Task: Audit Implemented Surface For Demo Truthfulness
@@ -13,7 +31,7 @@
 ### Task: Create Phase 10 Demo Packaging Artifact
 
 - What: Replaced the placeholder Phase 10 checklist with usable demo packaging materials: implemented-versus-planned wording rules, repo narrative, fleet safety operator mapping, short demo script, architecture diagram checklist, one-page eval summary outline, interview talking points, and final packaging checklist.
-- Where: [docs/mvp/demo-package.md](docs/mvp/demo-package.md).
+- Where: [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Complete Phase 10 with materials that communicate production-readiness thinking for RAG, constrained agent boundaries, Go package APIs, evals, monitoring, security, cost controls, and known limits without overstating implementation.
 - How: Spawned a parallel worker agent to draft the artifact, reviewed the resulting diff, kept current behavior described as package-level and in-memory, and marked live providers, vector search, real tools, persistence, identity, dashboards, and production audit/compliance guarantees as planned rather than implemented.
@@ -21,7 +39,7 @@
 ### Task: Synchronize Phase 10 Documentation State
 
 - What: Marked Phase 10 complete, updated the MVP overview and scope completion language, tightened the reusable demo-package prompt, and noted the new Phase 10 packaging surface in the root README.
-- Where: [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md), [README.md](README.md).
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [README.md](README.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, artifact map, definition of done, future-agent prompt, and repository overview aligned after adding the final demo packaging artifact.
 - How: Checked all Phase 10 tasks, added an output note, changed the artifact map from placeholder checklist language to finished packaging-material language, marked the under-five-minute demo and package deliverable done, and preserved explicit limits around end-to-end runtime behavior and production integrations.
@@ -29,10 +47,10 @@
 ### Task: Verify Phase 10 Documentation Changes
 
 - What: Verified the documentation-only Phase 10 change did not break the existing Go package suite.
-- Where: [docs/mvp/demo-package.md](docs/mvp/demo-package.md), [docs/mvp/phases.md](docs/mvp/phases.md), [CHANGELOG.md](CHANGELOG.md), [internal](internal).
+- Where: [docs/mvp/demo/demo-package.md](docs/mvp/demo/demo-package.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [CHANGELOG.md](CHANGELOG.md), [internal](internal).
 - When: 2026-05-06, America/Vancouver.
 - Why: Confirm Phase 10 packaging is repo-consistent and that no runtime package regressed while the docs were updated.
-- How: Ran `go test ./...` successfully after the documentation sync. Ran `git diff --check`; the full-worktree check reported trailing whitespace only in pre-existing dirty files outside the Phase 10 edit set (`.idea/.gitignore` and `research-report.md`), so the Phase 10 files were checked directly instead of changing unrelated work.
+- How: Ran `go test ./...` successfully after the documentation sync. Ran `git diff --check`; the full-worktree check reported trailing whitespace only in pre-existing dirty files outside the Phase 10 edit set (`.idea/.gitignore` and `docs/research/research-report.md`), so the Phase 10 files were checked directly instead of changing unrelated work.
 
 ## 2026-05-06 - Phase 9 Observability And Cost Controls
 
@@ -63,7 +81,7 @@
 ### Task: Document Phase 9 Observability Contract
 
 - What: Added the Phase 9 behavior contract, runtime surface, structured event model, recorded signals, redaction rules, budget controls, cache candidates, model-routing notes, current limits, test commands, and red-to-green evidence.
-- Where: [docs/mvp/observability-and-cost-controls.md](docs/mvp/observability-and-cost-controls.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- Where: [docs/mvp/quality/observability-and-cost-controls.md](docs/mvp/quality/observability-and-cost-controls.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, future-agent prompt, and observability behavior documentation synchronized after adding Phase 9 runtime behavior and the invalid-token guard.
 - How: Created the dedicated Phase 9 artifact, checked off the Phase 9 tracker, linked the new Go package, changed the reusable observability prompt to “implement or refine,” documented `ErrInvalidTokenUsage` and `model_call.rejected`, and kept external telemetry, persistent logs, live providers, billing reconciliation, live routing, cache storage, CLI, HTTP API, and database behavior out of scope.
@@ -71,7 +89,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview and scope language to include the Phase 9 observability package, targeted test command, package-level structured events, caller-supplied token usage, invalid token usage, budget-limit failures, cache candidates, and model-routing notes.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Remove stale statements that observability, token tracking, and cost controls were unimplemented while preserving the limits around external telemetry, persistence, live providers, billing, real integrations, CLI, HTTP API, and database behavior.
 - How: Added the Phase 9 artifact and package to documentation maps, marked observability and cost-control thinking as implemented, recorded the Phase 9 trust boundary, and clarified that the current surface is in-memory and package-level only.
@@ -79,7 +97,7 @@
 ### Task: Verify Phase 9 Observability Surface
 
 - What: Verified the targeted observability package, full Go test suite, vet checks, and package coverage after implementation and documentation sync.
-- Where: [internal/observability](internal/observability), [docs/mvp/observability-and-cost-controls.md](docs/mvp/observability-and-cost-controls.md), [CHANGELOG.md](CHANGELOG.md).
+- Where: [internal/observability](internal/observability), [docs/mvp/quality/observability-and-cost-controls.md](docs/mvp/quality/observability-and-cost-controls.md), [CHANGELOG.md](CHANGELOG.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Confirm Phase 9 is locally repeatable and does not break earlier MVP phase packages.
 - How: Ran `go test ./internal/observability`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; all completed successfully, with `internal/observability` reporting 94.3% statement coverage.
@@ -105,7 +123,7 @@
 ### Task: Document Phase 8 Eval Contract
 
 - What: Reworked the eval plan into the Phase 8 behavior contract, checked off Phase 8, documented golden cases, scoring rules, release thresholds, current limits, test commands, and red-to-green evidence.
-- Where: [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- Where: [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, future-agent prompt, and eval behavior documentation synchronized after adding runtime eval harness behavior.
 - How: Linked the new Go package from the Phase 8 tracker, changed the reusable eval prompt to “implement or refine,” recorded strict default thresholds, and kept observability, token and cost metrics, CLI reporting, HTTP API, persistence, and real integrations out of Phase 8 scope.
@@ -113,7 +131,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview and scope language to include the Phase 8 eval package and targeted test command while keeping observability and cost controls deferred.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Remove stale statements that said no eval harness existed and split eval completion from future observability work.
 - How: Added the eval artifact and package to documentation maps, marked deterministic local evals as implemented, added the Phase 8 trust boundary, and clarified that trace IDs, structured logs, latency, token usage, budget metrics, CLI, HTTP API, database, and real integrations remain unimplemented.
@@ -121,7 +139,7 @@
 ### Task: Verify Phase 8 Eval Harness
 
 - What: Verified the targeted eval package, full Go test suite, vet checks, and package coverage after the implementation and documentation sync.
-- Where: [internal/eval](internal/eval), [README.md](README.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md).
+- Where: [internal/eval](internal/eval), [README.md](README.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Confirm Phase 8 is locally repeatable and does not break earlier MVP phase packages.
 - How: Ran `go test ./internal/eval`, `go test ./...`, `go vet ./...`, and `go test -cover ./...`; all completed successfully, with `internal/eval` reporting 86.0% statement coverage.
@@ -147,7 +165,7 @@
 ### Task: Document Phase 7 Approval Contract
 
 - What: Added the Phase 7 approval workflow contract, runtime surface, approval request model, enforcement rules, audit history behavior, current limits, test command, and red-to-green evidence.
-- Where: [docs/mvp/human-approval-workflow.md](docs/mvp/human-approval-workflow.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- Where: [docs/mvp/workflow/human-approval-workflow.md](docs/mvp/workflow/human-approval-workflow.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, eval planning, future-agent prompt, and behavior documentation synchronized after adding approval workflow runtime behavior.
 - How: Created the dedicated Phase 7 artifact, checked off the Phase 7 tracker, linked the new Go package, added Phase 7 eval mappings for pending, denied, approved, scoped, and immutable-audit cases, and pointed the reusable approval prompt at the new contract.
@@ -155,7 +173,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview and scope language to include the Phase 7 approval package and targeted test command without claiming persistence, identity, real export, real escalation, external sharing, observability, eval harness, CLI, HTTP API, or database behavior exists.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md), [docs/mvp/product-frame.md](docs/mvp/product-frame.md), [docs/mvp/synthetic-incident-packets.md](docs/mvp/synthetic-incident-packets.md), [docs/mvp/severity-classification-and-recommended-actions.md](docs/mvp/severity-classification-and-recommended-actions.md), [docs/mvp/incident-brief-drafting.md](docs/mvp/incident-brief-drafting.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md), [docs/mvp/overview/product-frame.md](docs/mvp/overview/product-frame.md), [docs/mvp/workflow/synthetic-incident-packets.md](docs/mvp/workflow/synthetic-incident-packets.md), [docs/mvp/workflow/severity-classification-and-recommended-actions.md](docs/mvp/workflow/severity-classification-and-recommended-actions.md), [docs/mvp/workflow/incident-brief-drafting.md](docs/mvp/workflow/incident-brief-drafting.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Remove stale statements that human approval records and enforcement were future work while preserving the remaining limits around actual sensitive-action integrations and production runtime surfaces.
 - How: Added the Phase 7 artifact to documentation maps, marked human approval gating as implemented, recorded the fail-closed approval trust boundary, clarified Phase 5 approval flags and Phase 6 approval-state display as separate from Phase 7 decision records, and kept real export, escalation, and external sharing out of implemented scope.
@@ -181,7 +199,7 @@
 ### Task: Document Phase 6 Brief Contract
 
 - What: Added the Phase 6 brief drafting contract, runtime surface, section list, citation rules, redaction rules, approval-state behavior, current limits, test command, and red-to-green evidence.
-- Where: [docs/mvp/incident-brief-drafting.md](docs/mvp/incident-brief-drafting.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- Where: [docs/mvp/workflow/incident-brief-drafting.md](docs/mvp/workflow/incident-brief-drafting.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, eval planning, future-agent prompts, and behavior documentation synchronized after adding brief drafting runtime behavior.
 - How: Created the dedicated Phase 6 artifact, checked off the Phase 6 tracker, linked the new Go package, added Phase 6 eval mappings for citations, redaction, fail-closed behavior, uncertainty, and approval-state display, and pointed the reusable brief prompt at the new contract.
@@ -189,7 +207,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview and scope language to include the Phase 6 brief package and targeted test command without claiming a renderer, approval workflow, eval harness, export, escalation, external sharing, CLI, HTTP API, database, or persistence exists.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Avoid stale statements that said no brief generator existed while preserving the remaining workflow boundaries and later-phase limits.
 - How: Added the Phase 6 artifact to documentation maps, marked cited and redacted draft brief behavior as implemented, recorded the shareable-output redaction trust boundary, and kept human approval workflow and sensitive-action execution out of implemented scope.
@@ -215,7 +233,7 @@
 ### Task: Document Phase 5 Severity Contract
 
 - What: Added the Phase 5 severity and recommendation contract, runtime surface, deterministic rule table, recommendation output shape, approval-required flag behavior, current limits, test command, and red-to-green evidence.
-- Where: [docs/mvp/severity-classification-and-recommended-actions.md](docs/mvp/severity-classification-and-recommended-actions.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- Where: [docs/mvp/workflow/severity-classification-and-recommended-actions.md](docs/mvp/workflow/severity-classification-and-recommended-actions.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, eval planning, future-agent prompts, and behavior documentation synchronized after adding severity runtime behavior.
 - How: Created the dedicated Phase 5 artifact, checked off the Phase 5 tracker, linked the new Go package, added Phase 5 eval mappings for severity and recommendations, and pointed the reusable severity prompt at the new contract.
@@ -223,7 +241,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview and scope language to include the Phase 5 severity package and targeted test command without claiming a brief generator, approval workflow, export, escalation, external sharing, observability, or eval harness exists.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Avoid stale statements that said no severity classifier existed while preserving the remaining workflow boundaries and later-phase limits.
 - How: Added the Phase 5 artifact to documentation maps, marked severity and recommendations as implemented, recorded the deterministic severity trust boundary, and kept human approval workflow and sensitive-action execution out of implemented scope.
@@ -249,7 +267,7 @@
 ### Task: Document Phase 4 Timeline Contract
 
 - What: Added the Phase 4 timeline builder contract, output format, input dependencies, source-reference rules, uncertainty behavior, unsupported-claim behavior, current limits, test command, and red-to-green evidence.
-- Where: [docs/mvp/incident-timeline-builder.md](docs/mvp/incident-timeline-builder.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md).
+- Where: [docs/mvp/workflow/incident-timeline-builder.md](docs/mvp/workflow/incident-timeline-builder.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, eval planning, and behavior documentation synchronized after adding timeline runtime behavior.
 - How: Created the dedicated Phase 4 artifact, checked off the Phase 4 tracker, linked the new Go package, and added future eval checks for ordering, citation coverage, uncertainty, conflicts, and unsupported claims.
@@ -257,7 +275,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview language to include the Phase 4 timeline package and its targeted test command without claiming severity, brief, approval, export, escalation, or external sharing behavior.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Avoid stale statements that said no timeline builder existed while preserving the remaining unimplemented workflow boundaries.
 - How: Added the Phase 4 artifact to documentation maps, marked cited timeline generation as implemented, recorded the new timeline trust boundary, and verified `go test ./internal/timeline`, `go test ./internal/ingestion ./internal/retrieval ./internal/timeline`, and `go test ./...` passed.
@@ -283,7 +301,7 @@
 ### Task: Document Phase 3 Corpus And Grounding Contract
 
 - What: Added the Phase 3 mock RAG corpus contract, document metadata, mock SOPs, troubleshooting notes, citation format, no-match behavior, scope filtering behavior, prompt-injection fixture, eval questions, red-to-green evidence, and current limits.
-- Where: [docs/mvp/rag-corpus-and-grounding.md](docs/mvp/rag-corpus-and-grounding.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- Where: [docs/mvp/workflow/rag-corpus-and-grounding.md](docs/mvp/workflow/rag-corpus-and-grounding.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker, eval planning, future-agent prompts, and implementation behavior synchronized after adding the retrieval slice.
 - How: Created the dedicated Phase 3 artifact, checked off the Phase 3 tracker, added retrieval eval mappings, and updated the reusable RAG planning prompt to point at the new source document.
@@ -291,7 +309,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Updated repository overview language to include the Phase 3 retrieval package and its targeted test command without claiming a complete end-to-end incident workflow.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Avoid stale statements that said retrieval did not exist while preserving limits around timeline, severity, brief, approval, export, escalation, and external sharing.
 - How: Added the Phase 3 artifact to documentation maps, updated runtime-surface notes, marked the retrieved-content trust boundary as implemented, and kept later workflow phases unchecked.
@@ -317,7 +335,7 @@
 ### Task: Document Phase 2 Ingestion Contract
 
 - What: Added the Phase 2 ingestion schema, validation rules, audit event contract, test commands, red-to-green evidence, and current runtime limits.
-- Where: [docs/mvp/incident-packet-ingestion.md](docs/mvp/incident-packet-ingestion.md), [docs/mvp/phases.md](docs/mvp/phases.md).
+- Where: [docs/mvp/workflow/incident-packet-ingestion.md](docs/mvp/workflow/incident-packet-ingestion.md), [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep implementation behavior, acceptance criteria, and phase status synchronized after adding runtime code.
 - How: Created a dedicated Phase 2 artifact and checked off the Phase 2 tracker with links to the document and Go package.
@@ -325,7 +343,7 @@
 ### Task: Update Repository State Documentation
 
 - What: Replaced documentation-only current-state language with an accurate Phase 2 runtime summary and linked the ingestion artifact.
-- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Avoid overclaiming a complete app while no longer claiming the repo has no application code or tests.
 - How: Added runtime-surface notes, marked only the ingestion validation promise complete, and recorded the implemented untrusted-packet boundary while leaving later phases unchecked.
@@ -335,7 +353,7 @@
 ### Task: Create Synthetic Incident Packet Contract
 
 - What: Added the Phase 1 synthetic incident packet specs and shared workflow-output contract.
-- Where: [docs/mvp/synthetic-incident-packets.md](docs/mvp/synthetic-incident-packets.md).
+- Where: [docs/mvp/workflow/synthetic-incident-packets.md](docs/mvp/workflow/synthetic-incident-packets.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Define realistic fake evidence and expected workflow outputs before any ingestion, reasoning, eval, or fixture implementation begins.
 - How: Created five explicitly synthetic records covering low, medium, high, unknown, and adversarial or missing-data scenarios with required fields, telemetry samples, media references, transcript notes, still-frame notes, expected timelines, severity, recommendations, brief requirements, missing-data behavior, and acceptance criteria.
@@ -343,7 +361,7 @@
 ### Task: Mark Phase 1 Complete
 
 - What: Checked off the Phase 1 planning checklist and linked the synthetic packet output artifact.
-- Where: [docs/mvp/phases.md](docs/mvp/phases.md).
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Keep the phase tracker aligned with completed Markdown planning work while avoiding any claim that runtime behavior exists.
 - How: Marked only the Phase 1 documentation items complete and added a dated note that Phase 1 added Markdown planning artifacts only.
@@ -359,7 +377,7 @@
 ### Task: Sync Future Prompt And Eval References
 
 - What: Pointed future documentation agents and eval planning at the Phase 1 packet contract.
-- Where: [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md).
+- Where: [docs/mvp/execution/task-prompts.md](docs/mvp/execution/task-prompts.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Preserve the Phase 1 source of truth for future fixture, eval, and implementation work without creating machine-readable fixtures prematurely.
 - How: Updated the synthetic incident planning prompt to name the Markdown contract file and added a Phase 1 packet mapping for future eval fixture work.
@@ -369,15 +387,15 @@
 ### Task: Create Product Frame
 
 - What: Added the Phase 0 product frame for Fleet Incident Copilot.
-- Where: [docs/mvp/product-frame.md](docs/mvp/product-frame.md).
+- Where: [docs/mvp/overview/product-frame.md](docs/mvp/overview/product-frame.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Establish the primary user, problem, MVP promise, scope boundaries, trust boundaries, approval gates, prohibited claims, demo narrative, and success criteria before implementation.
-- How: Grounded the frame in [research-report.md](research-report.md), kept all data synthetic, and explicitly confirmed no code is needed for Phase 0.
+- How: Grounded the frame in [research-report.md](docs/research/research-report.md), kept all data synthetic, and explicitly confirmed no code is needed for Phase 0.
 
 ### Task: Mark Phase 0 Complete
 
 - What: Checked off the Phase 0 planning checklist and linked the output artifact.
-- Where: [docs/mvp/phases.md](docs/mvp/phases.md).
+- Where: [docs/mvp/execution/phases.md](docs/mvp/execution/phases.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Make the phase tracker reflect completed planning work without implying runtime behavior exists.
 - How: Marked only the Phase 0 documentation items complete and added a dated note that Phase 0 added Markdown planning artifacts only.
@@ -393,7 +411,7 @@
 ### Task: Refine Scope Guardrails
 
 - What: Added explicit prohibited claims and approval-gate rules.
-- Where: [docs/mvp/scope.md](docs/mvp/scope.md).
+- Where: [docs/mvp/overview/scope.md](docs/mvp/overview/scope.md).
 - When: 2026-05-06, America/Vancouver.
 - Why: Make the review boundaries visible before any implementation agent starts future work.
 - How: Added scope notes that distinguish planning checklists from implemented behavior, recorded Go as the future backend language, and made export, escalation, and external sharing approval requirements explicit.

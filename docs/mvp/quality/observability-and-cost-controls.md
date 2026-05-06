@@ -13,7 +13,7 @@ Phase 9 adds the first package-level observability and budget-control surface fo
 
 ## Runtime Surface
 
-- Package: [internal/observability](../../internal/observability).
+- Package: [internal/observability](../../../internal/observability).
 - Recorder constructor: `NewRecorder(now func() time.Time, budget Budget) *Recorder`.
 - Workflow entry point: `StartWorkflow(incidentID string, sensitive SensitiveData) (Workflow, error)`.
 - Event history: `Events() []Event`.
@@ -104,7 +104,7 @@ The package records routing notes only. It does not select providers, call model
 ## Red-To-Green Evidence
 
 - Red: `go test ./internal/observability` initially failed because `NewRecorder`, `Budget`, `SensitiveData`, workflow, event, budget, cache, and model-routing types did not exist.
-- Green: after implementing [internal/observability/observability.go](../../internal/observability/observability.go), `go test ./internal/observability` passed.
+- Green: after implementing [internal/observability/observability.go](../../../internal/observability/observability.go), `go test ./internal/observability` passed.
 - Regression red: `go test ./internal/observability` failed after adding the negative token usage test because `ErrInvalidTokenUsage` and `model_call.rejected` did not exist.
 - Regression green: after adding the invalid token guard, `go test ./internal/observability` passed.
 
