@@ -2,7 +2,7 @@
 
 This workspace turns [research-report.md](research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, and Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines. No CLI, HTTP API, database, severity classifier, brief generator, approval workflow, export, escalation, or external sharing exists yet.
+The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance, Phase 4 adds a strict-TDD Go timeline package that produces cited synthetic incident timelines, and Phase 5 adds a strict-TDD Go severity package that returns deterministic severity, SOP-grounded recommendations, and approval-required flags. No CLI, HTTP API, database, brief generator, approval workflow, export, escalation, or external sharing exists yet.
 
 ## Planning Artifacts
 
@@ -12,6 +12,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [Incident Packet Ingestion](docs/mvp/incident-packet-ingestion.md)
 - [RAG Corpus And Grounding](docs/mvp/rag-corpus-and-grounding.md)
 - [Incident Timeline Builder](docs/mvp/incident-timeline-builder.md)
+- [Severity Classification And Recommended Actions](docs/mvp/severity-classification-and-recommended-actions.md)
 - [Scope And Guardrails](docs/mvp/scope.md)
 - [Phases And Tasks](docs/mvp/phases.md)
 - [Task Prompts](docs/mvp/task-prompts.md)
@@ -29,6 +30,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [x] Validate synthetic incident packets before downstream reasoning can use them.
 - [x] Retrieve approved mock guidance with citation metadata and scope filtering.
 - [x] Build cited synthetic incident timelines from validated packet data.
+- [x] Classify severity and recommend next actions with deterministic rules.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
 
@@ -38,5 +40,6 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - Ingestion package: [internal/ingestion](internal/ingestion).
 - Retrieval package: [internal/retrieval](internal/retrieval).
 - Timeline package: [internal/timeline](internal/timeline).
-- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, and `go test ./internal/timeline`.
+- Severity package: [internal/severity](internal/severity).
+- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, and `go test ./internal/severity`.
 - Full Go test command: `go test ./...`.

@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 5 Severity Classification And Recommended Actions
+
+### Task: Add Phase 5 Severity TDD Coverage
+
+- What: Added failing-first severity tests for low hard-brake classification, medium stop-arm classification, high collision classification, unknown incomplete-evidence classification, conflicting telemetry handling, recommendation explanations, SOP citation grounding, adversarial transcript handling, deterministic no-model behavior, and approval-required flags.
+- Where: [internal/severity/severity_test.go](internal/severity/severity_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 5 with strict TDD and make severity, recommendation, and approval-flag behavior observable before adding production classifier logic.
+- How: Created synthetic in-test packet fixtures using the existing ingestion, retrieval, and timeline contracts; ran `go test ./internal/severity`; observed the expected red build failure for missing `Classify`, result, recommendation, source, and approval types.
+
+### Task: Implement Deterministic Severity And Recommendation Rules
+
+- What: Added a severity package that classifies low, medium, high, and unknown severity with deterministic rules, treats conflicting timeline telemetry as unknown, treats adversarial transcript content as untrusted data, returns explained recommendations with packet and retrieved-guidance sources, records `ModelJudgmentUsed: false`, and marks export, escalation, and external sharing as approval-required but not approved.
+- Where: [internal/severity/severity.go](internal/severity/severity.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Provide the first explainable Phase 5 reasoning surface without calling a model, executing sensitive actions, or introducing approval workflow behavior before Phase 7.
+- How: Implemented `Classify(packet ingestion.Packet, timelineResult timeline.Result, guidance retrieval.Result) Result` with event-type rules, timeline-conflict detection, `retrieved_data` citation filtering, recommendation action labels, source deduplication, and fail-closed sensitive-action approval flags; then confirmed `go test ./internal/severity` passed.
+
+### Task: Document Phase 5 Severity Contract
+
+- What: Added the Phase 5 severity and recommendation contract, runtime surface, deterministic rule table, recommendation output shape, approval-required flag behavior, current limits, test command, and red-to-green evidence.
+- Where: [docs/mvp/severity-classification-and-recommended-actions.md](docs/mvp/severity-classification-and-recommended-actions.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, eval planning, future-agent prompts, and behavior documentation synchronized after adding severity runtime behavior.
+- How: Created the dedicated Phase 5 artifact, checked off the Phase 5 tracker, linked the new Go package, added Phase 5 eval mappings for severity and recommendations, and pointed the reusable severity prompt at the new contract.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview and scope language to include the Phase 5 severity package and targeted test command without claiming a brief generator, approval workflow, export, escalation, external sharing, observability, or eval harness exists.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Avoid stale statements that said no severity classifier existed while preserving the remaining workflow boundaries and later-phase limits.
+- How: Added the Phase 5 artifact to documentation maps, marked severity and recommendations as implemented, recorded the deterministic severity trust boundary, and kept human approval workflow and sensitive-action execution out of implemented scope.
+
 ## 2026-05-06 - Phase 4 Incident Timeline Builder
 
 ### Task: Add Phase 4 Timeline TDD Coverage
