@@ -11,7 +11,7 @@ The MVP should show production judgment, not just LLM usage. It should make it e
 Given a synthetic fleet incident packet, the system should:
 
 - [x] Validate and ingest structured synthetic event metadata, GPS or speed samples, transcript notes, and still-frame notes.
-- [ ] Retrieve relevant mock SOP or troubleshooting guidance.
+- [x] Retrieve relevant mock SOP or troubleshooting guidance.
 - [ ] Build a cited incident timeline.
 - [ ] Classify severity with rationale.
 - [ ] Recommend next actions grounded in retrieved guidance.
@@ -19,7 +19,7 @@ Given a synthetic fleet incident packet, the system should:
 - [ ] Require human approval before export, escalation, or external sharing.
 - [ ] Emit observability and eval signals for traces, retrieval quality, latency, token use, tool calls, and safety checks.
 
-This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts plus the Phase 2 Go ingestion validator. No CLI, HTTP API, database, retrieval, timeline, severity, brief, approval, eval, export, escalation, or external-sharing runtime exists yet.
+This is the target promise, not complete end-to-end runtime behavior. The current repository state has Phase 0 and Phase 1 planning artifacts, the Phase 2 Go ingestion validator, and the Phase 3 Go retrieval package for approved mock guidance. No CLI, HTTP API, database, timeline, severity, brief, approval, eval, export, escalation, or external-sharing runtime exists yet.
 
 ## Primary User
 
@@ -41,6 +41,7 @@ A fleet safety operator reviewing an incident packet after a school bus, transit
 - [Product Frame](product-frame.md): Phase 0 product promise, primary user, approval gates, non-goals, demo narrative, and success criteria.
 - [Synthetic Incident Packets](synthetic-incident-packets.md): Phase 1 synthetic evidence records and workflow-output contract.
 - [Incident Packet Ingestion](incident-packet-ingestion.md): Phase 2 packet schema, validation rules, audit events, test commands, and red-to-green evidence.
+- [RAG Corpus And Grounding](rag-corpus-and-grounding.md): Phase 3 mock guidance corpus, citation rules, scope filtering, no-match behavior, prompt-injection fixture, eval questions, and retrieval test evidence.
 - [Scope And Guardrails](scope.md): in-scope, out-of-scope, trust boundaries, and demo path.
 - [Phases And Tasks](phases.md): tickable phase plan with prompts.
 - [Task Prompts](task-prompts.md): reusable prompts for future implementation or documentation work.

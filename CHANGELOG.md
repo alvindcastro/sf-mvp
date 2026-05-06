@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-06 - Phase 3 RAG Corpus And Grounding
+
+### Task: Add Phase 3 Retrieval TDD Coverage
+
+- What: Added failing-first retrieval tests for relevant SOP retrieval, citation metadata, no-match behavior, workflow and scope filtering, hostile retrieved text, and deterministic result limiting.
+- Where: [internal/retrieval/retrieval_test.go](internal/retrieval/retrieval_test.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Start Phase 3 with strict TDD and make the grounding boundary observable before adding production retrieval logic.
+- How: Created synthetic in-test mock SOP and troubleshooting documents, ran `go test ./internal/retrieval`, and observed the expected red build failure for missing retrieval APIs and types.
+
+### Task: Implement Deterministic Mock Guidance Retrieval
+
+- What: Added an in-memory retrieval package with document/query/result types, exact workflow and scope filtering, lexical scoring, stable citation references, snippets, and `retrieved_data` content-role marking.
+- Where: [internal/retrieval/retrieval.go](internal/retrieval/retrieval.go).
+- When: 2026-05-06, America/Vancouver.
+- Why: Allow future reasoning phases to retrieve only approved mock guidance with citations while keeping retrieved text untrusted.
+- How: Implemented `NewRetriever` and `Retrieve` with fail-closed empty results for empty workflow or scope, filtering before ranking, deterministic ordering by score and source ID, and citation references formatted as `SOURCE_ID#YYYY-MM-DD`.
+
+### Task: Document Phase 3 Corpus And Grounding Contract
+
+- What: Added the Phase 3 mock RAG corpus contract, document metadata, mock SOPs, troubleshooting notes, citation format, no-match behavior, scope filtering behavior, prompt-injection fixture, eval questions, red-to-green evidence, and current limits.
+- Where: [docs/mvp/rag-corpus-and-grounding.md](docs/mvp/rag-corpus-and-grounding.md), [docs/mvp/phases.md](docs/mvp/phases.md), [docs/mvp/eval-plan.md](docs/mvp/eval-plan.md), [docs/mvp/task-prompts.md](docs/mvp/task-prompts.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Keep the phase tracker, eval planning, future-agent prompts, and implementation behavior synchronized after adding the retrieval slice.
+- How: Created the dedicated Phase 3 artifact, checked off the Phase 3 tracker, added retrieval eval mappings, and updated the reusable RAG planning prompt to point at the new source document.
+
+### Task: Update Repository State Documentation
+
+- What: Updated repository overview language to include the Phase 3 retrieval package and its targeted test command without claiming a complete end-to-end incident workflow.
+- Where: [README.md](README.md), [docs/mvp/README.md](docs/mvp/README.md), [docs/mvp/scope.md](docs/mvp/scope.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Avoid stale statements that said retrieval did not exist while preserving limits around timeline, severity, brief, approval, export, escalation, and external sharing.
+- How: Added the Phase 3 artifact to documentation maps, updated runtime-surface notes, marked the retrieved-content trust boundary as implemented, and kept later workflow phases unchecked.
+
 ## 2026-05-06 - Phase 2 Incident Packet Ingestion
 
 ### Task: Add Phase 2 Go Module And TDD Coverage

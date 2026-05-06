@@ -2,7 +2,7 @@
 
 This workspace turns [research-report.md](research-report.md) into an actionable MVP plan for a Fleet Incident Copilot: a production-minded AI application demo for fleet-safety incident review.
 
-The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, and Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON before later reasoning phases can use it. No CLI, HTTP API, database, RAG retrieval, timeline builder, severity classifier, brief generator, approval workflow, export, escalation, or external sharing exists yet.
+The current runtime surface is intentionally small. Phase 0 and Phase 1 planning artifacts exist, Phase 2 adds a strict-TDD Go ingestion package that validates synthetic incident packet JSON, and Phase 3 adds a strict-TDD Go retrieval package that returns cited snippets from approved mock guidance. No CLI, HTTP API, database, timeline builder, severity classifier, brief generator, approval workflow, export, escalation, or external sharing exists yet.
 
 ## Planning Artifacts
 
@@ -10,6 +10,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [Product Frame](docs/mvp/product-frame.md)
 - [Synthetic Incident Packets](docs/mvp/synthetic-incident-packets.md)
 - [Incident Packet Ingestion](docs/mvp/incident-packet-ingestion.md)
+- [RAG Corpus And Grounding](docs/mvp/rag-corpus-and-grounding.md)
 - [Scope And Guardrails](docs/mvp/scope.md)
 - [Phases And Tasks](docs/mvp/phases.md)
 - [Task Prompts](docs/mvp/task-prompts.md)
@@ -25,6 +26,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [x] Require strict TDD for every coding task.
 - [x] Use Go for backend implementation when code phases begin.
 - [x] Validate synthetic incident packets before downstream reasoning can use them.
+- [x] Retrieve approved mock guidance with citation metadata and scope filtering.
 - [ ] Use the phase checklist to drive future implementation.
 - [ ] Keep future implementation notes synchronized with the docs when behavior changes.
 
@@ -32,5 +34,6 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 
 - Go module: [go.mod](go.mod).
 - Ingestion package: [internal/ingestion](internal/ingestion).
-- Targeted tests: `go test ./internal/ingestion`.
+- Retrieval package: [internal/retrieval](internal/retrieval).
+- Targeted tests: `go test ./internal/ingestion` and `go test ./internal/retrieval`.
 - Full Go test command: `go test ./...`.
