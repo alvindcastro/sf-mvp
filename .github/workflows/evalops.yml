@@ -1,0 +1,25 @@
+name: EvalOps release gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  evalops:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run EvalOps package checks
+        run: make evalops
+
+      - name: Run EvalOps release gate
+        run: make evalops-gate

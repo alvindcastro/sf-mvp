@@ -100,20 +100,22 @@ Output: [EvalOps Trace And Score Export](evalops-trace-score-export.md), `observ
 
 **Goal:** prevent regressions before demo or deployment.
 
-- [ ] **FQ14-T01 — Code: gate thresholds**
+Output: [EvalOps Release Gates](evalops-release-gates.md), `eval.EvaluateReleaseGate`, `eval.ReleaseGateMarkdownSummary`, `cmd/evalops-gate`, `Makefile`, and `.github/workflows/evalops.yml`.
+
+- [x] **FQ14-T01 — Code: gate thresholds**
   **Prompt:** [FQ14-T01](evalops-task-prompts.md#fq14-t01-code-gate-thresholds)
   **Done when:** zero critical failures, citation coverage, approval fail-closed, and redaction gates are enforced.
-- [ ] **FQ14-T02 — Add CI command**
+- [x] **FQ14-T02 — Add CI command**
   **Type:** Documentation/config
   **Done when:** `make evalops` and `make evalops-gate` are documented and CI-ready.
-- [ ] **FQ14-T03 — Code: GitHub summary report**
+- [x] **FQ14-T03 — Code: GitHub summary report**
   **Prompt:** [FQ14-T03](evalops-task-prompts.md#fq14-t03-code-github-summary-report)
   **Done when:** Markdown summary includes pass/fail table, failed case IDs, and remediation hints.
 
 ### FQ14 gate
 
-- [ ] Seeded critical failure blocks release.
-- [ ] Warning-only failures are visible but configurable.
+- [x] Seeded critical failure blocks release.
+- [x] Warning-only failures are visible but configurable.
 
 ---
 

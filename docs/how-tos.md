@@ -10,7 +10,7 @@ Common tasks for working on the Fleet Incident Copilot MVP.
 4. Check [Phases And Tasks](mvp/execution/phases.md) when a task belongs to a planned phase.
 5. Use [Strict TDD Rules](mvp/execution/tdd-rules.md) for every code change.
 
-If a behavior is not implemented in `internal` or the thin `cmd/demo-api` loopback server, describe it as planned or deferred. Do not imply a general CLI workflow, production HTTP API, database, live model call, real export, real escalation, real external sharing, Slack delivery, identity, dashboards, or production compliance behavior exists.
+If a behavior is not implemented in `internal`, the thin `cmd/demo-api` loopback server, or the narrow `cmd/evalops-gate` release-gate command, describe it as planned or deferred. Do not imply a general CLI workflow, production HTTP API, database, live model call, real export, real escalation, real external sharing, Slack delivery, identity, dashboards, or production compliance behavior exists.
 
 ## How To Add Or Change Package Behavior
 
@@ -38,6 +38,7 @@ go test ./internal/demo
 go test ./internal/notification
 go test ./internal/httpapi
 go test ./cmd/demo-api
+go test ./cmd/evalops-gate
 ```
 
 ## How To Add A Synthetic Incident Fixture
@@ -165,6 +166,38 @@ go test ./...
 
 The longer recording script lives in [Demo Package](mvp/demo/demo-package.md#local-demo-surface).
 
+## How To Run EvalOps Release Gates
+
+Run the focused EvalOps package and command checks:
+
+```bash
+make evalops
+```
+
+Run the local golden-case release gate:
+
+```bash
+make evalops-gate
+```
+
+For GitHub-style summary output, set `GITHUB_STEP_SUMMARY` or pass `-summary`
+directly:
+
+```bash
+GITHUB_STEP_SUMMARY=/tmp/evalops-summary.md make evalops-gate
+go run ./cmd/evalops-gate -summary /tmp/evalops-summary.md
+```
+
+To gate an imported shared Promptfoo/EvalOps result file:
+
+```bash
+go run ./cmd/evalops-gate -input promptfoo-results.json -summary /tmp/evalops-summary.md
+```
+
+Exit code `0` means pass or warning-only findings, `1` means a blocking gate
+failure, and `2` means malformed input, malformed config, or summary write
+failure. The full FQ14 behavior contract is in [EvalOps Release Gates](overlays/evalops-release-gates.md).
+
 ## How To Update Documentation Safely
 
 1. Keep the implemented-versus-planned boundary explicit.
@@ -185,7 +218,8 @@ Run:
 go test ./...
 go vet ./...
 go test -cover ./...
-git diff --check -- README.md CHANGELOG.md docs internal
+make evalops-gate
+git diff --check -- README.md CHANGELOG.md docs internal cmd Makefile .github
 git status --short
 ```
 

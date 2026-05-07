@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-07 - FQ14 EvalOps Release Gates
+
+### Task: Run Parallel FQ14 Implementation Agents
+
+- What: Ran parallel read-only Codex explorer agents for the FQ14 documentation contract and the current eval implementation surface while the main thread inspected the existing score adapter, importer, target command, Promptfoo config, and overlay docs.
+- Where: [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/overlays/evalops-task-prompts.md](docs/overlays/evalops-task-prompts.md), [internal/eval](internal/eval), [cmd/evalops-target](cmd/evalops-target), [evals/promptfoo/fleet-incident.yaml](evals/promptfoo/fleet-incident.yaml).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Split FQ14 discovery into independent docs and implementation tracks before adding release-gate code, command wiring, CI config, and documentation updates.
+- How: Spawned two explorer agents, used their findings to keep gate logic in `internal/eval`, add a separate batch command, avoid changing the per-case HTTP target semantics, and identify stale docs that still claimed no Makefile existed.
+
+### Task: Add Release Gate Threshold Evaluation
+
+- What: Added FQ14 release-gate config, gate result types, threshold validation, Promptfoo-output conversion from eval reports, fail-closed critical scorer handling, warning-only scorer handling, deterministic issue sorting, and shared-result recommendation failure preservation.
+- Where: [internal/eval/release_gate.go](internal/eval/release_gate.go), [internal/eval/release_gate_test.go](internal/eval/release_gate_test.go), [internal/eval/importer.go](internal/eval/importer.go), [internal/eval/importer_test.go](internal/eval/importer_test.go).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ14-T01 so seeded critical failures block release while severity, citation, approval fail-safe, redaction, unsupported-claim, prompt-injection, and warning-only scorer behavior stay machine-readable.
+- How: Added failing-first tests for missing gate APIs, seeded redaction critical failure, citation and severity threshold failures, approval and unsupported-claim failures, warning-only recommendation failures, malformed threshold config, report-to-score conversion, and imported recommendation failure preservation; then implemented the smallest package functions and importer adjustment to pass.
+
+### Task: Add GitHub Summary Report And Gate Command
+
+- What: Added deterministic Markdown summary rendering with pass/fail metrics, blocking failures, warnings, remediation hints, reproduce command, and a local `cmd/evalops-gate` command that writes to `GITHUB_STEP_SUMMARY` or a `-summary` path.
+- Where: [internal/eval/release_gate.go](internal/eval/release_gate.go), [internal/eval/testdata/release_gate_all_pass.md](internal/eval/testdata/release_gate_all_pass.md), [internal/eval/testdata/release_gate_warning_only.md](internal/eval/testdata/release_gate_warning_only.md), [internal/eval/testdata/release_gate_critical_failure.md](internal/eval/testdata/release_gate_critical_failure.md), [cmd/evalops-gate](cmd/evalops-gate).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ14-T03 so CI output is stable, diff-friendly, and actionable when a gate blocks release.
+- How: Added golden-file tests for all-pass, warning-only, and critical-failure summaries; added command tests for local summary output, imported critical-failure exit code `1`, warning-only exit code `0`, and malformed input exit code `2`; implemented local golden-case gating by default and shared Promptfoo/EvalOps JSON import through the existing importer.
+
+### Task: Add FQ14 CI And Documentation
+
+- What: Added `make evalops`, `make evalops-gate`, a GitHub Actions workflow, a focused FQ14 release-gates overlay doc, updated overlay task status, and synchronized contributor and entry-point docs that mention Makefile, eval commands, and current limits.
+- Where: [Makefile](Makefile), [.github/workflows/evalops.yml](.github/workflows/evalops.yml), [docs/overlays/evalops-release-gates.md](docs/overlays/evalops-release-gates.md), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/README.md](docs/README.md), [docs/testing.md](docs/testing.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/how-tos.md](docs/how-tos.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/troubleshooting.md](docs/troubleshooting.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [README.md](README.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ14-T02 and keep the implemented-versus-planned docs accurate now that a narrow EvalOps release-gate command and Make targets exist.
+- How: Added the CI shortcut targets and workflow, linked the FQ14 overlay from docs indexes, marked FQ14 tasks and gate checks complete, documented command exit codes and summary behavior, and replaced stale "no Makefile" wording with the current narrow Makefile boundary.
+
+### Task: Verify FQ14 Gates
+
+- What: Verified the release-gate evaluator, importer edge case, gate command, Make targets, and focused EvalOps command surface.
+- Where: [internal/eval](internal/eval), [cmd/evalops-gate](cmd/evalops-gate), [cmd/evalops-target](cmd/evalops-target), [Makefile](Makefile), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Confirm FQ14 critical failures block release, warning-only failures remain visible and configurable, imported shared results preserve scorer failures, and the CI-ready commands work locally.
+- How: Ran `go test ./internal/eval -run 'TestEvaluateReleaseGate|TestPromptfooOutputsFromReport|TestReleaseGateMarkdownSummary'` red before implementation and green after; ran `go test ./internal/eval -run TestImportSharedResultsPreservesRecommendationFailureForGateScoring` red before the importer fix and green after; ran `go test ./cmd/evalops-gate`, `go test ./internal/eval ./cmd/evalops-gate ./cmd/evalops-target -count=1`, `make evalops`, and `make evalops-gate`; all passed.
+
 ## 2026-05-07 - FQ13 EvalOps Trace And Score Export
 
 ### Task: Run Parallel FQ13 Implementation Agents

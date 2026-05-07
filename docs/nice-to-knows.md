@@ -4,9 +4,9 @@ Useful context that prevents common wrong assumptions.
 
 ## Runtime Surface
 
-- There is no Makefile in this repo.
+- The Makefile is intentionally small: `test`, `evalops`, and `evalops-gate` are local verification shortcuts, not a full build system.
 - There is a thin loopback-only demo API command at `cmd/demo-api`.
-- There is no general CLI workflow, database, frontend, worker, queue, or container runtime.
+- There is a narrow EvalOps gate command at `cmd/evalops-gate`; there is no general CLI workflow, database, frontend, worker, queue, or container runtime.
 - Most implementation remains Go package-level behavior under `internal`.
 - Most state is in memory and deterministic by design.
 - The module name is `sf-mvp`, even though the product narrative is Fleet Incident Copilot.
@@ -40,6 +40,7 @@ Useful context that prevents common wrong assumptions.
 - Eval checks redaction, unsupported claims, prompt-injection resistance, and approval fail-closed behavior.
 - Eval is deterministic and local. It does not call a model provider.
 - The eval report route runs the same deterministic golden cases and returns scores, thresholds, gates, and pass/fail state.
+- The FQ14 release gate runs locally through `make evalops-gate`, exits non-zero for blocking critical failures, and writes a GitHub-style Markdown summary when `GITHUB_STEP_SUMMARY` is set.
 
 ## Observability
 

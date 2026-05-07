@@ -1,6 +1,6 @@
 # Testing
 
-The repository uses Go tests as the main verification surface. There is no Makefile or separate test runner.
+The repository uses Go tests as the main verification surface. A small Makefile now wraps the EvalOps release-gate commands for CI.
 
 ## Quick Commands
 
@@ -8,6 +8,13 @@ Run the full package suite:
 
 ```bash
 go test ./...
+```
+
+Run the EvalOps release-gate checks:
+
+```bash
+make evalops
+make evalops-gate
 ```
 
 Run vet:
@@ -45,6 +52,7 @@ go test ./internal/demo
 go test ./internal/notification
 go test ./internal/httpapi
 go test ./cmd/demo-api
+go test ./cmd/evalops-gate
 ```
 
 Run one test by name:
@@ -79,12 +87,13 @@ Every code task should follow [Strict TDD Rules](mvp/execution/tdd-rules.md):
 - `internal/severity`: low, medium, high, unknown, conflicting evidence, recommendations, citations, and approval-required flags.
 - `internal/brief`: cited draft sections, redaction, fail-closed missing evidence, uncertainty labels, and approval-state display.
 - `internal/approval`: pending, approved, denied, missing approval, out-of-scope calls, callback execution, and immutable audit history.
-- `internal/eval`: golden cases, release thresholds, unsupported claims, redaction, prompt injection, and approval fail-closed behavior.
+- `internal/eval`: golden cases, release thresholds, unsupported claims, redaction, prompt injection, approval fail-closed behavior, FQ14 release-gate evaluation, and deterministic Markdown summaries.
 - `internal/observability`: trace IDs, structured events, redaction, token accounting, budget limits, invalid token usage, cache candidates, and routing notes.
 - `internal/demo`: machine-readable synthetic fixture loading, deterministic review composition, non-synthetic rejection, missing-evidence fail-closed behavior, citation and redaction preservation, approval-required action display, and trace propagation.
 - `internal/notification`: dry-run Slack-shaped preview formatting, mandatory dry-run mode, external-sharing approval gating, blocked/allowed preview states, redacted observability, and no network delivery.
 - `internal/httpapi`: loopback review, dry-run notification, scoped approval retry, local eval report, trace report, and caller-supplied budget report handler behavior; deterministic JSON response shape; malformed JSON; unknown ID; non-synthetic rejection; mandatory dry-run notification mode; missing, pending, denied, out-of-scope, exact approved, and wrong-action approval retry states; eval thresholds and gates; redacted trace event fields; missing trace behavior; ephemeral trace state; unsupported methods; unknown paths; and loopback defaults.
 - `cmd/demo-api`: thin local server wiring, default loopback address, loopback override, and non-loopback rejection.
+- `cmd/evalops-gate`: local golden-case gating, shared-result import gating, GitHub summary writing, and malformed input exit behavior.
 
 ## Coverage
 

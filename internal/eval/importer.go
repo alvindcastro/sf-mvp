@@ -150,6 +150,10 @@ func applySharedScore(result *CaseResult, scorer string, score float64, assertio
 		}
 	case "citation_coverage":
 		result.CitationCoverage = score
+	case "recommendation_accuracy":
+		if !assertion.Pass {
+			result.MissingRecommendations = []severity.RecommendationAction{"shared_result_reported_recommendation_failure"}
+		}
 	case "unsupported_claims":
 		if !assertion.Pass {
 			result.UnsupportedClaims = []string{"shared result reported unsupported claims"}

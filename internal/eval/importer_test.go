@@ -129,6 +129,29 @@ func TestImportSharedResultsRejectsDuplicateResult(t *testing.T) {
 	assertErrorContains(t, err, "duplicate")
 }
 
+func TestImportSharedResultsPreservesRecommendationFailureForGateScoring(t *testing.T) {
+	data := []byte(`{
+		"results": [
+			{
+				"case_id": "recommendation warning",
+				"incident_id": "FIC-SYN-002",
+				"scores": [{"scorer": "recommendation_accuracy", "score": 0, "pass": false}]
+			}
+		]
+	}`)
+
+	results, err := ImportSharedResultsJSON(data)
+	if err != nil {
+		t.Fatalf("ImportSharedResultsJSON returned error: %v", err)
+	}
+	output := PromptfooOutputFromResult(results[0])
+
+	score := output.Scores["recommendation_accuracy"]
+	if score.Pass || score.Score != 0 {
+		t.Fatalf("recommendation score = %#v, want imported failure preserved", score)
+	}
+}
+
 func assertErrorContains(t *testing.T, err error, want string) {
 	t.Helper()
 

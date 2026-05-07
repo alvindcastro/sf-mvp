@@ -5,6 +5,7 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 ## Repository Layout
 
 - [README.md](../README.md): top-level project summary and current runtime surface.
+- [Makefile](../Makefile): local verification shortcuts for `test`, `evalops`, and `evalops-gate`.
 - [docs/README.md](README.md): documentation index.
 - [docs/research](research): source research material.
 - [docs/mvp](mvp): product, scope, workflow, quality, execution, and demo artifacts.
@@ -14,12 +15,14 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 - [internal/severity](../internal/severity): classifies severity and recommends next actions with source references.
 - [internal/brief](../internal/brief): drafts cited, redacted, human-review incident briefs.
 - [internal/approval](../internal/approval): creates in-memory approval requests and gates sensitive actions.
-- [internal/eval](../internal/eval): runs deterministic in-memory golden-case evals.
+- [internal/eval](../internal/eval): runs deterministic in-memory golden-case evals, Promptfoo/EvalOps score adapters, score-event export contracts, and FQ14 release gates.
 - [internal/observability](../internal/observability): records in-memory workflow events, redaction, token, budget, cache, and routing signals.
 - [internal/demo](../internal/demo): loads machine-readable synthetic demo fixtures and composes deterministic in-memory review results.
 - [internal/notification](../internal/notification): prepares dry-run Slack-shaped notification previews from redacted briefs and gates them as external sharing.
 - [internal/httpapi](../internal/httpapi): exposes the local `POST /demo/review`, `POST /demo/approvals`, `POST /demo/approvals/decisions`, `POST /demo/notifications/slack`, `GET /demo/eval/latest`, `GET /demo/traces/{trace_id}`, and `POST /demo/budget/check` handlers.
 - [cmd/demo-api](../cmd/demo-api): starts the loopback-only local demo server.
+- [cmd/evalops-target](../cmd/evalops-target): starts the loopback-only Promptfoo-compatible eval target.
+- [cmd/evalops-gate](../cmd/evalops-gate): runs the local EvalOps release gate and writes GitHub-style Markdown summaries.
 
 ## Design Principles
 
@@ -46,7 +49,7 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 
 `internal/approval` stores approval state in memory. It records pending, approved, and denied decisions and blocks missing, pending, denied, mismatched, or out-of-scope sensitive action calls.
 
-`internal/eval` composes the package path over local golden cases and reports severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior.
+`internal/eval` composes the package path over local golden cases and reports severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior. It also owns the EvalOps shared result importer/exporter, Promptfoo score adapter, score event projection, release-gate threshold evaluation, and deterministic Markdown summary rendering.
 
 `internal/observability` records package-level workflow events in memory. It does not send telemetry externally or reconcile provider billing.
 
@@ -57,6 +60,8 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 `internal/httpapi` owns local transport behavior for the Phase 13 review route, Phase 14 notification preview route, Phase 15 scoped approval retry routes, and Phase 16 local report routes. It parses request JSON, delegates packet validation to `internal/ingestion`, delegates review composition to `internal/demo`, delegates preview generation to `internal/notification`, reuses an in-memory `internal/approval` gate for local retry state, exposes `internal/eval` and `internal/observability` through ephemeral report views, maps known errors to deterministic JSON responses, and must stay loopback-only and free of production auth, persistence, Slack delivery, webhook, model-provider, export, escalation, dashboard, alerting, OpenTelemetry export, billing reconciliation, model benchmarking, or real external-sharing behavior.
 
 `cmd/demo-api` is thin server wiring. It should keep the default listen address on `127.0.0.1:8080`, allow only loopback overrides, and avoid business logic.
+
+`cmd/evalops-gate` is thin release-gate wiring. It should keep threshold logic in `internal/eval`, run local golden cases by default, import shared result JSON only through `internal/eval`, write summaries without raw evidence, and return stable exit codes for pass, blocking failure, and malformed input.
 
 ## Development Workflow
 

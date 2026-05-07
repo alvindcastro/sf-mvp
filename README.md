@@ -14,6 +14,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [Testing](docs/testing.md): targeted and full Go test commands, TDD expectations, coverage notes, and doc-only verification.
 - [Troubleshooting](docs/troubleshooting.md): common local development and package-behavior issues.
 - [LinkedIn Post Drafts](docs/mvp/demo/linkedin-post-drafts.md): casual repo posts for hiring managers, CTOs, and engineering leaders.
+- [EvalOps Release Gates](docs/overlays/evalops-release-gates.md): FQ14 release thresholds, CI Make targets, GitHub summary output, and verification commands.
 
 ## MVP Artifacts
 
@@ -90,6 +91,13 @@ Fallback proof path:
 go test ./...
 ```
 
+EvalOps release-gate proof path:
+
+```bash
+make evalops
+make evalops-gate
+```
+
 ## Runtime Surface
 
 - Go module: [go.mod](go.mod).
@@ -105,5 +113,8 @@ go test ./...
 - Notification preview package: [internal/notification](internal/notification).
 - Demo HTTP handler package: [internal/httpapi](internal/httpapi).
 - Demo API command: [cmd/demo-api](cmd/demo-api).
-- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, `go test ./internal/brief`, `go test ./internal/approval`, `go test ./internal/eval`, `go test ./internal/observability`, `go test ./internal/demo`, `go test ./internal/notification`, `go test ./internal/httpapi`, and `go test ./cmd/demo-api`.
+- EvalOps target command: [cmd/evalops-target](cmd/evalops-target).
+- EvalOps release-gate command: [cmd/evalops-gate](cmd/evalops-gate).
+- CI shortcuts: [Makefile](Makefile) and [.github/workflows/evalops.yml](.github/workflows/evalops.yml).
+- Targeted tests: `go test ./internal/ingestion`, `go test ./internal/retrieval`, `go test ./internal/timeline`, `go test ./internal/severity`, `go test ./internal/brief`, `go test ./internal/approval`, `go test ./internal/eval`, `go test ./internal/observability`, `go test ./internal/demo`, `go test ./internal/notification`, `go test ./internal/httpapi`, `go test ./cmd/demo-api`, `go test ./cmd/evalops-target`, and `go test ./cmd/evalops-gate`.
 - Full Go test command: `go test ./...`.

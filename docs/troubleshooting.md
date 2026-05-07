@@ -4,12 +4,15 @@ Common problems and the fastest checks.
 
 ## `make` Commands Fail
 
-There is no Makefile in this repo. Use Go commands directly:
+The Makefile only wraps local verification commands. If a Make target fails,
+run the underlying Go command directly:
 
 ```bash
 go test ./...
 go vet ./...
 go test -cover ./...
+go test ./internal/eval ./cmd/evalops-target ./cmd/evalops-gate -count=1
+go run ./cmd/evalops-gate
 ```
 
 ## Demo API Does Not Start

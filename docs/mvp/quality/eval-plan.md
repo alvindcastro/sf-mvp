@@ -1,6 +1,6 @@
 # Eval Plan
 
-Phase 8 adds the first deterministic local eval harness for Fleet Incident Copilot. The harness runs in memory against synthetic golden cases and existing Phase 2 through Phase 7 package APIs. Phase 16 exposes the same harness through the loopback-only `GET /demo/eval/latest` report route. The harness itself does not add a CLI, database, logs, token tracking, model calls, or cost controls. Phase 9 can record an `eval.Report` summary through the separate observability package.
+Phase 8 adds the first deterministic local eval harness for Fleet Incident Copilot. The harness runs in memory against synthetic golden cases and existing Phase 2 through Phase 7 package APIs. Phase 16 exposes the same harness through the loopback-only `GET /demo/eval/latest` report route. FQ14 adds a narrow local release-gate command over the same scorer output. The harness itself does not add a database, logs, token tracking, model calls, or cost controls. Phase 9 can record an `eval.Report` summary through the separate observability package.
 
 ## Phase 8 Checklist
 
@@ -19,6 +19,8 @@ Phase 8 adds the first deterministic local eval harness for Fleet Incident Copil
 - Golden cases: `GoldenCases() []Case`.
 - Evaluation entry point: `Run(cases []Case, thresholds Thresholds) Report`.
 - Default release gates: `DefaultThresholds() Thresholds`.
+- EvalOps release gate: `EvaluateReleaseGate(outputs []PromptfooOutput, config ReleaseGateConfig) (ReleaseGateResult, error)`.
+- Local gate command: `make evalops-gate`.
 - Loopback report route: `GET /demo/eval/latest`.
 - Targeted test command: `go test ./internal/eval`.
 - Report route test command: `go test ./internal/httpapi`.
@@ -72,7 +74,7 @@ All cases are synthetic and in memory. They mirror [Synthetic Incident Packets](
 
 ## Current Limits
 
-- The harness is an in-memory package API. Phase 16 adds a loopback-only HTTP report view over it; no CLI report generator exists.
+- The harness is an in-memory package API. Phase 16 adds a loopback-only HTTP report view over it; FQ14 adds only a narrow release-gate command and Markdown summary renderer, not a general eval dashboard or report service.
 - Golden eval cases are Go fixtures, not external JSON or YAML fixture files.
 - The harness evaluates deterministic package outputs only; it does not call a model provider.
 - It does not itself collect latency, token usage, cost, trace IDs, structured logs, or budget metrics. The Phase 9 observability package can record eval summaries separately.
