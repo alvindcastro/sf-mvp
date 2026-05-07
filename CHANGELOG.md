@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-07 - FQ13 EvalOps Trace And Score Export
+
+### Task: Run Parallel FQ13 Implementation Agents
+
+- What: Ran parallel Codex worker agents for safe workflow attributes and eval score event export while the main thread reviewed the existing observability, eval target, and overlay documentation contracts.
+- Where: [internal/observability](internal/observability), [internal/eval](internal/eval), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/overlays/evalops-task-prompts.md](docs/overlays/evalops-task-prompts.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Split FQ13 into independent trace-attribute and score-export tracks while keeping documentation, safety boundaries, and final verification coordinated.
+- How: Spawned two worker agents with separate ownership, let them implement and verify their code paths in parallel, reviewed their combined diff, and kept docs/changelog integration in the main thread.
+
+### Task: Add Safe Workflow Attribute Mapping
+
+- What: Added pure OpenTelemetry-style workflow attribute mapping with trace ID, SHA-256 incident ID hash, normalized retrieval source IDs, severity, approval state, and latency.
+- Where: [internal/observability/observability.go](internal/observability/observability.go), [internal/observability/observability_test.go](internal/observability/observability_test.go), [docs/overlays/evalops-trace-score-export.md](docs/overlays/evalops-trace-score-export.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ13-T01 so incident workflow spans can be correlated and debugged without exposing raw incident IDs, transcript text, media references, still-frame details, or other raw evidence.
+- How: Added failing-first coverage for the attribute map and privacy boundary, implemented deterministic hashing, source ID normalization, latency formatting, and omission of raw evidence fields.
+
+### Task: Add Eval Score Event Export
+
+- What: Added score event records, an injectable score event exporter interface, no-op default behavior, disabled, best-effort, and release-gate export modes, and eval target wiring for trace/run correlation metadata.
+- Where: [internal/eval/score_event_exporter.go](internal/eval/score_event_exporter.go), [internal/eval/score_event_exporter_test.go](internal/eval/score_event_exporter_test.go), [internal/eval/target.go](internal/eval/target.go), [docs/overlays/evalops-trace-score-export.md](docs/overlays/evalops-trace-score-export.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ13-T02 so Promptfoo/EvalOps scores can be exported as stable, safe events correlated with trace IDs while keeping exporter failures non-blocking outside release-gate mode.
+- How: Mapped Promptfoo scores to `eval.score.<scorer>` events with score, pass/fail, criticality, severity, reason, case, run, and trace fields; added no-op and disabled behavior; ignored best-effort exporter errors; and returned machine-readable failures in release-gate mode.
+
+### Task: Add FQ13 Trace And Score Export Documentation
+
+- What: Documented the FQ13 code surface, safe workflow attributes, score event shape, export modes, request `vars` correlation, local OTel/Langfuse endpoint variables, disabled-by-default behavior, safety boundary, and verification commands.
+- Where: [docs/overlays/evalops-trace-score-export.md](docs/overlays/evalops-trace-score-export.md), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/README.md](docs/README.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ13-T03 and keep the overlay index in sync with the newly implemented trace and score export contracts.
+- How: Added a focused overlay doc, linked it from the docs index, marked FQ13 tasks and gates complete, and clarified that the current repository exposes an adapter contract but does not start external telemetry services by default.
+
+### Task: Verify FQ13 Gates
+
+- What: Verified the observability attribute mapper, eval score event exporter, eval target compatibility, and full Go suite.
+- Where: [internal/observability](internal/observability), [internal/eval](internal/eval), [cmd/evalops-target](cmd/evalops-target), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Confirm FQ13 satisfies the no-raw-evidence and telemetry-disabled gates without regressing existing Promptfoo target or observability behavior.
+- How: Ran `go test ./internal/observability -count=1`, `go test ./internal/eval -count=1`, `go test ./internal/eval ./internal/observability ./cmd/evalops-target -count=1`, and `go test ./... -count=1`; all passed.
+
 ## 2026-05-07 - FQ12 EvalOps Promptfoo Bridge
 
 ### Task: Run Parallel FQ12 Implementation Agents

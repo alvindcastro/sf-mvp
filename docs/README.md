@@ -15,6 +15,7 @@ This directory keeps the research and MVP planning artifacts separate from the r
 - [EvalOps Extension](overlays/evalops-extension.md): FQ11-FQ15 overlay for reusable eval contracts, Promptfoo bridge work, trace and score export, release gates, and review loops.
 - [EvalOps Shared Case And Result Contract](overlays/evalops-shared-contract.md): FQ11 JSONL case schema, result importer shape, golden-case mapping, and verification commands.
 - [EvalOps Promptfoo Bridge](overlays/evalops-promptfoo-bridge.md): FQ12 local HTTP target, Promptfoo config, score adapter output, and run commands.
+- [EvalOps Trace And Score Export](overlays/evalops-trace-score-export.md): FQ13 safe workflow attributes, score event export modes, trace correlation, and local OTel/Langfuse setup notes.
 
 ## Contributor Guides
 

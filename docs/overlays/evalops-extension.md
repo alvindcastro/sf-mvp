@@ -77,20 +77,22 @@ Output: [EvalOps Promptfoo Bridge](evalops-promptfoo-bridge.md), `eval.NewIncide
 
 **Goal:** make the incident workflow explainable in any OTel-compatible backend.
 
-- [ ] **FQ13-T01 — Code: workflow span attributes**
+Output: [EvalOps Trace And Score Export](evalops-trace-score-export.md), `observability.WorkflowAttributes`, `eval.ScoreEventsFromPromptfooOutput`, `eval.ExportPromptfooScoreEvents`, and eval target score exporter options.
+
+- [x] **FQ13-T01 — Code: workflow span attributes**
   **Prompt:** [FQ13-T01](evalops-task-prompts.md#fq13-t01-code-workflow-span-attributes)
   **Done when:** tests cover trace ID, incident ID hashing, retrieval IDs, severity, approval status, and redaction.
-- [ ] **FQ13-T02 — Code: eval score event export**
+- [x] **FQ13-T02 — Code: eval score event export**
   **Prompt:** [FQ13-T02](evalops-task-prompts.md#fq13-t02-code-eval-score-event-export)
   **Done when:** score events are stable, safe, and can be correlated with trace IDs.
-- [ ] **FQ13-T03 — Document Langfuse/OTel setup**
+- [x] **FQ13-T03 — Document Langfuse/OTel setup**
   **Type:** Documentation
   **Done when:** docs explain local OTel collector, Jaeger/Langfuse endpoint variables, and disabled-by-default behavior.
 
 ### FQ13 gate
 
-- [ ] No raw incident evidence appears in spans.
-- [ ] Telemetry disabled mode is tested.
+- [x] No raw incident evidence appears in spans.
+- [x] Telemetry disabled mode is tested.
 
 ---
 

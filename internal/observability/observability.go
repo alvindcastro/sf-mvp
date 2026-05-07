@@ -1,16 +1,20 @@
 package observability
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"sf-mvp/internal/approval"
 	"sf-mvp/internal/eval"
 	"sf-mvp/internal/retrieval"
+	"sf-mvp/internal/severity"
 )
 
 const RedactedValue = "[REDACTED]"
@@ -48,6 +52,17 @@ type Workflow struct {
 	TraceID    string
 	IncidentID string
 	sensitive  SensitiveData
+}
+
+type WorkflowAttributeInput struct {
+	Workflow           Workflow
+	RetrievedSourceIDs []string
+	SeverityLabel      severity.Level
+	ApprovalState      approval.Decision
+	Latency            time.Duration
+	RawTranscriptNotes []string
+	RawMediaReferences []string
+	RawStillFrameNotes []string
 }
 
 type Event struct {
@@ -309,6 +324,22 @@ func DefaultCostPlan() CostPlan {
 	}
 }
 
+func WorkflowAttributes(input WorkflowAttributeInput) map[string]string {
+	attributes := map[string]string{
+		"workflow.trace_id":         strings.TrimSpace(input.Workflow.TraceID),
+		"workflow.incident_id_hash": incidentIDHash(input.Workflow.IncidentID),
+		"workflow.severity":         strings.TrimSpace(string(input.SeverityLabel)),
+		"workflow.approval_state":   strings.TrimSpace(string(input.ApprovalState)),
+		"workflow.latency_ms":       formatLatencyMilliseconds(input.Latency),
+	}
+
+	if sourceIDs := normalizedSourceIDs(input.RetrievedSourceIDs); len(sourceIDs) > 0 {
+		attributes["workflow.retrieved_source_ids"] = strings.Join(sourceIDs, ",")
+	}
+
+	return attributes
+}
+
 func (r *Recorder) budgetExceededReason(usage TokenUsage) string {
 	if r.budget.MaxModelCalls > 0 && r.modelCalls+1 > r.budget.MaxModelCalls {
 		return "model call limit exceeded"
@@ -422,6 +453,33 @@ func traceIncidentID(incidentID string) string {
 	traceID = strings.ReplaceAll(traceID, "_", "-")
 	traceID = strings.ReplaceAll(traceID, " ", "-")
 	return traceID
+}
+
+func incidentIDHash(incidentID string) string {
+	sum := sha256.Sum256([]byte(strings.TrimSpace(incidentID)))
+	return "sha256:" + hex.EncodeToString(sum[:])
+}
+
+func normalizedSourceIDs(sourceIDs []string) []string {
+	seen := make(map[string]struct{}, len(sourceIDs))
+	normalized := make([]string, 0, len(sourceIDs))
+	for _, sourceID := range sourceIDs {
+		sourceID = strings.TrimSpace(sourceID)
+		if sourceID == "" {
+			continue
+		}
+		if _, ok := seen[sourceID]; ok {
+			continue
+		}
+		seen[sourceID] = struct{}{}
+		normalized = append(normalized, sourceID)
+	}
+	sort.Strings(normalized)
+	return normalized
+}
+
+func formatLatencyMilliseconds(duration time.Duration) string {
+	return strconv.FormatFloat(float64(duration)/float64(time.Millisecond), 'f', -1, 64)
 }
 
 var coordinatePattern = regexp.MustCompile(`[-+]?\d{1,3}\.\d+,\s*[-+]?\d{1,3}\.\d+`)

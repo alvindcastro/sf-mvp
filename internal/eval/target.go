@@ -57,7 +57,9 @@ type IncidentEvalApprovalChecker interface {
 type IncidentEvalTargetOption func(*incidentEvalTarget)
 
 type incidentEvalTarget struct {
-	workflow IncidentEvalWorkflow
+	workflow       IncidentEvalWorkflow
+	scoreExporter  ScoreEventExporter
+	scoreEventMode ScoreEventExportMode
 }
 
 type incidentEvalTargetRequest struct {
@@ -93,7 +95,8 @@ type incidentEvalError struct {
 
 func NewIncidentEvalTarget(options ...IncidentEvalTargetOption) http.Handler {
 	target := &incidentEvalTarget{
-		workflow: NewLocalIncidentEvalWorkflow(IncidentEvalWorkflowSteps{}),
+		workflow:       NewLocalIncidentEvalWorkflow(IncidentEvalWorkflowSteps{}),
+		scoreEventMode: ScoreEventExportModeBestEffort,
 	}
 	for _, option := range options {
 		option(target)
@@ -106,6 +109,18 @@ func WithIncidentEvalWorkflow(workflow IncidentEvalWorkflow) IncidentEvalTargetO
 		if workflow != nil {
 			target.workflow = workflow
 		}
+	}
+}
+
+func WithScoreEventExporter(exporter ScoreEventExporter) IncidentEvalTargetOption {
+	return func(target *incidentEvalTarget) {
+		target.scoreExporter = exporter
+	}
+}
+
+func WithScoreEventExportMode(mode ScoreEventExportMode) IncidentEvalTargetOption {
+	return func(target *incidentEvalTarget) {
+		target.scoreEventMode = mode
 	}
 }
 
@@ -174,6 +189,18 @@ func (target *incidentEvalTarget) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	}
 	if output.CriticalFailures == nil {
 		output.CriticalFailures = []PromptfooCriticalFailure{}
+	}
+	err = ExportPromptfooScoreEvents(ctx, output, ScoreEventExportOptions{
+		Mode:     target.scoreEventMode,
+		Exporter: target.scoreExporter,
+		Metadata: ScoreEventMetadata{
+			RunID:   firstNonEmpty(varsString(request.Vars, "eval_run_id"), varsString(request.Vars, "run_id")),
+			TraceID: varsString(request.Vars, "trace_id"),
+		},
+	})
+	if err != nil && target.scoreEventMode == ScoreEventExportModeReleaseGate {
+		writeIncidentEvalError(w, http.StatusBadGateway, "score_event_export_failed", err.Error())
+		return
 	}
 	writeIncidentEvalJSON(w, http.StatusOK, IncidentEvalTargetResponse{Output: output})
 }

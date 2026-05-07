@@ -330,6 +330,45 @@ func TestRecordEvalScoreTracksEvalMetrics(t *testing.T) {
 	}
 }
 
+func TestWorkflowAttributesMapSafeOpenTelemetryStyleFields(t *testing.T) {
+	workflow := Workflow{
+		TraceID:    "trace-fic-syn-017-20260506t160000z-001",
+		IncidentID: "FIC-SYN-017",
+	}
+
+	attributes := WorkflowAttributes(WorkflowAttributeInput{
+		Workflow:           workflow,
+		RetrievedSourceIDs: []string{" FIC-TS-MISSING-MEDIA-001 ", "", "FIC-SOP-HARD-BRAKE-001", "FIC-SOP-HARD-BRAKE-001"},
+		SeverityLabel:      severity.LevelMedium,
+		ApprovalState:      approval.DecisionPending,
+		Latency:            42*time.Millisecond + 500*time.Microsecond,
+		RawTranscriptNotes: []string{"Driver said private transcript detail near Depot 9."},
+		RawMediaReferences: []string{"synthetic://media/private-camera-angle-017.mp4"},
+		RawStillFrameNotes: []string{"Still frame shows private side-door detail."},
+	})
+
+	want := map[string]string{
+		"workflow.trace_id":             "trace-fic-syn-017-20260506t160000z-001",
+		"workflow.incident_id_hash":     "sha256:cdcd7e14394344372016403370275f9d314de594321ed9cca7b7e977f058ecc1",
+		"workflow.retrieved_source_ids": "FIC-SOP-HARD-BRAKE-001,FIC-TS-MISSING-MEDIA-001",
+		"workflow.severity":             "medium",
+		"workflow.approval_state":       "pending",
+		"workflow.latency_ms":           "42.5",
+	}
+	if !reflect.DeepEqual(attributes, want) {
+		t.Fatalf("WorkflowAttributes() = %#v, want %#v", attributes, want)
+	}
+	assertAttributeValuesDoNotContain(t, attributes,
+		"FIC-SYN-017",
+		"private transcript detail",
+		"Depot 9",
+		"synthetic://media/private-camera-angle-017.mp4",
+		"private-camera-angle-017",
+		"private side-door detail",
+	)
+	assertAttributeKeysDoNotContain(t, attributes, "transcript", "media", "still")
+}
+
 func TestDefaultCostPlanDefinesCacheCandidatesAndModelRoutingNotes(t *testing.T) {
 	plan := DefaultCostPlan()
 
@@ -384,6 +423,30 @@ func assertModelRoute(t *testing.T, routes []ModelRoutingNote, route ModelRoute)
 		}
 	}
 	t.Fatalf("model route %q not found in %#v", route, routes)
+}
+
+func assertAttributeValuesDoNotContain(t *testing.T, attributes map[string]string, leaked ...string) {
+	t.Helper()
+
+	for key, value := range attributes {
+		for _, term := range leaked {
+			if strings.Contains(value, term) {
+				t.Fatalf("attribute %q leaked %q in value %q", key, term, value)
+			}
+		}
+	}
+}
+
+func assertAttributeKeysDoNotContain(t *testing.T, attributes map[string]string, leaked ...string) {
+	t.Helper()
+
+	for key := range attributes {
+		for _, term := range leaked {
+			if strings.Contains(key, term) {
+				t.Fatalf("attribute key %q leaked raw evidence category %q", key, term)
+			}
+		}
+	}
 }
 
 func fixedClock() func() time.Time {
