@@ -13,6 +13,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [Nice To Knows](docs/nice-to-knows.md): practical context about the current package-level runtime and demo limits.
 - [Testing](docs/testing.md): targeted and full Go test commands, TDD expectations, coverage notes, and doc-only verification.
 - [Troubleshooting](docs/troubleshooting.md): common local development and package-behavior issues.
+- [LinkedIn Post Drafts](docs/mvp/demo/linkedin-post-drafts.md): casual repo posts for hiring managers, CTOs, and engineering leaders.
 
 ## MVP Artifacts
 

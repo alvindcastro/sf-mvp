@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-05-07 - FQ11 EvalOps Shared Contract
+
+### Task: Run Parallel FQ11 Implementation Agents
+
+- What: Ran parallel Codex worker agents for the FQ11 JSONL exporter and shared result importer while the main thread inspected the existing eval package, overlay docs, and documentation update needs.
+- Where: [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/overlays/evalops-task-prompts.md](docs/overlays/evalops-task-prompts.md), [internal/eval](internal/eval).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Split the exporter and importer work into independent implementation tracks while keeping docs, changelog, and final verification coordinated.
+- How: Spawned two worker agents with disjoint ownership notes, reviewed their red/green evidence, integrated the resulting `internal/eval` changes, and closed the agents after completion.
+
+### Task: Add FQ11 Shared Case Contract Documentation
+
+- What: Documented the shared JSONL case schema, Promptfoo/shared result import shape, allowed scorer names, privacy boundary, and one-row mapping for each existing synthetic golden case.
+- Where: [docs/overlays/evalops-shared-contract.md](docs/overlays/evalops-shared-contract.md), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/README.md](docs/README.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ11-T01 by making the cross-project contract explicit without adding real fleet data, raw evidence, model calls, or external service assumptions.
+- How: Added a focused overlay contract doc, mapped `FIC-SYN-001` through `FIC-SYN-005` to safe packet fields, expected severity, citation refs, approval fail-safe behavior, forbidden claims, and tags, linked the overlay from the docs index, and marked the FQ11 checklist complete after verification.
+
+### Task: Add JSONL Exporter For Eval Cases
+
+- What: Added `eval.ExportCasesJSONL` with deterministic JSONL output for existing synthetic golden cases and a golden-file test that rejects raw sensitive evidence leakage.
+- Where: [internal/eval/exporter.go](internal/eval/exporter.go), [internal/eval/exporter_test.go](internal/eval/exporter_test.go), [internal/eval/testdata/evalops_cases.golden.jsonl](internal/eval/testdata/evalops_cases.golden.jsonl), [docs/overlays/evalops-shared-contract.md](docs/overlays/evalops-shared-contract.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ11-T02 so existing eval cases can be reused by external eval tooling through a stable shared contract while keeping packet evidence private.
+- How: Added failing-first exporter coverage for stable ordering, case IDs, expected severity and citation fields, adversarial tags, and privacy checks; observed red for missing `ExportCasesJSONL` and then for leaked adversarial fixture text; implemented a sorted JSONL projection that includes only safe packet routing fields and excludes vehicle IDs, routes, locations, telemetry labels, media refs, transcript notes, still-frame notes, and expected sensitive terms.
+
+### Task: Add Shared Result Importer
+
+- What: Added `eval.ImportSharedResultsJSON` to read shared EvalOps or Promptfoo-style result JSON and convert scorer assertions into existing `eval.CaseResult` records.
+- Where: [internal/eval/importer.go](internal/eval/importer.go), [internal/eval/importer_test.go](internal/eval/importer_test.go), [docs/overlays/evalops-shared-contract.md](docs/overlays/evalops-shared-contract.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ11-T03 so Promptfoo/evalops results can feed the current eval result model with useful validation errors instead of ad hoc parsing.
+- How: Added failing-first importer coverage for valid nested Promptfoo-style results, missing `case_id`, malformed numeric score, unknown scorer, and duplicate result records; implemented minimal JSON parsing for `results`, nested `results.results`, `vars`, `scores`, and `assertionResults`, with allowed scorer validation and case-result field mapping.
+
+### Task: Verify FQ11 Gates
+
+- What: Verified the new FQ11 exporter, importer, existing eval package behavior, observability package, and full Go suite.
+- Where: [internal/eval](internal/eval), [internal/observability](internal/observability), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Confirm FQ11 meets the overlay gates and does not regress deterministic eval or observability behavior.
+- How: Ran `go test ./internal/eval -count=1`, `go test ./internal/eval ./internal/observability -count=1`, and `go test ./...`; all passed.
+
+## 2026-05-06 - LinkedIn Post Drafts
+
+### Task: Draft Repo-Focused LinkedIn Posts
+
+- What: Added Markdown LinkedIn post drafts that present the Fleet Incident Copilot repo in a casual, practical voice for hiring managers, CTOs, and engineering leaders.
+- Where: [docs/mvp/demo/linkedin-post-drafts.md](docs/mvp/demo/linkedin-post-drafts.md), [docs/README.md](docs/README.md), [docs/mvp/README.md](docs/mvp/README.md), [README.md](README.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Make the repo easier to share as an applied-AI engineering signal while keeping the tone plain, concrete, and honest about current limits.
+- How: Turned the drafted LinkedIn copy into a dedicated docs artifact, added writing guardrails inspired by `docs/eos.md`, linked the artifact from the repo documentation indexes, and avoided changing runtime code.
+
+### Task: Revise LinkedIn Draft Subjects And Style
+
+- What: Revised the LinkedIn draft artifact into multiple subject-specific posts with fuller paragraphs, less single-sentence line structure, and an explicit no-em-dash style rule.
+- Where: [docs/mvp/demo/linkedin-post-drafts.md](docs/mvp/demo/linkedin-post-drafts.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-06, America/Vancouver.
+- Why: Make the post set feel less repetitive and better suited to repeated LinkedIn publishing for hiring managers, CTOs, and engineering leaders.
+- How: Replaced broad angle variants with separate posts about AI assistance, trust boundaries, strict TDD, human approval, synthetic data, local demo limits, evals, observability, backend product thinking, small scope, CTO review, and hiring-manager signal.
+
 ## 2026-05-06 - Phase 17 Demo Script Refresh
 
 ### Task: Audit Phase 17 Scope With Parallel Agents

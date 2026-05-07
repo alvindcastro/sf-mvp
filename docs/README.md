@@ -10,6 +10,11 @@ This directory keeps the research and MVP planning artifacts separate from the r
 
 - [MVP Overview](mvp/README.md): thesis, demo promise, proof points, and artifact map.
 
+## EvalOps Overlays
+
+- [EvalOps Extension](overlays/evalops-extension.md): FQ11-FQ15 overlay for reusable eval contracts, Promptfoo bridge work, trace and score export, release gates, and review loops.
+- [EvalOps Shared Case And Result Contract](overlays/evalops-shared-contract.md): FQ11 JSONL case schema, result importer shape, golden-case mapping, and verification commands.
+
 ## Contributor Guides
 
 - [How-Tos](how-tos.md): common local workflows for scope checks, package changes, synthetic fixtures, documentation updates, and review prep.
@@ -50,3 +55,4 @@ Execution and packaging:
 - [Strict TDD Rules](mvp/execution/tdd-rules.md)
 - [Demo Package](mvp/demo/demo-package.md): refreshed local API walkthrough, response highlights, fallback tests, and interview packaging.
 - [Demo Surface Roadmap](mvp/demo/demo-surface-roadmap.md)
+- [LinkedIn Post Drafts](mvp/demo/linkedin-post-drafts.md): casual repo posts for hiring managers, CTOs, and engineering leaders.

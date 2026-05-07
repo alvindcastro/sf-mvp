@@ -76,3 +76,4 @@ Execution and packaging:
 - [Strict TDD Rules](execution/tdd-rules.md): non-negotiable rules for code tasks.
 - [Demo Package](demo/demo-package.md): Phase 10 repo narrative and Phase 17 refreshed local API walkthrough, including verified startup, `curl` commands, expected response highlights, fallback `go test ./...`, recording plan, one-page eval summary, interview talking points, and implemented-versus-planned wording rules.
 - [Demo Surface Roadmap](demo/demo-surface-roadmap.md): Phase 11 roadmap, now updated with the implemented Phase 13 loopback review API, implemented Phase 14 dry-run notification preview, implemented Phase 15 scoped approval retry, implemented Phase 16 eval and trace reports, and implemented Phase 17 demo-script refresh.
+- [LinkedIn Post Drafts](demo/linkedin-post-drafts.md): casual repo posts aimed at hiring managers, CTOs, and engineering leaders, with AI framed as an assistive tool and the repo framed around concrete engineering judgment.
