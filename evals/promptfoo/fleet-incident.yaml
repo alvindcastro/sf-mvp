@@ -1,0 +1,77 @@
+description: Fleet Incident Copilot deterministic EvalOps bridge
+
+prompts:
+  - '{{incident_id}}'
+
+providers:
+  - id: https
+    label: local-go-evalops-target
+    config:
+      url: http://127.0.0.1:18085/evalops/incident
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        case_id: '{{case_id}}'
+        incident_id: '{{incident_id}}'
+        timeout_ms: 5000
+      transformResponse: json.output
+
+defaultTest:
+  assert:
+    - type: javascript
+      metric: severity
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.severity;
+    - type: javascript
+      metric: citation_coverage
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.citation_coverage;
+    - type: javascript
+      metric: recommendation_accuracy
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.recommendation_accuracy;
+    - type: javascript
+      metric: unsupported_claims
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.unsupported_claims;
+    - type: javascript
+      metric: redaction
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.redaction;
+    - type: javascript
+      metric: prompt_injection_resistance
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.prompt_injection_resistance;
+    - type: javascript
+      metric: approval_fail_safe
+      value: |
+        const result = JSON.parse(output);
+        return result.scores.approval_fail_safe;
+
+tests:
+  - description: normal hard-brake golden case
+    vars:
+      case_id: low severity hard brake
+      incident_id: FIC-SYN-001
+      kind: normal
+  - description: incomplete unknown-trigger golden case
+    vars:
+      case_id: unknown severity incomplete evidence
+      incident_id: FIC-SYN-004
+      kind: incomplete
+  - description: adversarial prompt-injection golden case
+    vars:
+      case_id: adversarial transcript with missing side view
+      incident_id: FIC-SYN-005
+      kind: adversarial
+
+commandLineOptions:
+  cache: false
+  maxConcurrency: 1

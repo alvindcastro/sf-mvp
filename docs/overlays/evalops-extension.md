@@ -53,21 +53,23 @@ Output: [EvalOps Shared Case And Result Contract](evalops-shared-contract.md), `
 
 **Goal:** run incident workflow regression cases through Promptfoo without rewriting Go evals in JavaScript.
 
-- [ ] **FQ12-T01 — Code: local incident eval target**
+Output: [EvalOps Promptfoo Bridge](evalops-promptfoo-bridge.md), `eval.NewIncidentEvalTarget`, `eval.PromptfooOutputFromResult`, `cmd/evalops-target`, and `evals/promptfoo/fleet-incident.yaml`.
+
+- [x] **FQ12-T01 — Code: local incident eval target**
   **Prompt:** [FQ12-T01](evalops-task-prompts.md#fq12-t01-code-local-incident-eval-target)
   **Done when:** `httptest` covers valid case, invalid case, missing packet, prompt-injection case, and timeout.
-- [ ] **FQ12-T02 — Add Promptfoo config**
+- [x] **FQ12-T02 — Add Promptfoo config**
   **Type:** Documentation/config
   **Files:** `evals/promptfoo/fleet-incident.yaml`
   **Done when:** config calls the local Go target and includes normal, incomplete, and adversarial cases.
-- [ ] **FQ12-T03 — Code: score adapter output**
+- [x] **FQ12-T03 — Code: score adapter output**
   **Prompt:** [FQ12-T03](evalops-task-prompts.md#fq12-t03-code-score-adapter-output)
   **Done when:** Go returns scores for severity, citations, unsupported claims, redaction, and approval fail-closed behavior.
 
 ### FQ12 gate
 
-- [ ] Promptfoo run can be executed locally against deterministic Go code.
-- [ ] No model provider key is required.
+- [x] Promptfoo run can be executed locally against deterministic Go code.
+- [x] No model provider key is required.
 
 ---
 

@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-07 - FQ12 EvalOps Promptfoo Bridge
+
+### Task: Run Parallel FQ12 Implementation Agents
+
+- What: Ran parallel Codex worker agents for the local incident eval HTTP target and Promptfoo score adapter while the main thread inspected existing eval, HTTP, command, and overlay documentation patterns.
+- Where: [internal/eval](internal/eval), [cmd/evalops-target](cmd/evalops-target), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/overlays/evalops-task-prompts.md](docs/overlays/evalops-task-prompts.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Split FQ12 into independent target and scoring tracks while keeping Promptfoo config, docs, and final verification coordinated.
+- How: Spawned two worker agents with separate ownership, integrated their outputs in `internal/eval`, reconciled overlapping target and score-adapter types, added the loopback command/config/docs from the main thread, and closed both agents after completion.
+
+### Task: Add Local Incident Eval HTTP Target
+
+- What: Added a deterministic local HTTP target for incident evals through `eval.NewIncidentEvalTarget` and a loopback-only `cmd/evalops-target` process at `POST /evalops/incident`.
+- Where: [internal/eval/target.go](internal/eval/target.go), [internal/eval/target_test.go](internal/eval/target_test.go), [cmd/evalops-target/main.go](cmd/evalops-target/main.go), [cmd/evalops-target/main_test.go](cmd/evalops-target/main_test.go), [docs/overlays/evalops-promptfoo-bridge.md](docs/overlays/evalops-promptfoo-bridge.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ12-T01 so Promptfoo and local CI can call deterministic Go eval behavior without rewriting the harness in JavaScript or calling live model providers.
+- How: Added failing-first `httptest` coverage for valid packet input, malformed JSON, missing packet/incident input, prompt-injection golden case, timeout behavior, and response-shape privacy; implemented packet and golden-case request handling, injectable workflow and step interfaces for local ingestion/retrieval/timeline/severity/brief/approval checks, timeout mapping, score-focused JSON responses, and a loopback-only command wrapper.
+
+### Task: Add Promptfoo Score Adapter Output
+
+- What: Added `eval.PromptfooOutputFromResult` to convert existing `eval.CaseResult` records into Promptfoo/EvalOps-style scores.
+- Where: [internal/eval/score_adapter.go](internal/eval/score_adapter.go), [internal/eval/score_adapter_test.go](internal/eval/score_adapter_test.go), [docs/overlays/evalops-promptfoo-bridge.md](docs/overlays/evalops-promptfoo-bridge.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ12-T03 by making severity, citation, recommendation, unsupported-claim, redaction, prompt-injection, and approval fail-safe checks machine-readable for release gates and Promptfoo assertions.
+- How: Added failing-first score-adapter tests for passing and failing case results; implemented per-scorer score objects, severity labels, pass/fail reasons, critical safety markers, and machine-readable critical failures with `case_id`, `scorer`, `code`, and `reason`.
+
+### Task: Add Promptfoo Config And Bridge Documentation
+
+- What: Added a Promptfoo YAML config for normal, incomplete, and adversarial cases plus FQ12 bridge documentation with run commands, request shape, response shape, safety boundary, and verification commands.
+- Where: [evals/promptfoo/fleet-incident.yaml](evals/promptfoo/fleet-incident.yaml), [docs/overlays/evalops-promptfoo-bridge.md](docs/overlays/evalops-promptfoo-bridge.md), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/README.md](docs/README.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ12-T02 and make the local bridge runnable without model-provider keys or external service assumptions.
+- How: Configured Promptfoo's HTTP provider to call `http://127.0.0.1:18085/evalops/incident`, transform the response to `json.output`, assert all scorer outputs with JavaScript assertions, include `FIC-SYN-001`, `FIC-SYN-004`, and `FIC-SYN-005`, and documented startup plus `npx promptfoo eval -c evals/promptfoo/fleet-incident.yaml`.
+
+### Task: Verify FQ12 Gates
+
+- What: Verified the FQ12 target, score adapter, eval package, command wrapper, observability compatibility, and full Go suite.
+- Where: [internal/eval](internal/eval), [cmd/evalops-target](cmd/evalops-target), [internal/observability](internal/observability), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Confirm FQ12 is deterministic, local, no-key, and does not regress existing eval or observability behavior before marking the overlay gate complete.
+- How: Ran `go test ./internal/eval -count=1`, `go test ./cmd/evalops-target -count=1`, `go test ./internal/eval ./cmd/evalops-target ./internal/observability -count=1`, and `go test ./...`; all passed.
+
 ## 2026-05-07 - FQ11 EvalOps Shared Contract
 
 ### Task: Run Parallel FQ11 Implementation Agents
