@@ -15,6 +15,7 @@ The current runtime surface is intentionally small. Phase 0 and Phase 1 planning
 - [Troubleshooting](docs/troubleshooting.md): common local development and package-behavior issues.
 - [LinkedIn Post Drafts](docs/mvp/demo/linkedin-post-drafts.md): casual repo posts for hiring managers, CTOs, and engineering leaders.
 - [EvalOps Release Gates](docs/overlays/evalops-release-gates.md): FQ14 release thresholds, CI Make targets, GitHub summary output, and verification commands.
+- [EvalOps Review Loop](docs/overlays/evalops-review-loop.md): FQ15 issue-to-case workflow, draft JSONL generator, non-blocking review flags, and monthly calibration checklist.
 
 ## MVP Artifacts
 
@@ -107,7 +108,7 @@ make evalops-gate
 - Severity package: [internal/severity](internal/severity).
 - Brief package: [internal/brief](internal/brief).
 - Approval package: [internal/approval](internal/approval).
-- Eval package: [internal/eval](internal/eval).
+- Eval package: [internal/eval](internal/eval), including shared case export/import, Promptfoo score adapters, release gates, and draft review-loop case generation.
 - Observability package: [internal/observability](internal/observability).
 - Demo composer package: [internal/demo](internal/demo).
 - Notification preview package: [internal/notification](internal/notification).

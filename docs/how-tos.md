@@ -198,6 +198,17 @@ Exit code `0` means pass or warning-only findings, `1` means a blocking gate
 failure, and `2` means malformed input, malformed config, or summary write
 failure. The full FQ14 behavior contract is in [EvalOps Release Gates](overlays/evalops-release-gates.md).
 
+## How To Draft EvalOps Review Cases
+
+Use `eval.ExportDraftCasesJSONL` from package code when a manual review, demo
+rehearsal, or production-like trace identifies a useful new regression. There
+is no CLI for this helper yet.
+
+Draft records must stay synthetic and non-blocking: keep `review_required=true`,
+keep `gate_blocking=false`, and replace every `TODO_REVIEW` expected value only
+after human review. The full FQ15 workflow and monthly calibration checklist are
+in [EvalOps Review Loop](overlays/evalops-review-loop.md).
+
 ## How To Update Documentation Safely
 
 1. Keep the implemented-versus-planned boundary explicit.

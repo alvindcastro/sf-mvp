@@ -15,7 +15,7 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 - [internal/severity](../internal/severity): classifies severity and recommends next actions with source references.
 - [internal/brief](../internal/brief): drafts cited, redacted, human-review incident briefs.
 - [internal/approval](../internal/approval): creates in-memory approval requests and gates sensitive actions.
-- [internal/eval](../internal/eval): runs deterministic in-memory golden-case evals, Promptfoo/EvalOps score adapters, score-event export contracts, and FQ14 release gates.
+- [internal/eval](../internal/eval): runs deterministic in-memory golden-case evals, Promptfoo/EvalOps score adapters, score-event export contracts, FQ14 release gates, and FQ15 draft review-loop case generation.
 - [internal/observability](../internal/observability): records in-memory workflow events, redaction, token, budget, cache, and routing signals.
 - [internal/demo](../internal/demo): loads machine-readable synthetic demo fixtures and composes deterministic in-memory review results.
 - [internal/notification](../internal/notification): prepares dry-run Slack-shaped notification previews from redacted briefs and gates them as external sharing.
@@ -49,7 +49,7 @@ This repository is a Go workspace for the Fleet Incident Copilot MVP. It demonst
 
 `internal/approval` stores approval state in memory. It records pending, approved, and denied decisions and blocks missing, pending, denied, mismatched, or out-of-scope sensitive action calls.
 
-`internal/eval` composes the package path over local golden cases and reports severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior. It also owns the EvalOps shared result importer/exporter, Promptfoo score adapter, score event projection, release-gate threshold evaluation, and deterministic Markdown summary rendering.
+`internal/eval` composes the package path over local golden cases and reports severity accuracy, citation coverage, recommendation accuracy, unsupported claims, redaction leaks, prompt-injection resistance, and approval fail-closed behavior. It also owns the EvalOps shared result importer/exporter, Promptfoo score adapter, score event projection, release-gate threshold evaluation, deterministic Markdown summary rendering, and non-blocking draft case generation from redacted review-loop samples.
 
 `internal/observability` records package-level workflow events in memory. It does not send telemetry externally or reconcile provider billing.
 

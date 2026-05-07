@@ -59,6 +59,7 @@ Run one test by name:
 
 ```bash
 go test ./internal/eval -run TestRunHandlesPromptInjectionFixtures
+go test ./internal/eval -run 'TestExportDraftCasesJSONL' -count=1
 ```
 
 Run repeated checks when diagnosing nondeterminism:
@@ -87,7 +88,7 @@ Every code task should follow [Strict TDD Rules](mvp/execution/tdd-rules.md):
 - `internal/severity`: low, medium, high, unknown, conflicting evidence, recommendations, citations, and approval-required flags.
 - `internal/brief`: cited draft sections, redaction, fail-closed missing evidence, uncertainty labels, and approval-state display.
 - `internal/approval`: pending, approved, denied, missing approval, out-of-scope calls, callback execution, and immutable audit history.
-- `internal/eval`: golden cases, release thresholds, unsupported claims, redaction, prompt injection, approval fail-closed behavior, FQ14 release-gate evaluation, and deterministic Markdown summaries.
+- `internal/eval`: golden cases, release thresholds, unsupported claims, redaction, prompt injection, approval fail-closed behavior, FQ14 release-gate evaluation, deterministic Markdown summaries, and FQ15 draft review-loop JSONL generation.
 - `internal/observability`: trace IDs, structured events, redaction, token accounting, budget limits, invalid token usage, cache candidates, and routing notes.
 - `internal/demo`: machine-readable synthetic fixture loading, deterministic review composition, non-synthetic rejection, missing-evidence fail-closed behavior, citation and redaction preservation, approval-required action display, and trace propagation.
 - `internal/notification`: dry-run Slack-shaped preview formatting, mandatory dry-run mode, external-sharing approval gating, blocked/allowed preview states, redacted observability, and no network delivery.

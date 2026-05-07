@@ -123,12 +123,20 @@ Output: [EvalOps Release Gates](evalops-release-gates.md), `eval.EvaluateRelease
 
 **Goal:** convert demo/user-found issues into regression cases.
 
-- [ ] **FQ15-T01 — Define issue-to-case workflow**
+Output: [EvalOps Review Loop](evalops-review-loop.md), `eval.ExportDraftCasesJSONL`, `eval.ReviewTraceSample`, and `eval.DraftCaseRecord`.
+
+- [x] **FQ15-T01 — Define issue-to-case workflow**
   **Type:** Documentation
   **Done when:** failures from manual review, demo rehearsal, or production-like traces become reviewed JSONL cases.
-- [ ] **FQ15-T02 — Code: draft case generator**
+- [x] **FQ15-T02 — Code: draft case generator**
   **Prompt:** [FQ15-T02](evalops-task-prompts.md#fq15-t02-code-draft-case-generator)
   **Done when:** trace/review samples convert to draft cases with TODO expected fields.
-- [ ] **FQ15-T03 — Add monthly calibration checklist**
+- [x] **FQ15-T03 — Add monthly calibration checklist**
   **Type:** Documentation
   **Done when:** thresholds, prompts, fixtures, and allowed claims are periodically reviewed.
+
+### FQ15 gate
+
+- [x] Draft cases preserve trace IDs and inherited tags.
+- [x] Draft cases require human review and remain non-blocking until promoted.
+- [x] Draft JSONL omits raw review notes, trace text, and incident evidence.

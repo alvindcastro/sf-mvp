@@ -9,6 +9,9 @@ export.
 
 - `eval.ExportCasesJSONL(cases []eval.Case) ([]byte, error)` exports synthetic
   eval cases as deterministic JSONL.
+- `eval.ExportDraftCasesJSONL(samples []eval.ReviewTraceSample) ([]byte, error)`
+  exports redacted review-loop samples as non-blocking draft JSONL with TODO
+  expected fields.
 - `eval.ImportSharedResultsJSON(data []byte) ([]eval.CaseResult, error)` imports
   shared EvalOps or Promptfoo-style result JSON into existing `eval.CaseResult`
   records.
@@ -104,6 +107,20 @@ Allowed scorer names:
 Malformed score values, unknown scorers, missing `case_id`, and duplicate
 `case_id` records fail with actionable errors. Valid records convert into
 `eval.CaseResult` so downstream gates can reuse the existing eval report model.
+
+## Draft Review Cases
+
+FQ15 draft cases are an intake format for new reviewed regressions, not a
+release-gate input. `ExportDraftCasesJSONL` writes the same redacted routing
+fields used by shared cases plus `source_trace_id`, TODO expected fields,
+`review_required=true`, and `gate_blocking=false`.
+
+The draft exporter preserves trace IDs and inherited tags, deduplicates by
+`case_id`, rejects non-`FIC-SYN-` incident IDs, and omits review notes, trace
+event text, raw evidence, vehicle IDs, routes, location labels, transcript
+notes, still-frame notes, and media references. A human reviewer must replace
+`TODO_REVIEW` expected values before a draft is promoted into the reviewed eval
+case set.
 
 ## Verification
 

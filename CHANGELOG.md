@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-05-07 - FQ15 EvalOps Review Loop
+
+### Task: Run Parallel FQ15 Implementation Agents
+
+- What: Ran parallel Codex explorer agents for the FQ15 documentation contract and the existing EvalOps implementation surface while the main thread inspected the FQ15 overlay, prompt, eval package, and docs patterns.
+- Where: [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/overlays/evalops-task-prompts.md](docs/overlays/evalops-task-prompts.md), [internal/eval](internal/eval), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Split FQ15 discovery into independent docs and implementation tracks before adding review-loop draft case generation and documentation updates.
+- How: Used the docs explorer to confirm FQ15-T01 through FQ15-T03 scope and the implementation explorer to keep the code package-level in `internal/eval`, avoid CLI and Makefile changes, preserve existing EvalOps command behavior, and align the new API with the existing JSONL exporter naming.
+
+### Task: Add Draft Review-Loop Case Export
+
+- What: Added package-level draft case generation from redacted review or trace samples, including TODO expected fields, inherited tag normalization, deduplication by case ID, trace ID preservation, `review_required=true`, `gate_blocking=false`, synthetic incident validation, and raw-review-note omission.
+- Where: [internal/eval/draft_case_generator.go](internal/eval/draft_case_generator.go), [internal/eval/draft_case_generator_test.go](internal/eval/draft_case_generator_test.go), [docs/overlays/evalops-review-loop.md](docs/overlays/evalops-review-loop.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ15-T02 so demo, manual review, or production-like trace failures can become non-blocking draft JSONL cases until human-reviewed expected fields are filled.
+- How: Added failing-first tests for TODO expected fields, tag inheritance, duplicate case IDs, trace ID preservation, explicit review-required and non-blocking flags, invalid sample rejection, and privacy boundaries; observed the narrow test fail on missing generator APIs, then implemented `ExportDraftCasesJSONL` with deterministic JSONL encoding and kept `GenerateDraftCasesJSONL` as an internal compatibility wrapper.
+
+### Task: Document FQ15 Workflow And Calibration
+
+- What: Added the FQ15 review-loop workflow, draft JSONL shape, safety boundary, monthly calibration checklist, task-board updates, and synchronized top-level docs that mention the EvalOps and eval package surfaces.
+- Where: [docs/overlays/evalops-review-loop.md](docs/overlays/evalops-review-loop.md), [docs/overlays/evalops-extension.md](docs/overlays/evalops-extension.md), [docs/overlays/evalops-shared-contract.md](docs/overlays/evalops-shared-contract.md), [docs/README.md](docs/README.md), [README.md](README.md), [docs/developer-guide.md](docs/developer-guide.md), [docs/how-tos.md](docs/how-tos.md), [docs/testing.md](docs/testing.md), [docs/nice-to-knows.md](docs/nice-to-knows.md), [docs/mvp/quality/eval-plan.md](docs/mvp/quality/eval-plan.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Complete FQ15-T01 and FQ15-T03 while keeping implemented-versus-planned docs accurate for the new package-level helper.
+- How: Created a focused FQ15 overlay, marked all FQ15 tasks complete, documented that drafts are synthetic-only and non-blocking until promoted, added a monthly review checklist for thresholds, prompts, fixtures, allowed claims, and draft queue hygiene, and linked the new behavior from the relevant repo entry points.
+
+### Task: Verify FQ15 Review Loop
+
+- What: Verified the draft exporter red/green path, focused eval package, EvalOps Make targets, local release gate, full Go suite, and scoped diff whitespace check.
+- Where: [internal/eval](internal/eval), [Makefile](Makefile), [docs/overlays/evalops-review-loop.md](docs/overlays/evalops-review-loop.md), [CHANGELOG.md](CHANGELOG.md).
+- When: 2026-05-07, America/Los_Angeles.
+- Why: Confirm FQ15 draft cases satisfy TODO expected fields, tag inheritance, deduplication, trace preservation, review-required/non-blocking behavior, validation, and privacy expectations without regressing existing eval gates.
+- How: Ran `go test ./internal/eval -run 'TestGenerateDraftCasesJSONL' -count=1` red before implementation and saw the expected missing API build failure; ran `go test ./internal/eval -run 'TestGenerateDraftCasesJSONL|TestExportDraftCasesJSONL' -count=1`, `go test ./internal/eval -count=1`, `make evalops`, `make evalops-gate`, and `go test ./... -count=1` green after implementation. Also ran a scoped `git diff --check` over the FQ15 files successfully; the broader docs-wide whitespace check surfaced unrelated pre-existing trailing whitespace in user-modified `docs/eos.md` and `docs/research/research-report.md`.
+
 ## 2026-05-07 - FQ14 EvalOps Release Gates
 
 ### Task: Run Parallel FQ14 Implementation Agents

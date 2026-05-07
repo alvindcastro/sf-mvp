@@ -41,6 +41,7 @@ Useful context that prevents common wrong assumptions.
 - Eval is deterministic and local. It does not call a model provider.
 - The eval report route runs the same deterministic golden cases and returns scores, thresholds, gates, and pass/fail state.
 - The FQ14 release gate runs locally through `make evalops-gate`, exits non-zero for blocking critical failures, and writes a GitHub-style Markdown summary when `GITHUB_STEP_SUMMARY` is set.
+- The FQ15 review-loop helper exports non-blocking draft JSONL from redacted samples; it is package-level behavior, not a queue, issue tracker, or persistent case store.
 
 ## Observability
 
